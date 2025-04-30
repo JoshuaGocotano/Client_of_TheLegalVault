@@ -1,8 +1,11 @@
 import { forwardRef } from "react";
 
-import opascorlogo from "@/assets/opascorlogo2.png";
+import opascorlogo from "@/assets/opascorlogo.png";
+import opascorlogo2 from "@/assets/opascorlogo2.png";
 
 import { cn } from "@/utils/cn";
+
+import PropTypes from "prop-types";
 
 export const Sidebar = forwardRef(({}, ref) => {
     return (
@@ -14,11 +17,15 @@ export const Sidebar = forwardRef(({}, ref) => {
         >
             <div className="flex gap-x-3 p-3">
                 <img
-                    src={opascorlogo}
-                    alt="Logo"
-                    className="h-10 w-10"
+                    src={opascorlogo2}
+                    alt="opascor_logo_light"
+                    className="h-12 w-12 dark:hidden"
                 />
-                <h1 className="text-xl font-bold text-slate-900 dark:text-slate-200">OPASCOR</h1>
+                <img
+                    src={opascorlogo}
+                    alt="opascor_logo_dark"
+                    className="hidden h-12 w-12 dark:block"
+                />
             </div>
         </aside>
     );
