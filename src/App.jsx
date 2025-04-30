@@ -23,15 +23,19 @@ export default function App() {
                 },
                 {
                     path: "internal-clients",
-                    element: <h1 className="title">Clients</h1>,
+                    element: <h1 className="title">Internal Clients</h1>,
                 },
                 {
                     path: "external-clients",
-                    element: <h1 className="title">Clients</h1>,
+                    element: <h1 className="title">External Clients</h1>,
                 },
                 {
                     path: "tickets",
                     element: <h1 className="title">Tickets</h1>,
+                },
+                {
+                    path: "corrective-maintenance",
+                    element: <h1 className="title">Corrective Maintenance Forms</h1>,
                 },
                 {
                     path: "admins",

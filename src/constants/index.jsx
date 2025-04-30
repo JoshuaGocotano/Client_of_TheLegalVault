@@ -1,4 +1,4 @@
-import { ChartColumn, Home, NotepadText, Package, PackagePlus, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
+import { ChartColumn, Home, NotepadText, Tickets, BookCheck, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
 
 export const navbarLinks = [
     {
@@ -25,12 +25,12 @@ export const navbarLinks = [
         title: "Clients",
         links: [
             {
-                label: "Internal Clients",
+                label: "Internal",
                 icon: Users,
                 path: "/internal-clients",
             },
             {
-                label: "External Clients",
+                label: "External",
                 icon: UserPlus,
                 path: "/external-clients",
             },
@@ -41,13 +41,13 @@ export const navbarLinks = [
         links: [
             {
                 label: "Tickets",
-                icon: Package,
+                icon: Tickets,
                 path: "/Tickets",
             },
             {
-                label: "New Tickets",
-                icon: PackagePlus,
-                path: "/new-ticket",
+                label: "CMFs",
+                icon: BookCheck,
+                path: "/corrective-maintenance",
             },
         ],
     },
