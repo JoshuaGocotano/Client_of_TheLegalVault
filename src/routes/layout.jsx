@@ -6,13 +6,17 @@ import { Sidebar } from "@/layouts/sidebar";
 import { Header } from "@/layouts/header";
 
 import { cn } from "@/utils/cn";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const Layout = () => {
     const isDesktopDevice = useMediaQuery("(min-width: 768px)");
-    const [collapsed, setCollapsed] = useState(true);
+    const [collapsed, setCollapsed] = useState(!isDesktopDevice);
 
     const sidebarRef = useRef(null);
+
+    useEffect(() => {
+        setCollapsed(!isDesktopDevice);
+    }, [isDesktopDevice]);
 
     return (
         <div className="min-h-screen bg-slate-100 transition-colors dark:bg-slate-950">

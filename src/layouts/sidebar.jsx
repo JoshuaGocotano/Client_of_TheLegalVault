@@ -27,7 +27,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                     className="h-10 w-10 dark:hidden"
                 />
                 <img
-                    src={opascorlogo}
+                    src={opascorlogo2}
                     alt="opascor_logo_dark"
                     className="hidden h-10 w-10 dark:block"
                 />
