@@ -22,20 +22,24 @@ export default function App() {
                     element: <h1 className="title">Reports</h1>,
                 },
                 {
+                    path: "internal-clients",
+                    element: <h1 className="title">Clients</h1>,
+                },
+                {
+                    path: "external-clients",
+                    element: <h1 className="title">Clients</h1>,
+                },
+                {
                     path: "tickets",
                     element: <h1 className="title">Tickets</h1>,
                 },
                 {
-                    path: "clients",
-                    element: <h1 className="title">Clients</h1>,
+                    path: "admins",
+                    element: <h1 className="title">Administrators</h1>,
                 },
                 {
                     path: "settings",
                     element: <h1 className="title">Settings</h1>,
-                },
-                {
-                    path: "admins",
-                    element: <h1 className="title">Administrators</h1>,
                 },
             ],
         },
