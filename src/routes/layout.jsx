@@ -10,12 +10,12 @@ import { useRef, useState } from "react";
 
 const Layout = () => {
     const isDesktopDevice = useMediaQuery("(min-width: 768px)");
-    const [collapsed, setCollapsed] = useState(false);
+    const [collapsed, setCollapsed] = useState(true);
 
     const sidebarRef = useRef(null);
 
     return (
-        <div className="min-h-screen bg-slate-100 transition-colors dark:bg-slate-900">
+        <div className="min-h-screen bg-slate-100 transition-colors dark:bg-slate-950">
             <div
                 className={cn(
                     "pointer-events-none fixed inset-0 -z-10 bg-black opacity-0 transition-opacity",

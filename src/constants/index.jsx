@@ -1,4 +1,4 @@
-import { ChartColumn, Home, NotepadText, Tickets, BookCheck, Settings, ShoppingBag, UserCheck, UserPlus, Users } from "lucide-react";
+import { ChartColumn, Home, NotepadText, Tickets, BookCheck, Settings, UserPlus, Users, ShieldUser } from "lucide-react";
 
 export const navbarLinks = [
     {
@@ -56,7 +56,7 @@ export const navbarLinks = [
         links: [
             {
                 label: "Admins",
-                icon: Settings,
+                icon: ShieldUser,
                 path: "/admins",
             },
         ],
