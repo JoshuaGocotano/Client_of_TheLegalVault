@@ -1,7 +1,14 @@
-import { ChevronsLeft, Search } from "lucide-react";
+import { useTheme } from "@/hooks/use-theme";
+
+import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
+
+import profileImage from "@/assets/JoshuaG..jpg";
+
 import PropTypes from "prop-types";
 
 export const Header = ({ collapsed, setCollapsed }) => {
+    const { theme, setTheme } = useTheme();
+
     return (
         <header className="relative z-10 flex h-[60px] items-center justify-between bg-white px-4 shadow-md transition-colors dark:bg-slate-900">
             <div className="flex items-center gap-x-3">
@@ -24,6 +31,33 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 dark:text-slate-50"
                     />
                 </div>
+            </div>
+            <div className="flex items-center gap-x-3">
+                <button
+                    className="btn-ghost size-10"
+                    onClick={() => {
+                        setTheme(theme === "dark" ? "light" : "dark");
+                    }}
+                >
+                    <Sun
+                        size={20}
+                        className="dark:hidden"
+                    />
+                    <Moon
+                        size={20}
+                        className="hidden dark:block"
+                    />
+                </button>
+                <button className="btn-ghost size-10">
+                    <Bell size={20} />
+                </button>
+                <button className="size-10 overflow-hidden rounded-full">
+                    <img
+                        src={profileImage}
+                        alt="profile image"
+                        className="size-full object-cover"
+                    />
+                </button>
             </div>
         </header>
     );
