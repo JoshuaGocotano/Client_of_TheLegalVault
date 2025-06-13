@@ -1,75 +1,46 @@
-import { ChartColumn, Home, NotepadText, Tickets, BookCheck, Settings, UserPlus, Users, ShieldUser } from "lucide-react";
+import { ChartColumn, Folders, Home, NotepadText, ListTodo, Users, Logs, Archive, ShieldUser } from "lucide-react";
 
 export const navbarLinks = [
     {
-        title: "Dashboard",
-        links: [
-            {
-                label: "Home",
-                icon: Home,
-                path: "/",
-            },
-            {
-                label: "Analytics",
-                icon: ChartColumn,
-                path: "/analytics",
-            },
-            {
-                label: "Reports",
-                icon: NotepadText,
-                path: "/reports",
-            },
-        ],
+        label: "Home",
+        icon: Home,
+        path: "/",
     },
     {
-        title: "Clients",
-        links: [
-            {
-                label: "Internal",
-                icon: Users,
-                path: "/internal-clients",
-            },
-            {
-                label: "External",
-                icon: UserPlus,
-                path: "/external-clients",
-            },
-        ],
+        label: "Cases",
+        icon: Folders,
+        path: "/cases",
     },
     {
-        title: "Tickets",
-        links: [
-            {
-                label: "Tickets",
-                icon: Tickets,
-                path: "/Tickets",
-            },
-            {
-                label: "CMFs",
-                icon: BookCheck,
-                path: "/corrective-maintenance",
-            },
-        ],
+        label: "Clients",
+        icon: Users,
+        path: "/clients",
     },
     {
-        title: "Admins",
-        links: [
-            {
-                label: "Admins",
-                icon: ShieldUser,
-                path: "/admins",
-            },
-        ],
+        label: "Tasks",
+        icon: ListTodo,
+        path: "/tasks",
+    },
+
+    {
+        label: "Users",
+        icon: ShieldUser,
+        path: "/users",
     },
     {
-        title: "Settings",
-        links: [
-            {
-                label: "Settings",
-                icon: Settings,
-                path: "/settings",
-            },
-        ],
+        label: "Reports",
+        icon: ChartColumn,
+        path: "/reports",
+    },
+    {
+        label: "User Logs",
+        icon: Logs,
+        path: "/user-logs",
+    },
+    {
+        label: "Case Archive",
+        icon: Archive,
+        path: "/case-archive",
     },
 ];
 

@@ -13,75 +13,118 @@ const DashboardPage = () => {
         <>
             <div className="flex flex-col gap-y-4">
                 <h1 className="title">Dashboard</h1>
+                <p>Welcome back, here's your overview</p>
+
+                {/* first row */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {/* Total Tickets Resolved */}
+                    {/* Total Cases */}
                     <div className="card">
                         <div className="card-header">
+                            <p className="card-title">Users</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <Tickets size={26} />
                             </div>
-                            <p className="card-title">Total Tickets</p>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">532</p>
-                            <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                                <TrendingUp size={18} />
-                                20%
-                            </span>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">32</p>
                         </div>
                     </div>
 
-                    {/* Total Corrective Maintenance Forms */}
+                    {/* Total Archived Cases */}
                     <div className="card">
                         <div className="card-header">
+                            <p className="card-title">Archived Cases</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <BookCheck size={26} />
                             </div>
-                            <p className="card-title">Total CMFs</p>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">407</p>
-                            <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                                <TrendingUp size={18} />
-                                5%
-                            </span>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">407</p>
                         </div>
                     </div>
 
-                    {/* Pending Tickets */}
+                    {/* Total Processing Cases */}
                     <div className="card">
                         <div className="card-header">
+                            <p className="card-title">Processing Cases</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <BookCheck size={26} />
                             </div>
-                            <p className="card-title">Pending Tickets</p>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">5</p>
-                            <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                                <TrendingUp size={18} />
-                                5%
-                            </span>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">5</p>
                         </div>
                     </div>
 
-                    {/* Total Clients */}
+                    {/* Total Processing Documents */}
                     <div className="card">
                         <div className="card-header">
+                            <p className="card-title">Processing Documents</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <Users size={26} />
                             </div>
-                            <p className="card-title">Total Clients</p>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-3xl font-bold text-slate-900 transition-colors dark:text-slate-50">91</p>
-                            <span className="flex w-fit items-center gap-x-2 rounded-full border border-blue-500 px-2 py-1 font-medium text-blue-500 dark:border-blue-600 dark:text-blue-600">
-                                <TrendingUp size={18} />
-                                2%
-                            </span>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">91</p>
                         </div>
                     </div>
                 </div>
+
+                {/* second row */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {/* Total Clients */}
+                    <div className="card">
+                        <div className="card-header">
+                            <p className="card-title">Clients</p>
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                                <Tickets size={26} />
+                            </div>
+                        </div>
+                        <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">21</p>
+                        </div>
+                    </div>
+
+                    {/* Total Archived Documents */}
+                    <div className="card">
+                        <div className="card-header">
+                            <p className="card-title">Archived Documents</p>
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                                <BookCheck size={26} />
+                            </div>
+                        </div>
+                        <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">723</p>
+                        </div>
+                    </div>
+
+                    {/* Total Pending Approvals */}
+                    <div className="card">
+                        <div className="card-header">
+                            <p className="card-title">Pending Approvals</p>
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                                <BookCheck size={26} />
+                            </div>
+                        </div>
+                        <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">5</p>
+                        </div>
+                    </div>
+
+                    {/* Total Pending Tasks */}
+                    <div className="card">
+                        <div className="card-header">
+                            <p className="card-title">Pending Tasks</p>
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                                <Users size={26} />
+                            </div>
+                        </div>
+                        <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">91</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
                     <div className="card col-span-1 md:col-span-2 lg:col-span-4">
                         <div className="card-header">

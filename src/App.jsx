@@ -14,32 +14,37 @@ export default function App() {
                     element: <DashboardPage />,
                 },
                 {
-                    path: "analytics",
-                    element: <h1 className="title">Analytics</h1>,
+                    path: "cases",
+                    element: <h1 className="title">Cases</h1>,
                 },
                 {
-                    path: "reports",
-                    element: <h1 className="title">Reports</h1>,
+                    path: "clients",
+                    element: <h1 className="title">Clients</h1>,
                 },
                 {
-                    path: "internal-clients",
-                    element: <h1 className="title">Internal Clients</h1>,
+                    path: "tasks",
+                    element: <h1 className="title">Tasks</h1>,
                 },
                 {
-                    path: "external-clients",
-                    element: <h1 className="title">External Clients</h1>,
+                    path: "users",
+                    element: <h1 className="title">Users</h1>,
                 },
                 {
-                    path: "tickets",
-                    element: <h1 className="title">Tickets</h1>,
+                    path: "user-logs",
+                    element: <h1 className="title">User Logs</h1>,
                 },
                 {
-                    path: "corrective-maintenance",
-                    element: <h1 className="title">Corrective Maintenance Forms</h1>,
+                    path: "case-archive",
+                    element: <h1 className="title">Archive Cases</h1>,
                 },
                 {
                     path: "admins",
                     element: <h1 className="title">Administrators</h1>,
+                },
+
+                {
+                    path: "reports",
+                    element: <h1 className="title">Reports</h1>,
                 },
                 {
                     path: "settings",
