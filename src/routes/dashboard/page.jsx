@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/use-theme";
 
 import { overviewData } from "@/constants";
 
-import { BookCheck, Tickets, TrendingDown, TrendingUp, Users } from "lucide-react";
+import { BookCheck, FileCheck, Users, ShieldUser, Archive, FolderOpen, FileMinus, UserRoundMinus, ListTodo } from "lucide-react";
 
 const DashboardPage = () => {
     const { theme, setTheme } = useTheme();
@@ -13,7 +13,7 @@ const DashboardPage = () => {
         <>
             <div className="flex flex-col gap-y-4">
                 <h1 className="title">Dashboard</h1>
-                <p>Welcome back, here's your overview</p>
+                <p className="dark:text-slate-100">Welcome back, here's your overview</p>
 
                 {/* first row */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -22,7 +22,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Users</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <Tickets size={26} />
+                                <ShieldUser size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -35,7 +35,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Archived Cases</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <BookCheck size={26} />
+                                <Archive size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -48,7 +48,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Processing Cases</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <BookCheck size={26} />
+                                <FolderOpen size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -61,7 +61,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Processing Documents</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <Users size={26} />
+                                <FileMinus size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -77,7 +77,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Clients</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <Tickets size={26} />
+                                <Users size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -90,7 +90,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Archived Documents</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <BookCheck size={26} />
+                                <FileCheck size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -103,7 +103,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Pending Approvals</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <BookCheck size={26} />
+                                <UserRoundMinus size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -116,7 +116,7 @@ const DashboardPage = () => {
                         <div className="card-header">
                             <p className="card-title">Pending Tasks</p>
                             <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <Users size={26} />
+                                <ListTodo size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
@@ -125,6 +125,7 @@ const DashboardPage = () => {
                     </div>
                 </div>
 
+                {/* charts and graphs */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
                     <div className="card col-span-1 md:col-span-2 lg:col-span-4">
                         <div className="card-header">
@@ -161,7 +162,7 @@ const DashboardPage = () => {
                                     </defs>
                                     <Tooltip
                                         cursor={false}
-                                        formatter={(value) => `$${value}`}
+                                        formatter={(value) => `₱${value}`}
                                         active={true}
                                     />
                                     <XAxis
@@ -173,7 +174,7 @@ const DashboardPage = () => {
                                         dataKey="total"
                                         strokeWidth={0}
                                         stroke={theme === "light" ? "#475569" : "#94a3b8"}
-                                        tickFormatter={(value) => `$${value}`}
+                                        tickFormatter={(value) => `₱${value}`}
                                         tickMargin={6}
                                     />
                                     <Area

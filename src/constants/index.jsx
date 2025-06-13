@@ -1,4 +1,4 @@
-import { ChartColumn, Folders, Home, NotepadText, ListTodo, Users, Logs, Archive, ShieldUser } from "lucide-react";
+import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser } from "lucide-react";
 
 export const navbarLinks = [
     {
