@@ -3,8 +3,7 @@ import { NavLink } from "react-router-dom";
 
 import { navbarLinks } from "../constants";
 
-import opascorlogo from "@/assets/opascorlogo.png";
-import opascorlogo2 from "@/assets/opascorlogo2.png";
+import light_logo2 from "@/assets/light_logo2.png";
 
 import { cn } from "@/utils/cn";
 
@@ -20,18 +19,18 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 collapsed ? "max-md:left-full" : "max-md:left-0",
             )}
         >
-            <div className="flex items-center gap-x-3 p-3">
+            <div className="flex items-center gap-x-3 p-3 opacity-60">
                 <img
-                    src={opascorlogo2}
+                    src={light_logo2}
                     alt="opascor_logo_light"
-                    className="h-10 w-10 dark:hidden"
+                    className="w-20 h-23 dark:hidden"
                 />
                 <img
-                    src={opascorlogo2}
+                    src={light_logo2}
                     alt="opascor_logo_dark"
-                    className="hidden h-10 w-10 dark:block"
+                    className="w-18 hidden h-20 dark:block"
                 />
-                {!collapsed && <p className="text-xl font-medium text-slate-900 transition-colors dark:text-slate-50">OPASCOR</p>}
+                {!collapsed && <p className="font-serif text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">Legal Vault</p>}
             </div>
             <div className="flex w-full flex-col gap-y-4 overflow-y-auto overflow-x-hidden p-3 [scrollbar-width:_thin]">
                 {navbarLinks.map((navbarLink) => (
