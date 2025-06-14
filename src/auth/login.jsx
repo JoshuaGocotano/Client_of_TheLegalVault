@@ -1,9 +1,16 @@
 import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+    const navigate = useNavigate();
+
     const [showPassword, setShowPassword] = useState(false);
+
+    const handleLogin = () => {
+        navigate("/layout");
+    };
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-blue-50 px-4">
@@ -65,6 +72,7 @@ const Login = () => {
                         <button
                             type="submit"
                             className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
+                            onClick={handleLogin}
                         >
                             Login
                         </button>
