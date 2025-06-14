@@ -2,11 +2,16 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@/context/theme-context";
 import Layout from "./routes/layout";
 import DashboardPage from "./routes/dashboard/page";
+import Login from "./auth/login";
 
 export default function App() {
     const router = createBrowserRouter([
         {
             path: "/",
+            element: <Login />,
+        },
+        {
+            path: "/layout",
             element: <Layout />,
             children: [
                 {
@@ -35,7 +40,7 @@ export default function App() {
                 },
                 {
                     path: "case-archive",
-                    element: <h1 className="title">Archive Cases</h1>,
+                    element: <h1 className="title">Archived Cases</h1>,
                 },
                 {
                     path: "admins",

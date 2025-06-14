@@ -1,5 +1,7 @@
 import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser } from "lucide-react";
 
+import ProfileImage from "@/assets/JoshuaG..jpg";
+
 export const navbarLinks = [
     {
         label: "Home",
@@ -92,5 +94,36 @@ export const overviewData = [
     {
         name: "Dec",
         total: 2500,
+    },
+];
+
+export const recentSalesData = [
+    {
+        id: 1,
+        name: "Olivia Martin",
+        email: "olivia.martin@email.com",
+        image: ProfileImage,
+        total: 1500,
+    },
+    {
+        id: 2,
+        name: "James Smith",
+        email: "james.smith@email.com",
+        image: ProfileImage,
+        total: 2000,
+    },
+    {
+        id: 3,
+        name: "Sophia Brown",
+        email: "sophia.brown@email.com",
+        image: ProfileImage,
+        total: 4000,
+    },
+    {
+        id: 4,
+        name: "Noah Wilson",
+        email: "noah.wilson@email.com",
+        image: ProfileImage,
+        total: 3000,
     },
 ];
