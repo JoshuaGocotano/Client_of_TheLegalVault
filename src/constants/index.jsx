@@ -1,4 +1,4 @@
-import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser } from "lucide-react";
+import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText } from "lucide-react";
 
 import ProfileImage from "@/assets/JoshuaG..jpg";
 
@@ -12,6 +12,11 @@ export const navbarLinks = [
         label: "Cases",
         icon: Folders,
         path: "/cases",
+    },
+    {
+        label: "Documents",
+        icon: FileText,
+        path: "/documents",
     },
     {
         label: "Clients",

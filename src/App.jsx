@@ -6,12 +6,12 @@ import Login from "./auth/login";
 
 export default function App() {
     const router = createBrowserRouter([
+        // {
+        //     path: "/",
+        //     element: <Login />,
+        // },
         {
             path: "/",
-            element: <Login />,
-        },
-        {
-            path: "/layout",
             element: <Layout />,
             children: [
                 {
@@ -21,6 +21,10 @@ export default function App() {
                 {
                     path: "cases",
                     element: <h1 className="title">Cases</h1>,
+                },
+                {
+                    path: "documents",
+                    element: <h1 className="title">Documents</h1>,
                 },
                 {
                     path: "clients",
