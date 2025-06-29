@@ -1,32 +1,15 @@
-import { useAuth } from "@/context/auth-context";
-import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
-import { ShieldCheck } from "lucide-react";
+import { Mail } from "lucide-react";
 
-export default function Verify() {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const [code, setCode] = useState("");
+export default function ForgotPassword() {
+    const [email, setEmail] = useState("");
 
-    const handleVerify = (e) => {
+    const handleSubmit = (e) => {
         e.preventDefault();
-
-        // TODO: Replace with actual backend 2FA code validation
-        if (code === "123456") {
-            navigate("/");
-        } else {
-            alert("Invalid verification code");
-        }
+        // TODO: Call backend to initiate password reset
+        alert(`Password reset link sent to ${email}`);
     };
-
-    if (!user) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-blue-50">
-                <p className="text-xl text-red-500">Unauthorized</p>
-            </div>
-        );
-    }
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-blue-50 px-4">
@@ -40,28 +23,25 @@ export default function Verify() {
                     />
                 </div>
 
-                {/* 2FA Form Section */}
+                {/* Forgot Password Form Section */}
                 <div
                     className="flex h-auto w-full flex-col justify-center rounded-2xl p-8 text-white shadow-2xl md:h-[600px] md:w-[50%] md:p-10"
                     style={{ backgroundColor: "#173B7E" }}
                 >
-                    <h2 className="mb-2 text-center text-3xl font-bold md:text-left">Two-Factor Authentication</h2>
-                    <p className="mb-6 text-center text-sm text-blue-200 md:text-left">
-                        Enter the 6-digit code sent to <span className="font-medium">{user.email}</span>
-                    </p>
+                    <h2 className="mb-2 text-center text-3xl font-bold md:text-left">Forgot Password</h2>
+                    <p className="mb-6 text-center text-sm text-blue-200 md:text-left">Enter your email address to receive a password reset link.</p>
 
                     <form
                         className="space-y-6"
-                        onSubmit={handleVerify}
+                        onSubmit={handleSubmit}
                     >
                         <div className="relative">
-                            <ShieldCheck className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             <input
-                                type="text"
-                                maxLength={6}
-                                value={code}
-                                onChange={(e) => setCode(e.target.value)}
-                                placeholder="Enter verification code"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Email"
                                 className="w-full rounded-md border border-blue-300 px-4 py-2 pl-10 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
                                 required
                             />
@@ -71,16 +51,15 @@ export default function Verify() {
                             type="submit"
                             className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
                         >
-                            Verify
+                            Send Reset Link
                         </button>
 
                         <div className="mt-2 text-center text-sm text-blue-200">
-                            Didn’t receive a code?{" "}
                             <a
-                                href="#"
-                                className="underline"
+                                href="/login"
+                                className="hover:underline"
                             >
-                                Resend
+                                Back to login
                             </a>
                         </div>
                     </form>

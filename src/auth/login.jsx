@@ -2,14 +2,29 @@ import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/auth-context";
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
-    const handleLogin = () => {
-        navigate("/layout");
+    const handleLogin = (e) => {
+        e.preventDefault();
+
+        // 👉 TODO: Replace with real backend API check
+        if (email === "admin@example.com" && password === "password123") {
+            // Save user (mock) to context
+            login({ email }); // You can also add roles, permissions, etc.
+
+            // Redirect to 2FA screen
+            navigate("/verify");
+        } else {
+            alert("Invalid email or password");
+        }
     };
 
     return (
@@ -31,14 +46,20 @@ const Login = () => {
                 >
                     <h2 className="mb-7 text-center text-3xl font-bold md:text-left">Login</h2>
 
-                    <form className="space-y-4">
-                        {/* Username Input */}
+                    <form
+                        className="space-y-4"
+                        onSubmit={handleLogin}
+                    >
+                        {/* Email Input */}
                         <div className="relative">
                             <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             <input
-                                type="text"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email"
                                 className="w-full rounded-md border border-blue-300 px-4 py-2 pl-10 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                required
                             />
                         </div>
 
@@ -47,8 +68,11 @@ const Login = () => {
                             <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             <input
                                 type={showPassword ? "text" : "password"}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
                                 placeholder="Password"
                                 className="w-full rounded-md border border-blue-300 px-4 py-2 pl-10 pr-10 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                required
                             />
                             <div
                                 className="absolute right-3 top-2.5 cursor-pointer text-gray-400 hover:text-gray-600"
@@ -72,7 +96,6 @@ const Login = () => {
                         <button
                             type="submit"
                             className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
-                            onClick={handleLogin}
                         >
                             Login
                         </button>
@@ -80,7 +103,7 @@ const Login = () => {
                         {/* Forgot Password Link */}
                         <div className="mt-2 text-center text-sm text-blue-200">
                             <a
-                                href="#"
+                                href="/forgot-password"
                                 className="hover:underline"
                             >
                                 Forgot password?
