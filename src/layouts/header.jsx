@@ -22,8 +22,11 @@ export const Header = ({ collapsed, setCollapsed }) => {
     });
 
     const handleLogout = () => {
-        logout();
-        navigate("/login");
+        const confirmLogout = window.confirm("Are you sure you want to logout?");
+        if (confirmLogout) {
+            logout();
+            navigate("/login");
+        }
     };
 
     return (
