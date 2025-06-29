@@ -94,7 +94,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                             <div className="max-w-full truncate px-2 py-1 text-sm text-gray-500 dark:text-gray-300">{user?.email}</div>
                             <button
                                 onClick={handleLogout}
-                                className="w-full rounded px-2 py-1 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="w-full rounded px-2 py-1 text-left text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                                 Logout
                             </button>

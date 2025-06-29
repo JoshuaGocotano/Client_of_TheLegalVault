@@ -16,7 +16,7 @@ const Login = () => {
         e.preventDefault();
 
         // 👉 TODO: Replace with real backend API check
-        if (email === "admin@example.com" && password === "password123") {
+        if (email === "joshua@sample.com" && password === "password123") {
             // Save user (mock) to context
             login({ email }); // You can also add roles, permissions, etc.
 
