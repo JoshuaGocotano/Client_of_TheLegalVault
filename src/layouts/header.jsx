@@ -29,6 +29,10 @@ export const Header = ({ collapsed, setCollapsed }) => {
         }
     };
 
+    const handleProfile = () => {
+        window.confirm("Profile info in modal should appear...");
+    };
+
     return (
         <header className="relative z-10 ml-4 flex h-[60px] items-center justify-between rounded-lg bg-white px-4 shadow-md transition-colors dark:bg-slate-900">
             <div className="flex items-center gap-x-3">
@@ -93,8 +97,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         <div className="absolute right-0 mt-2 w-48 rounded-md bg-white p-2 shadow-lg dark:bg-slate-800">
                             <div className="max-w-full truncate px-2 py-1 text-sm text-gray-500 dark:text-gray-300">{user?.email}</div>
                             <button
+                                onClick={handleProfile}
+                                className="w-full rounded px-2 py-1 text-left text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            >
+                                Profile
+                            </button>
+                            <button
                                 onClick={handleLogout}
-                                className="w-full rounded px-2 py-1 text-left text-sm font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                className="w-full rounded px-2 py-1 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
                             >
                                 Logout
                             </button>
