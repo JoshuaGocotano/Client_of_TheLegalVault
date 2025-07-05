@@ -11,19 +11,35 @@ const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState("");
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
 
-        // 👉 TODO: Replace with real backend API check
-        if (email === "joshua@gmail.com" && password === "password123") {
-            // Save user (mock) to context
-            login({ email }); // You can also add roles, permissions, etc.
+        try {
+            const res = await fetch("http://localhost:3000/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
 
-            // Redirect to 2FA screen
-            navigate("/verify");
-        } else {
-            alert("Invalid email or password");
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Login failed");
+                return;
+            }
+
+            // Save to context
+            login(data.user); // assume backend returns { user: { ... } }
+
+            // Redirecting to the dashboard if SUCCESSFUL
+            navigate("/");
+        } catch (err) {
+            console.error("Login error:", err);
+            setError("Something went wrong. Please try again.");
         }
     };
 
@@ -46,11 +62,13 @@ const Login = () => {
                 >
                     <h2 className="mb-7 text-center text-3xl font-bold md:text-left">Login</h2>
 
+                    {error && <div className="mb-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-red-600 shadow">{error}</div>}
+
                     <form
                         className="space-y-4"
                         onSubmit={handleLogin}
                     >
-                        {/* Email Input */}
+                        {/* Email */}
                         <div className="relative">
                             <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             <input
@@ -63,7 +81,7 @@ const Login = () => {
                             />
                         </div>
 
-                        {/* Password Input */}
+                        {/* Password */}
                         <div className="relative">
                             <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             <input
@@ -100,20 +118,13 @@ const Login = () => {
                             Login
                         </button>
 
-                        {/* Forgot Password Link */}
-                        <div className="mt-2 flex justify-between text-sm text-blue-200">
+                        {/* Links */}
+                        <div className="mt-2 text-center text-sm text-blue-200">
                             <a
                                 href="/forgot-password"
                                 className="hover:underline"
                             >
                                 Forgot password?
-                            </a>
-
-                            <a
-                                href="/register"
-                                className="hover:underline"
-                            >
-                                Register
                             </a>
                         </div>
                     </form>

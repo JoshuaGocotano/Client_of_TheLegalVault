@@ -1,10 +1,13 @@
-import { useState } from "react";
-import boslogo from "@/assets/light_logo2.png";
+import { useEffect, useState } from "react";
+import boslogo from "@/assets/light_logo.png";
 import { Mail, Lock, Eye, EyeOff, User, Phone, Briefcase } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 
 const Register = () => {
-    const { user } = useAuth(); // ✅ Grab the logged-in user (assumed to be Admin)
+    const navigate = useNavigate();
+    const { user } = useAuth();
+
     const [user_fname, setFName] = useState("");
     const [user_mname, setMName] = useState("");
     const [user_lname, setLName] = useState("");
@@ -13,9 +16,34 @@ const Register = () => {
     const [user_phonenum, setPhone] = useState("");
     const [user_role, setRole] = useState("Paralegal");
     const [branch_id, setBranchId] = useState("");
+    const [branches, setBranches] = useState([]);
+
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
 
+    // 🔐 Redirect if not Admin
+    useEffect(() => {
+        if (!user || user.user_role !== "Admin") {
+            navigate("/unauthorized");
+        }
+    }, [user, navigate]);
+
+    // 🌐 Fetch branch list from backend
+    useEffect(() => {
+        const fetchBranches = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/branches");
+                const data = await res.json();
+                setBranches(data);
+            } catch (err) {
+                console.error("Failed to load branches:", err);
+            }
+        };
+
+        fetchBranches();
+    }, []);
+
+    // 🔄 Form submission
     const handleRegistration = async (e) => {
         e.preventDefault();
 
@@ -28,7 +56,7 @@ const Register = () => {
             user_phonenum,
             user_role,
             branch_id,
-            created_by: user?.user_id, // ✅ Set created_by to currently logged-in admin
+            created_by: user?.user_id,
         };
 
         try {
@@ -43,7 +71,8 @@ const Register = () => {
             const data = await res.json();
             if (res.ok) {
                 setMessage("✅ User successfully registered.");
-                // Optional: reset form
+
+                // Reset form
                 setFName("");
                 setMName("");
                 setLName("");
@@ -64,6 +93,7 @@ const Register = () => {
     return (
         <div className="flex min-h-screen items-center justify-center bg-blue-50 px-4">
             <div className="w-full max-w-4xl rounded-2xl bg-[#173B7E] p-10 text-white shadow-2xl">
+                {/* Logo */}
                 <div className="mb-4 flex justify-center">
                     <img
                         src={boslogo}
@@ -74,6 +104,7 @@ const Register = () => {
 
                 <h2 className="mb-6 text-center text-3xl font-bold">Register a New User</h2>
 
+                {/* Feedback Message */}
                 {message && <div className="mb-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-blue-900 shadow">{message}</div>}
 
                 <form
@@ -174,15 +205,25 @@ const Register = () => {
                         </select>
                     </div>
 
-                    {/* Branch ID */}
-                    <input
-                        type="number"
-                        value={branch_id}
-                        onChange={(e) => setBranchId(e.target.value)}
-                        placeholder="Branch ID"
-                        className="w-full rounded-md border border-blue-300 px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
-                        required
-                    />
+                    {/* Branch Dropdown (from API) */}
+                    <div className="relative">
+                        <select
+                            value={branch_id}
+                            onChange={(e) => setBranchId(e.target.value)}
+                            className="w-full rounded-md border border-blue-300 px-4 py-2 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            required
+                        >
+                            <option value="">Select Branch</option>
+                            {branches.map((branch) => (
+                                <option
+                                    key={branch.branch_id}
+                                    value={branch.branch_id}
+                                >
+                                    {branch.branch_name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
                     {/* Submit Button */}
                     <div className="col-span-1 md:col-span-2">

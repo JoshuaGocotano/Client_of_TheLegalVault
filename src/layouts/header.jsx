@@ -95,7 +95,9 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
                     {open && (
                         <div className="absolute right-0 mt-2 w-48 rounded-md bg-white p-2 shadow-lg dark:bg-slate-800">
-                            <div className="max-w-full truncate px-2 py-1 text-sm text-gray-500 dark:text-gray-300">{user?.email}</div>
+                            <div className="max-w-full truncate px-2 py-1 text-sm font-bold text-gray-500 dark:text-gray-300">
+                                {user?.user_fname + " " + user?.user_lname}
+                            </div>
                             <button
                                 onClick={handleProfile}
                                 className="w-full rounded px-2 py-1 text-left text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
