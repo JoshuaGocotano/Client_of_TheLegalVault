@@ -16,7 +16,7 @@ const Login = () => {
         e.preventDefault();
 
         // 👉 TODO: Replace with real backend API check
-        if (email === "joshua@sample.com" && password === "password123") {
+        if (email === "joshua@gmail.com" && password === "password123") {
             // Save user (mock) to context
             login({ email }); // You can also add roles, permissions, etc.
 
@@ -101,12 +101,19 @@ const Login = () => {
                         </button>
 
                         {/* Forgot Password Link */}
-                        <div className="mt-2 text-center text-sm text-blue-200">
+                        <div className="mt-2 flex justify-between text-sm text-blue-200">
                             <a
                                 href="/forgot-password"
                                 className="hover:underline"
                             >
                                 Forgot password?
+                            </a>
+
+                            <a
+                                href="/register"
+                                className="hover:underline"
+                            >
+                                Register
                             </a>
                         </div>
                     </form>

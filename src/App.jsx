@@ -9,6 +9,8 @@ import DashboardPage from "./routes/dashboard/page";
 import Login from "./auth/login";
 import Verify from "./auth/verification"; // 2FA
 import ForgotPassword from "./auth/forgotpass";
+import Registration from "./components/registration";
+import Users from "./routes/users";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -25,6 +27,10 @@ export default function App() {
             element: <ForgotPassword />,
         },
         {
+            path: "/register",
+            element: <Registration />,
+        },
+        {
             element: <ProtectedRoute />,
             children: [
                 {
@@ -36,7 +42,7 @@ export default function App() {
                         { path: "documents", element: <h1 className="title">Documents</h1> },
                         { path: "clients", element: <h1 className="title">Clients</h1> },
                         { path: "tasks", element: <h1 className="title">Tasks</h1> },
-                        { path: "users", element: <h1 className="title">Users</h1> },
+                        { path: "users", element: <Users /> },
                         { path: "reports", element: <h1 className="title">Reports</h1> },
                         { path: "user-logs", element: <h1 className="title">User Logs</h1> },
                         { path: "case-archive", element: <h1 className="title">Archived Cases</h1> },
