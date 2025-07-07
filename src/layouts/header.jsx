@@ -11,7 +11,7 @@ import PropTypes from "prop-types";
 
 export const Header = ({ collapsed, setCollapsed }) => {
     const { theme, setTheme } = useTheme();
-    const { logout, user } = useAuth();
+    const { logout, user, loading } = useAuth();
     const navigate = useNavigate();
 
     const [open, setOpen] = useState(false);
@@ -21,11 +21,12 @@ export const Header = ({ collapsed, setCollapsed }) => {
         setOpen(false);
     });
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         const confirmLogout = window.confirm("Are you sure you want to logout?");
+
         if (confirmLogout) {
-            logout();
-            navigate("/login");
+            await logout();
+            // navigate("/login");
         }
     };
 
@@ -77,7 +78,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     <Bell size={20} />
                 </button>
 
-                {/* Profile Image Dropdown */}
+                {/* Profile Image Dropdown for options Profile and Logout */}
                 <div
                     className="relative"
                     ref={dropdownRef}
@@ -96,7 +97,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     {open && (
                         <div className="absolute right-0 mt-2 w-48 rounded-md bg-white p-2 shadow-lg dark:bg-slate-800">
                             <div className="max-w-full truncate px-2 py-1 text-sm font-bold text-gray-500 dark:text-gray-300">
-                                {user?.user_fname + " " + user?.user_lname}
+                                {loading ? "Loading..." : user ? `${user.user_fname} ${user.user_lname}` : "No user"}
                             </div>
                             <button
                                 onClick={handleProfile}
