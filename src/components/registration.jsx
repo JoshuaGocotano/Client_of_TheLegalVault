@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import boslogo from "@/assets/light_logo.png";
-import { Mail, Lock, Eye, EyeOff, User, Phone, Briefcase } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, User, Phone, Briefcase, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 
@@ -16,19 +16,19 @@ const Register = () => {
     const [user_phonenum, setPhone] = useState("");
     const [user_role, setRole] = useState("Paralegal");
     const [branch_id, setBranchId] = useState("");
-    const [branches, setBranches] = useState([]);
+    const [user_profile, setProfile] = useState(null);
+    const [preview, setPreview] = useState(null);
 
+    const [branches, setBranches] = useState([]);
     const [showPassword, setShowPassword] = useState(false);
     const [message, setMessage] = useState("");
 
-    // 🔐 Redirect if not Admin
     useEffect(() => {
         if (!user || user.user_role !== "Admin") {
             navigate("/unauthorized");
         }
     }, [user, navigate]);
 
-    // 🌐 Fetch branch list from backend
     useEffect(() => {
         const fetchBranches = async () => {
             try {
@@ -43,36 +43,34 @@ const Register = () => {
         fetchBranches();
     }, []);
 
-    // 🔄 Form submission
     const handleRegistration = async (e) => {
         e.preventDefault();
 
-        const userData = {
-            user_email,
-            user_password,
-            user_fname,
-            user_mname,
-            user_lname,
-            user_phonenum,
-            user_role,
-            branch_id,
-            created_by: user?.user_id,
-        };
+        const formData = new FormData();
+        formData.append("user_email", user_email);
+        formData.append("user_password", user_password);
+        formData.append("user_fname", user_fname);
+        formData.append("user_mname", user_mname);
+        formData.append("user_lname", user_lname);
+        formData.append("user_phonenum", user_phonenum);
+        formData.append("user_role", user_role);
+        formData.append("branch_id", branch_id);
+        formData.append("created_by", user?.user_id);
+        
+        if (user_profile) {
+            formData.append("user_profile", user_profile);
+        }
 
         try {
             const res = await fetch("http://localhost:3000/api/users", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userData),
+                body: formData,
             });
 
             const data = await res.json();
             if (res.ok) {
                 setMessage("✅ User successfully registered.");
 
-                // Reset form
                 setFName("");
                 setMName("");
                 setLName("");
@@ -81,6 +79,8 @@ const Register = () => {
                 setPhone("");
                 setRole("Paralegal");
                 setBranchId("");
+                setProfile(null);
+                setPreview(null);
             } else {
                 setMessage(data.error || "❌ Registration failed.");
             }
@@ -93,7 +93,6 @@ const Register = () => {
     return (
         <div className="flex min-h-screen items-center justify-center bg-blue-50 px-4">
             <div className="w-full max-w-4xl rounded-2xl bg-[#173B7E] p-10 text-white shadow-2xl">
-                {/* Logo */}
                 <div className="mb-4 flex justify-center">
                     <img
                         src={boslogo}
@@ -104,12 +103,11 @@ const Register = () => {
 
                 <h2 className="mb-6 text-center text-3xl font-bold">Register a New User</h2>
 
-                {/* Feedback Message */}
                 {message && <div className="mb-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-blue-900 shadow">{message}</div>}
 
                 <form
-                    className="grid grid-cols-1 gap-4 md:grid-cols-2"
                     onSubmit={handleRegistration}
+                    className="grid grid-cols-1 gap-4 md:grid-cols-2"
                 >
                     {/* First Name */}
                     <div className="relative">
@@ -205,7 +203,7 @@ const Register = () => {
                         </select>
                     </div>
 
-                    {/* Branch Dropdown (from API) */}
+                    {/* Branch Selection */}
                     <div className="relative">
                         <select
                             value={branch_id}
@@ -223,6 +221,33 @@ const Register = () => {
                                 </option>
                             ))}
                         </select>
+                    </div>
+
+                    {/* Profile Upload & Preview */}
+                    <div className="col-span-1 flex flex-col items-center gap-2 md:col-span-2">
+                        {preview && (
+                            <img
+                                src={preview}
+                                alt="Profile Preview"
+                                className="h-24 w-24 rounded-full border-2 border-white object-cover shadow"
+                            />
+                        )}
+                        <label className="flex cursor-pointer items-center gap-2 text-sm text-white hover:underline">
+                            <Image className="h-5 w-5" />
+                            <span>Upload Profile Picture</span>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                        setProfile(file);
+                                        setPreview(URL.createObjectURL(file));
+                                    }
+                                }}
+                                className="hidden"
+                            />
+                        </label>
                     </div>
 
                     {/* Submit Button */}
