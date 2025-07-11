@@ -3,7 +3,7 @@ import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
-import profileImage from "@/assets/JoshuaG..jpg";
+import profileImage from "@/assets/JoshuaG..jpg"; // for sample profile pic
 
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -58,7 +58,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 </div>
             </div>
 
-            <div className="relative flex items-center gap-x-3">
+            <div className="relative flex items-center gap-x-2">
                 <button
                     className="btn-ghost size-10"
                     onClick={() => {
@@ -74,6 +74,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         className="hidden dark:block"
                     />
                 </button>
+
+                {/* Notifications */}
                 <button className="btn-ghost size-10">
                     <Bell size={20} />
                 </button>
@@ -84,13 +86,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     ref={dropdownRef}
                 >
                     <button
-                        className="size-10 overflow-hidden rounded-full"
+                        className="flex h-10 items-center rounded-full bg-blue-900 p-1 pr-0 transition hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-[#173B7E]"
                         onClick={() => setOpen(!open)}
                     >
+                        <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
                         <img
                             src={profileImage}
-                            alt="profile image"
-                            className="size-full object-cover"
+                            alt="profile"
+                            className="h-11 w-11 rounded-full object-cover outline outline-2 outline-gray-200 dark:outline-gray-500"
                         />
                     </button>
 

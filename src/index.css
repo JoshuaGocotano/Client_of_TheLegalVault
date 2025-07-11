@@ -19,7 +19,6 @@
         @apply flex h-[40px] w-full flex-shrink-0 items-center gap-x-3 rounded-lg p-3 text-base font-medium text-slate-900 transition-colors hover:bg-blue-100 dark:text-slate-50 dark:hover:bg-blue-950;
         &.active {
             background-color: #173B7E;
-            /* color: #ffffff; */
             @apply text-slate-50;
         }
     }
