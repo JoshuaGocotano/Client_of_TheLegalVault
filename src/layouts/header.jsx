@@ -91,7 +91,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     >
                         <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
                         <img
-                            src={profileImage}
+                            src={`http://localhost:3000${user.user_profile}`}
                             alt="profile"
                             className="h-11 w-11 rounded-full object-cover outline outline-2 outline-gray-200 dark:outline-gray-500"
                         />
