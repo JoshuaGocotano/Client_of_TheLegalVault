@@ -32,7 +32,11 @@ const Register = () => {
     useEffect(() => {
         const fetchBranches = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/branches");
+                const res = await fetch("http://localhost:3000/api/branches", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
                 const data = await res.json();
                 setBranches(data);
             } catch (err) {
@@ -56,7 +60,7 @@ const Register = () => {
         formData.append("user_role", user_role);
         formData.append("branch_id", branch_id);
         formData.append("created_by", user?.user_id);
-        
+
         if (user_profile) {
             formData.append("user_profile", user_profile);
         }
@@ -64,6 +68,7 @@ const Register = () => {
         try {
             const res = await fetch("http://localhost:3000/api/users", {
                 method: "POST",
+                credentials: "include",
                 body: formData,
             });
 
