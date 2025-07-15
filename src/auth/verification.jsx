@@ -1,3 +1,5 @@
+// Two-Factor Authentication process here // I just called it verification
+
 import { useAuth } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";

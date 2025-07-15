@@ -3,7 +3,6 @@ import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
-import profileImage from "@/assets/JoshuaG..jpg"; // for sample profile pic
 
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";

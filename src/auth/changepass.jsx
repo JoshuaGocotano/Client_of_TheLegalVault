@@ -1,5 +1,5 @@
 import React from "react";
 
 export const ChangePass = () => {
-    return <div>changepass</div>;
+    return <div>Changing passwword here...</div>;
 };

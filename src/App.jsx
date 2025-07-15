@@ -11,6 +11,7 @@ import Verify from "./auth/verification"; // 2FA
 import ForgotPassword from "./auth/forgotpass";
 import Registration from "./components/registration";
 import Users from "./routes/users";
+import { ChangePass } from "./auth/changepass";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -19,12 +20,16 @@ export default function App() {
             element: <Login />,
         },
         {
+            path: "/forgot-password",
+            element: <ForgotPassword />,
+        },
+        {
             path: "/verify",
             element: <Verify />,
         },
         {
-            path: "/forgot-password",
-            element: <ForgotPassword />,
+            path: "/change-password",
+            element: <ChangePass />,
         },
         {
             path: "/register",

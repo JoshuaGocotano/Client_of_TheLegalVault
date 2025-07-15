@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import boslogo from "@/assets/light_logo.png";
+import boslogo from "@/assets/boslogo_white.png";
 import { Mail, Lock, Eye, EyeOff, User, Phone, Briefcase, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
