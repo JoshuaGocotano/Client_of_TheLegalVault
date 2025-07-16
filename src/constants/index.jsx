@@ -28,7 +28,6 @@ export const navbarLinks = [
         icon: ListTodo,
         path: "/tasks",
     },
-
     {
         label: "Users",
         icon: ShieldUser,

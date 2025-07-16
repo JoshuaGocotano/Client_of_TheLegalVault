@@ -1,6 +1,7 @@
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { ProfileModal } from "../components/profile-modal";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
 
@@ -15,6 +16,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
+    const [showProfileModal, setShowProfileModal] = useState(false);
 
     useClickOutside([dropdownRef], () => {
         setOpen(false);
@@ -22,15 +24,13 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
     const handleLogout = async () => {
         const confirmLogout = window.confirm("Are you sure you want to logout?");
-
         if (confirmLogout) {
             await logout();
-            // navigate("/login");
         }
     };
 
     const handleProfile = () => {
-        window.confirm("Profile info in modal should appear...");
+        setShowProfileModal(true);
     };
 
     return (
@@ -74,12 +74,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     />
                 </button>
 
-                {/* Notifications */}
-                <button className="btn-ghost size-10">
+                <button
+                    onClick={() => navigate("notifications")}
+                    className="btn-ghost size-10"
+                >
                     <Bell size={20} />
                 </button>
 
-                {/* Profile Image Dropdown for options Profile and Logout */}
+                {/* Profile Image Dropdown */}
                 <div
                     className="relative"
                     ref={dropdownRef}
@@ -117,6 +119,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     )}
                 </div>
             </div>
+
+            {/* Profile Modal */}
+            {showProfileModal && (
+                <ProfileModal
+                    user={user}
+                    onClose={() => setShowProfileModal(false)}
+                />
+            )}
         </header>
     );
 };

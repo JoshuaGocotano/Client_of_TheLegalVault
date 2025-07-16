@@ -10,8 +10,20 @@ import Login from "./auth/login";
 import Verify from "./auth/verification"; // 2FA
 import ForgotPassword from "./auth/forgotpass";
 import Registration from "./components/registration";
-import Users from "./routes/users";
 import { ChangePass } from "./auth/changepass";
+
+// sidebar items
+import Cases from "./routes/sidebar/cases";
+import Documents from "./routes/sidebar/documents";
+import Clients from "./routes/sidebar/clients";
+import Tasks from "./routes/sidebar/tasks";
+import Users from "./routes/sidebar/users";
+import Reports from "./routes/sidebar/reports";
+import Activity from "./components/activity";
+import UserLogs from "./routes/sidebar/userlogs";
+import Archives from "./routes/sidebar/archives";
+import Notifications from "./components/notifications";
+import NotificationSettings from "./components/notif-settings";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -43,14 +55,17 @@ export default function App() {
                     element: <Layout />,
                     children: [
                         { index: true, element: <DashboardPage /> },
-                        { path: "cases", element: <h1 className="title">Cases</h1> },
-                        { path: "documents", element: <h1 className="title">Documents</h1> },
-                        { path: "clients", element: <h1 className="title">Clients</h1> },
-                        { path: "tasks", element: <h1 className="title">Tasks</h1> },
+                        { path: "cases", element: <Cases /> },
+                        { path: "documents", element: <Documents /> },
+                        { path: "clients", element: <Clients /> },
+                        { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
-                        { path: "reports", element: <h1 className="title">Reports</h1> },
-                        { path: "user-logs", element: <h1 className="title">User Logs</h1> },
-                        { path: "case-archive", element: <h1 className="title">Archived Cases</h1> },
+                        { path: "reports", element: <Reports /> },
+                        { path: "reports/activity", element: <Activity /> },
+                        { path: "user-logs", element: <UserLogs /> },
+                        { path: "case-archive", element: <Archives /> },
+                        { path: "notifications", element: <Notifications /> },
+                        { path: "notifications/notif-settings", element: <NotificationSettings /> },
                     ],
                 },
             ],
