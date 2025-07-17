@@ -24,6 +24,7 @@ import UserLogs from "./routes/sidebar/userlogs";
 import Archives from "./routes/sidebar/archives";
 import Notifications from "./components/notifications";
 import NotificationSettings from "./components/notif-settings";
+import { UnauthorizedAccess } from "./auth/unauthorized";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -46,6 +47,10 @@ export default function App() {
         {
             path: "/register",
             element: <Registration />,
+        },
+        {
+            path: "/unauthorized",
+            element: <UnauthorizedAccess />,
         },
         {
             element: <ProtectedRoute />,

@@ -6,7 +6,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 
 export const ProfileModal = ({ onClose }) => {
-    const { user } = useAuth();
+    const { user, setUser } = useAuth();
 
     const [formData, setFormData] = useState({ ...user });
     const [isEditing, setIsEditing] = useState(false);
@@ -17,7 +17,6 @@ export const ProfileModal = ({ onClose }) => {
     useClickOutside([modalRef], onClose);
 
     useEffect(() => {
-        // Keep form in sync with user if context updates
         setFormData({ ...user });
     }, [user]);
 
@@ -43,7 +42,7 @@ export const ProfileModal = ({ onClose }) => {
     }, [user]);
 
     const outlineColor =
-        user.user_status === "Active"
+        formData.user_status === "Active"
             ? "outline-green-600"
             : user.user_status === "Pending"
               ? "outline-yellow-500"
@@ -68,6 +67,13 @@ export const ProfileModal = ({ onClose }) => {
             });
 
             if (!res.ok) throw new Error("Failed to update user");
+
+            const verifyRes = await fetch("http://localhost:3000/api/verify", {
+                credentials: "include",
+            });
+
+            const { user: updatedUser } = await verifyRes.json();
+            setUser(updatedUser);
 
             alert("Profile updated successfully.");
             setIsEditing(false);
@@ -174,7 +180,7 @@ export const ProfileModal = ({ onClose }) => {
                             <button
                                 onClick={() => {
                                     setIsEditing(false);
-                                    setFormData({ ...user }); // reset
+                                    setFormData({ ...user });
                                 }}
                                 className="flex items-center gap-2 rounded bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
                             >
