@@ -26,7 +26,6 @@ export const AuthProvider = ({ children }) => {
                 });
 
                 const data = await res.json();
-                // console.log("Verify response:", data);
 
                 if (res.ok && data.user) {
                     login(data.user);

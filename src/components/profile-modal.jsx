@@ -1,16 +1,25 @@
 import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { Mail, Phone, BadgeCheck, UserCheck, Building2, Pencil, Save, X } from "lucide-react";
-import { useClickOutside } from "@/hooks/use-click-outside";
 
-export const ProfileModal = ({ user, onClose }) => {
+import { useClickOutside } from "@/hooks/use-click-outside";
+import { useAuth } from "@/context/auth-context";
+
+export const ProfileModal = ({ onClose }) => {
+    const { user } = useAuth();
+
+    const [formData, setFormData] = useState({ ...user });
+    const [isEditing, setIsEditing] = useState(false);
     const [branchName, setBranchName] = useState("Loading...");
     const [loadingBranch, setLoadingBranch] = useState(true);
-    const [isEditing, setIsEditing] = useState(false);
-    const [formData, setFormData] = useState({ ...user });
 
     const modalRef = useRef(null);
     useClickOutside([modalRef], onClose);
+
+    useEffect(() => {
+        // Keep form in sync with user if context updates
+        setFormData({ ...user });
+    }, [user]);
 
     useEffect(() => {
         const fetchBranchName = async () => {
@@ -62,7 +71,6 @@ export const ProfileModal = ({ user, onClose }) => {
 
             alert("Profile updated successfully.");
             setIsEditing(false);
-            
         } catch (err) {
             console.error(err);
             alert("An error occurred while updating.");
@@ -107,14 +115,15 @@ export const ProfileModal = ({ user, onClose }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
             <div
                 ref={modalRef}
-                className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900"
+                className="relative w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-slate-900 sm:p-6 md:p-8"
             >
                 <button
-                    className="btn-ghost absolute right-2 top-2"
+                    className="btn-ghost absolute right-2 top-2 text-gray-500 hover:text-red-500 dark:text-gray-300"
                     onClick={onClose}
                 >
                     <X size={20} />
                 </button>
+
                 <div className="flex flex-col items-center justify-center">
                     <img
                         src={`http://localhost:3000${user.user_profile}`}
@@ -165,7 +174,7 @@ export const ProfileModal = ({ user, onClose }) => {
                             <button
                                 onClick={() => {
                                     setIsEditing(false);
-                                    setFormData({ ...user }); // Reset form
+                                    setFormData({ ...user }); // reset
                                 }}
                                 className="flex items-center gap-2 rounded bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
                             >
@@ -189,6 +198,5 @@ export const ProfileModal = ({ user, onClose }) => {
 };
 
 ProfileModal.propTypes = {
-    user: PropTypes.object.isRequired,
     onClose: PropTypes.func.isRequired,
 };

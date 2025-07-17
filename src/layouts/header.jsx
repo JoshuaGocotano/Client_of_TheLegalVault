@@ -123,7 +123,6 @@ export const Header = ({ collapsed, setCollapsed }) => {
             {/* Profile Modal */}
             {showProfileModal && (
                 <ProfileModal
-                    user={user}
                     onClose={() => setShowProfileModal(false)}
                 />
             )}
