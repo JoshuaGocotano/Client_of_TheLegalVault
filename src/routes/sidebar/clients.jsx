@@ -1,7 +1,7 @@
 import React from "react";
 
 const Clients = () => {
-    return <div>Clients</div>;
+    return <div className="title">Clients</div>;
 };
 
 export default Clients;

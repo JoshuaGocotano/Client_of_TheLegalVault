@@ -1,7 +1,7 @@
 import React from "react";
 
 const Tasks = () => {
-    return <div>Tasks</div>;
+    return <div className="title">Tasks</div>;
 };
 
 export default Tasks;
