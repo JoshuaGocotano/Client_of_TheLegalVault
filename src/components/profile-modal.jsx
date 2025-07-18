@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
-import { Mail, Phone, BadgeCheck, UserCheck, Building2, Pencil, Save, X } from "lucide-react";
+import { Mail, Phone, BadgeCheck, UserCheck, Building2, Pencil, Save, X, User, LockIcon } from "lucide-react";
 
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
@@ -44,9 +44,9 @@ export const ProfileModal = ({ onClose }) => {
     const outlineColor =
         formData.user_status === "Active"
             ? "outline-green-600"
-            : user.user_status === "Pending"
+            : formData.user_status === "Pending"
               ? "outline-yellow-500"
-              : user.user_status === "Suspended"
+              : formData.user_status === "Suspended"
                 ? "outline-red-500"
                 : "outline-gray-300";
 
@@ -85,9 +85,21 @@ export const ProfileModal = ({ onClose }) => {
 
     const infoItems = [
         {
+            label: "User ID",
+            name: "user_id",
+            icon: <User size={16} />,
+            editable: false,
+        },
+        {
             label: "Email",
             name: "user_email",
             icon: <Mail size={16} />,
+            editable: true,
+        },
+        {
+            label: "Password",
+            name: "user_password",
+            icon: <LockIcon size={16} />,
             editable: true,
         },
         {
@@ -97,16 +109,10 @@ export const ProfileModal = ({ onClose }) => {
             editable: true,
         },
         {
-            label: "Role",
-            name: "user_role",
-            icon: <BadgeCheck size={16} />,
-            editable: true,
-        },
-        {
             label: "Status",
             name: "user_status",
             icon: <UserCheck size={16} />,
-            editable: true,
+            editable: false,
         },
         {
             label: "Branch",
@@ -153,14 +159,15 @@ export const ProfileModal = ({ onClose }) => {
                                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</span>
                                 {isEditing && editable ? (
                                     <input
-                                        type="text"
+                                        type={name == "user_password" ? "password" : "text"}
                                         name={name}
                                         value={formData[name] || ""}
+                                        placeholder={name == "user_password" ? "Enter new password" : formData[name]}
                                         onChange={handleInputChange}
                                         className="rounded bg-white px-2 py-1 text-sm text-gray-800 outline-none dark:bg-slate-700 dark:text-white"
                                     />
                                 ) : (
-                                    <span>{value ?? formData[name]}</span>
+                                    <span>{name == "user_password" ? "●●●●●●●●" : (value ?? formData[name])}</span>
                                 )}
                             </div>
                         </div>
