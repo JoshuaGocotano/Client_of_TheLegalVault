@@ -130,7 +130,7 @@ export const ProfileModal = ({ onClose }) => {
                 className="relative w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-slate-900 sm:p-6 md:p-8"
             >
                 <button
-                    className="btn-ghost absolute right-2 top-2 text-gray-500 hover:text-red-500 dark:text-gray-300"
+                    className="btn-ghost absolute right-2 top-2"
                     onClick={onClose}
                 >
                     <X size={20} />

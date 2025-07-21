@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useClickOutside } from "@/hooks/use-click-outside";
+import ViewModal from "../../components/view-case";
 
 const InitialData = [
     {
@@ -10,7 +12,7 @@ const InitialData = [
         category: "Corporate",
         status: "Pending",
         lawyer: "Sarah Wilson",
-        balance: "P 35,000.00",
+        balance: "P 40,000.00",
         fee: "P 50,000.00",
     },
     {
@@ -20,7 +22,7 @@ const InitialData = [
         category: "Property",
         status: "Processing",
         lawyer: "John Cooper",
-        balance: "P 7,000.00",
+        balance: "P 0,000.00",
         fee: "P 10,000.00",
     },
     {
@@ -30,7 +32,7 @@ const InitialData = [
         category: "Corporate",
         status: "Completed",
         lawyer: "Emma Thompson",
-        balance: "P 12,500.00",
+        balance: "P 2,500.00",
         fee: "P 12,500.00",
     },
 ];
@@ -49,8 +51,14 @@ const getStatusColor = (status) => {
 };
 
 const Cases = () => {
+    const [search, setSearch] = useState("");
     const [data, setData] = useState(InitialData);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCase, setSelectedCase] = useState(null);
+
+    const addCaseModalRef = useRef();
+    const navigate = useNavigate();
+
     const [newCase, setNewCase] = useState({
         id: "",
         name: "",
@@ -64,7 +72,19 @@ const Cases = () => {
         lawyer: "Unassigned",
         balance: "P 0.00",
     });
-    const navigate = useNavigate();
+
+    useClickOutside([addCaseModalRef], () => setIsModalOpen(false));
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.key === "Escape") {
+                setIsModalOpen(false);
+                setSelectedCase(null);
+            }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, []);
 
     const handleAddCase = () => {
         const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
@@ -87,7 +107,7 @@ const Cases = () => {
     };
 
     return (
-        <div className="rounded-xl bg-white p-4 shadow-md dark:bg-slate-900 md:p-6 lg:p-8">
+        <div className="bg-blue rounded-xl bg-slate-50 p-4 shadow-lg dark:bg-slate-900 sm:p-6">
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h2 className="text-xl font-bold text-gray-800 dark:text-white sm:text-2xl">Cases</h2>
@@ -95,7 +115,15 @@ const Cases = () => {
                 </div>
             </div>
 
-            <div className="mb-6 flex justify-end gap-3">
+            {/* Search and Buttons */}
+            <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
+                <input
+                    type="text"
+                    placeholder="Search case..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 md:flex-1"
+                />
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-green-700"
@@ -110,42 +138,43 @@ const Cases = () => {
                 </button>
             </div>
 
+            {/* Case Table */}
             <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
                 <table className="min-w-full table-auto text-left text-sm">
                     <thead className="text-xs uppercase dark:text-white">
                         <tr>
-                            <th className="whitespace-nowrap px-4 py-3">Case ID</th>
-                            <th className="whitespace-nowrap px-4 py-3">Name</th>
-                            <th className="whitespace-nowrap px-4 py-3">Client</th>
-                            <th className="whitespace-nowrap px-4 py-3">Category</th>
-                            <th className="whitespace-nowrap px-4 py-3">Status</th>
-                            <th className="whitespace-nowrap px-4 py-3">Lawyer</th>
-                            <th className="whitespace-nowrap px-4 py-3">Fee</th>
-                            <th className="whitespace-nowrap px-4 py-3">Balance</th>
-                            <th className="whitespace-nowrap px-4 py-3">Actions</th>
+                            <th className="px-4 py-3">Case ID</th>
+                            <th className="px-4 py-3">Name</th>
+                            <th className="px-4 py-3">Client</th>
+                            <th className="px-4 py-3">Category</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3">Lawyer</th>
+                            <th className="px-4 py-3">Fee</th>
+                            <th className="px-4 py-3">Balance</th>
+                            <th className="px-4 py-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700 dark:text-white">
                         {data.map((item) => (
                             <tr
                                 key={item.id}
-                                className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
+                                className="border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-slate-800"
                             >
-                                <td className="whitespace-nowrap px-4 py-3">{item.id}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{item.name}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{item.client}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{item.category}</td>
+                                <td className="px-4 py-3">C{item.id}</td>
+                                <td className="px-4 py-3">{item.name}</td>
+                                <td className="px-4 py-3">{item.client}</td>
+                                <td className="px-4 py-3">{item.category}</td>
                                 <td className="px-4 py-3">
                                     <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(item.status)}`}>{item.status}</span>
                                 </td>
-                                <td className="whitespace-nowrap px-4 py-3">{item.lawyer}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{item.fee}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{item.balance}</td>
+                                <td className="px-4 py-3">{item.lawyer}</td>
+                                <td className="px-4 py-3">{item.fee}</td>
+                                <td className="px-4 py-3">{item.balance}</td>
                                 <td className="px-4 py-3">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <button
                                             className="p-1.5 text-blue-600 hover:text-blue-800"
-                                            onClick={() => alert(`Viewing ${item.name}`)}
+                                            onClick={() => setSelectedCase(item)}
                                         >
                                             <Eye className="h-4 w-4" />
                                         </button>
@@ -169,19 +198,19 @@ const Cases = () => {
                 </table>
             </div>
 
-            {/* Modal */}
+            {/* Add Case Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
+                    <div
+                        ref={addCaseModalRef}
+                        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800"
+                    >
                         <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Case</h3>
-
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             {[
-                                ["Cabinet Number", "CabinetNum"],
-                                ["Drawer Number", "DrawerNum"],
-                                ["Folder Number", "FolderNum"],
+                                ["Cabinet Number", "id"],
                                 ["Case Name", "name"],
-                                ["Case Category", "category"],
+                                ["Category", "category"],
                                 ["Client", "client"],
                                 ["Branch", "branch"],
                                 ["Filed Date", "filedDate", "date"],
@@ -198,7 +227,6 @@ const Cases = () => {
                                     />
                                 </div>
                             ))}
-
                             <div className="md:col-span-2">
                                 <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                                 <textarea
@@ -210,7 +238,6 @@ const Cases = () => {
                                 ></textarea>
                             </div>
                         </div>
-
                         <div className="mt-6 flex justify-end gap-3">
                             <button
                                 onClick={() => setIsModalOpen(false)}
@@ -228,6 +255,11 @@ const Cases = () => {
                     </div>
                 </div>
             )}
+
+            <ViewModal
+                selectedCase={selectedCase}
+                setSelectedCase={setSelectedCase}
+            />
         </div>
     );
 };

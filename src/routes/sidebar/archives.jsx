@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Filter, X } from "lucide-react";
-import Cases from "./cases";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import ViewModal from "../../components/view-case";
 
 const initialCases = [
     {
@@ -10,6 +10,12 @@ const initialCases = [
         client: "Davis Corp",
         dateFiled: "11/5/2022",
         archivedDate: "11/5/2022",
+        category: "Corporate",
+        lawyer: "Mark Reyes",
+        fee: "₱20,000.00",
+        balance: "₱10,000.00",
+        status: "Closed",
+        description: "Corporate filing case from 2022.",
     },
     {
         id: "A12345",
@@ -17,6 +23,12 @@ const initialCases = [
         client: "John Smith",
         dateFiled: "1/15/2023",
         archivedDate: "N/A",
+        category: "Civil",
+        lawyer: "Anna Cruz",
+        fee: "₱50,000.00",
+        balance: "₱30,000.00",
+        status: "For Review",
+        description: "Civil case involving property dispute.",
     },
     {
         id: "B67890",
@@ -24,13 +36,35 @@ const initialCases = [
         client: "Emily Wilson",
         dateFiled: "2/28/2023",
         archivedDate: "N/A",
+        category: "Real Estate",
+        lawyer: "James Tan",
+        fee: "₱35,000.00",
+        balance: "₱5,000.00",
+        status: "Pending",
+        description: "Dispute over residential land ownership.",
     },
 ];
 
+const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+        case "closed":
+            return "text-green-600";
+        case "pending":
+            return "text-yellow-600";
+        case "for review":
+            return "text-blue-600";
+        default:
+            return "text-gray-600";
+    }
+};
+
 const Archives = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const modalRef = useRef();
+    const fileInputRef = useRef();
     const [search, setSearch] = useState("");
     const [cases, setCases] = useState(initialCases);
-    const [viewCaseData, setViewCaseData] = useState(null);
+    const [selectedCase, setSelectedCase] = useState(null);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [clientFilter, setClientFilter] = useState("");
     const [archivedDateFilter, setArchivedDateFilter] = useState("");
@@ -38,7 +72,6 @@ const Archives = () => {
     const viewModalRef = useRef();
     const filterModalRef = useRef();
 
-    // Handle clicks outside both modals
     useClickOutside([viewModalRef, filterModalRef], () => {
         if (viewCaseData) setViewCaseData(null);
         if (isFilterOpen) setIsFilterOpen(false);
@@ -46,6 +79,10 @@ const Archives = () => {
 
     const handleUnarchive = (id) => {
         setCases((prev) => prev.filter((item) => item.id !== id));
+    };
+
+    const handleFileUpload = (e) => {
+        console.log("File uploaded:", e.target.files[0]);
     };
 
     const filteredCases = cases.filter((item) => {
@@ -56,7 +93,7 @@ const Archives = () => {
     });
 
     return (
-        <div className="min-h-screen p-6 text-gray-800">
+        <div className="min-h-screen p-1 text-gray-800">
             <h1 className="mb-1 text-2xl font-bold dark:text-white">Archives</h1>
             <p className="mb-6 text-sm text-gray-600">Browse and search completed and archived cases</p>
 
@@ -95,7 +132,7 @@ const Archives = () => {
                         {filteredCases.map((item) => (
                             <tr
                                 key={item.id}
-                                className="border-b hover:bg-blue-500 dark:text-white"
+                                className="border-b hover:bg-blue-100 dark:text-white dark:hover:bg-blue-950"
                             >
                                 <td className="px-4 py-2">{item.id}</td>
                                 <td className="px-4 py-2">{item.name}</td>
@@ -104,7 +141,7 @@ const Archives = () => {
                                 <td className="px-4 py-2">{item.archivedDate}</td>
                                 <td className="space-x-2 px-4 py-2 font-medium text-blue-600">
                                     <button
-                                        onClick={() => setViewCaseData(item)}
+                                        onClick={() => setSelectedCase(item)}
                                         className="hover:underline"
                                     >
                                         View
@@ -122,14 +159,7 @@ const Archives = () => {
                 </table>
             </div>
 
-            {viewCaseData && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black bg-opacity-40">
-                    <div ref={viewModalRef}>
-                        <Cases />
-                    </div>
-                </div>
-            )}
-
+            {/* Filter Modal */}
             {isFilterOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
                     <div
@@ -189,6 +219,11 @@ const Archives = () => {
                     </div>
                 </div>
             )}
+
+            <ViewModal
+                selectedCase={selectedCase}
+                setSelectedCase={setSelectedCase}
+            />
         </div>
     );
 };
