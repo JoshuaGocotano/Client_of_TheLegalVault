@@ -137,9 +137,9 @@ const Cases = () => {
             </div>
 
             {/* Case Table */}
-            <div className="w-full overflow-x-auto rounded-xl border-gray-200 bg-slate-50 p-4 shadow-xl dark:bg-slate-900">
+            <div className="card overflow-x-auto">
                 <table className="min-w-full table-auto text-left text-sm">
-                    <thead className="border-b border-gray-200 text-xs uppercase dark:border-gray-700 dark:text-white">
+                    <thead className="text-xs uppercase dark:text-slate-300">
                         <tr>
                             <th className="px-4 py-3">Case ID</th>
                             <th className="px-4 py-3">Name</th>
@@ -156,7 +156,7 @@ const Cases = () => {
                         {data.map((item) => (
                             <tr
                                 key={item.id}
-                                className="border-t border-gray-200 transition hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-slate-800"
+                                className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
                             >
                                 <td className="px-4 py-3">C{item.id}</td>
                                 <td className="px-4 py-3">{item.name}</td>
@@ -169,7 +169,7 @@ const Cases = () => {
                                 <td className="px-4 py-3">{item.fee}</td>
                                 <td className="px-4 py-3">{item.balance}</td>
                                 <td className="px-4 py-3">
-                                    <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex flex-wrap items-center gap-1">
                                         <button
                                             className="p-1.5 text-blue-600 hover:text-blue-800"
                                             onClick={() => setSelectedCase(item)}
