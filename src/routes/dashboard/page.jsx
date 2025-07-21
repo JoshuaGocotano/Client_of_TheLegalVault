@@ -2,7 +2,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 
 import { useTheme } from "@/hooks/use-theme";
 
-import { overviewData, recentSalesData } from "@/constants";
+import { overviewData, userRecentActivity } from "@/constants";
 
 import { FileCheck, Users, ShieldUser, Archive, FolderOpen, FileMinus, UserRoundMinus, ListTodo } from "lucide-react";
 
@@ -129,7 +129,7 @@ const DashboardPage = () => {
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7">
                     <div className="card col-span-1 md:col-span-2 lg:col-span-4">
                         <div className="card-header">
-                            <p className="card-title">Overview</p>
+                            <p className="card-title">Overview of Cases</p>
                         </div>
                         <div className="card-body p-0">
                             <ResponsiveContainer
@@ -162,19 +162,24 @@ const DashboardPage = () => {
                                     </defs>
                                     <Tooltip
                                         cursor={false}
-                                        formatter={(value) => `₱${value}`}
+                                        formatter={(value) => `${value}`}
                                         active={true}
                                     />
                                     <XAxis
                                         dataKey="name"
                                         strokeWidth={0}
                                         stroke={theme === "light" ? "#475569" : "#94a3b8"}
+                                        tick={{ fontSize: 12 }}
+                                        angle={-30}
+                                        textAnchor="end"
+                                        interval={0}
+                                        height={60}
                                     />
                                     <YAxis
                                         dataKey="total"
                                         strokeWidth={0}
                                         stroke={theme === "light" ? "#475569" : "#94a3b8"}
-                                        tickFormatter={(value) => `₱${value}`}
+                                        tickFormatter={(value) => `${value}`}
                                         tickMargin={6}
                                     />
                                     <Area
@@ -194,23 +199,30 @@ const DashboardPage = () => {
                             <p className="card-title">Recent Activity</p>
                         </div>
                         <div className="card-body h-[300px] overflow-auto p-0">
-                            {recentSalesData.map((sale) => (
+                            {userRecentActivity.map((log) => (
                                 <div
-                                    key={sale.id}
+                                    key={log.id}
                                     className="flex items-center justify-between gap-x-4 py-2 pr-2"
                                 >
                                     <div className="flex items-center gap-x-4">
                                         <img
-                                            src={sale.image}
-                                            alt={sale.name}
+                                            src={log.user.image}
+                                            alt={log.user.name}
                                             className="size-10 flex-shrink-0 rounded-full object-cover"
                                         />
-                                        <div className="flex flex-col gap-y-2">
-                                            <p className="font-medium text-slate-900 dark:text-slate-50">{sale.name}</p>
-                                            <p className="text-sm text-slate-600 dark:text-slate-400">{sale.email}</p>
+                                        <div className="flex flex-col gap-y-1">
+                                            <p className="font-medium text-slate-900 dark:text-slate-50">{log.user.name}</p>
+                                            <p className="text-sm text-slate-500 dark:text-slate-400">{log.user_log_description}</p>
                                         </div>
                                     </div>
-                                    <p className="font-medium text-slate-900 dark:text-slate-50">${sale.total}</p>
+                                    <div className="text-right">
+                                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                                            {new Date(log.user_log_datetime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                        </p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            {new Date(log.user_log_datetime).toLocaleDateString()}
+                                        </p>
+                                    </div>
                                 </div>
                             ))}
                         </div>

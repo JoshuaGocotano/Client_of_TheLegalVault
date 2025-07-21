@@ -34,7 +34,7 @@ const Login = () => {
             }
 
             // Save to context
-            login(data.user); // assume backend returns { user: { ... } }
+            login(data.user); 
 
             // Redirecting to the dashboard if SUCCESSFUL
             navigate("/");
