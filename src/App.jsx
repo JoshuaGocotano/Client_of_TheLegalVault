@@ -19,8 +19,7 @@ import Clients from "./routes/sidebar/clients";
 import Tasks from "./routes/sidebar/tasks";
 import Users from "./routes/sidebar/users";
 import Reports from "./routes/sidebar/reports";
-import Activity from "./components/activity";
-import UserLogs from "./routes/sidebar/userlogs";
+import UserLogs from "./routes/sidebar/user-logs";
 import Archives from "./routes/sidebar/archives";
 import Notifications from "./components/notifications";
 import NotificationSettings from "./components/notif-settings";
@@ -66,7 +65,6 @@ export default function App() {
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
                         { path: "reports", element: <Reports /> },
-                        { path: "reports/activity", element: <Activity /> },
                         { path: "user-logs", element: <UserLogs /> },
                         { path: "case-archive", element: <Archives /> },
                         { path: "notifications", element: <Notifications /> },
