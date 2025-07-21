@@ -107,12 +107,10 @@ const Cases = () => {
     };
 
     return (
-        <div className="bg-blue rounded-xl bg-slate-50 p-4 shadow-lg dark:bg-slate-900 sm:p-6">
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <h2 className="text-xl font-bold text-gray-800 dark:text-white sm:text-2xl">Cases</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-300">Manage all case details here...</p>
-                </div>
+        <div className="mx-auto">
+            <div className="mb-6 flex flex-col gap-y-1">
+                <h2 className="title">Cases</h2>
+                <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
             </div>
 
             {/* Search and Buttons */}
@@ -139,9 +137,9 @@ const Cases = () => {
             </div>
 
             {/* Case Table */}
-            <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="w-full overflow-x-auto rounded-xl border-gray-200 bg-slate-50 p-4 shadow-xl dark:bg-slate-900">
                 <table className="min-w-full table-auto text-left text-sm">
-                    <thead className="text-xs uppercase dark:text-white">
+                    <thead className="border-b border-gray-200 text-xs uppercase dark:border-gray-700 dark:text-white">
                         <tr>
                             <th className="px-4 py-3">Case ID</th>
                             <th className="px-4 py-3">Name</th>

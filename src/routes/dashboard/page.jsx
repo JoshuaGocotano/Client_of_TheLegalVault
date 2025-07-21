@@ -11,9 +11,9 @@ const DashboardPage = () => {
 
     return (
         <>
-            <div className="flex flex-col gap-y-4">
+            <div className="flex flex-col gap-y-3">
                 <h1 className="title">Dashboard</h1>
-                <p className="dark:text-slate-100">Welcome back! Here's your overview...</p>
+                <p className="dark:text-slate-300">Welcome back! Here's your overview.</p>
 
                 {/* first row */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
