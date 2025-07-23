@@ -1,30 +1,33 @@
 import { ShieldUser, FileText, Archive, FolderKanban } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useNavigate } from "react-router-dom";
+
 import user1 from "@/assets/JoshuaG..jpg";
 import user2 from "../../../../uploads/joshua.png";
 import user3 from "../../../../uploads/user_profile-1752223125848-455598027.jpg";
+
+import { useTheme } from "@/hooks/use-theme";
 
 const initialUsers = [
     {
         user: "Sarah Wilson",
         action: "Logged out 2 minutes ago",
         status: "Inactive",
-        date: "April 21, 2025 ",
+        date: "April 21, 2025",
         image: user1,
     },
     {
         user: "Bryan Wilson",
         action: "Logged in 5 minutes ago",
         status: "Active",
-        date: "April 21, 2025 ",
+        date: "April 21, 2025",
         image: user2,
     },
     {
         user: "John Wilson",
         action: "Logged in 10 minutes ago",
         status: "Active",
-        date: "April 21, 2025 ",
+        date: "April 21, 2025",
         image: user3,
     },
 ];
@@ -49,7 +52,7 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
-const ChartPlaceholder = ({ title, dataKey }) => (
+const ChartPlaceholder = ({ title, dataKey, theme }) => (
     <div className="flex flex-col gap-3 rounded-lg bg-white p-4 shadow dark:bg-slate-900">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
         <div className="h-[200px] w-full">
@@ -83,12 +86,12 @@ const ChartPlaceholder = ({ title, dataKey }) => (
                     </defs>
                     <XAxis
                         dataKey="name"
-                        stroke="#94a3b8"
+                        stroke={theme === "light" ? "#475569" : "#94a3b8"}
+                        strokeWidth={0}
                     />
-                    <YAxis stroke="#94a3b8" />
-                    <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#e2e8f0"
+                    <YAxis
+                        stroke={theme === "light" ? "#94a3b8" : "#cbd5e1"}
+                        strokeWidth={0}
                     />
                     <Tooltip />
                     <Area
@@ -106,6 +109,7 @@ const ChartPlaceholder = ({ title, dataKey }) => (
 
 export const Reports = () => {
     const navigate = useNavigate();
+    const { theme } = useTheme(); // ✅ Hook is now correctly used inside component
 
     return (
         <div className="space-y-6">
@@ -161,6 +165,7 @@ export const Reports = () => {
                     <ChartPlaceholder
                         title="Completed Cases"
                         dataKey="Cases"
+                        theme={theme}
                     />
                 </div>
             </div>
