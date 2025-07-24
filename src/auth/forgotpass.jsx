@@ -1,14 +1,17 @@
 import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
 import { Mail } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
+    const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
         // TODO: Call backend to initiate password reset
         alert(`Password reset link sent to ${email}`);
+        navigate("/verify");
     };
 
     return (

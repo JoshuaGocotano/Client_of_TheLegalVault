@@ -13,7 +13,7 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
 
-    const [loginLoading, setLoginLoading] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const Spinner = () => (
         <svg
@@ -40,7 +40,7 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-        setLoginLoading(true);
+        setLoading(true);
         setError("");
 
         try {
@@ -57,7 +57,7 @@ const Login = () => {
 
             if (!res.ok) {
                 setError(data.error || "Login failed");
-                setLoginLoading(false);
+                setLoading(false);
                 return;
             }
 
@@ -66,12 +66,12 @@ const Login = () => {
 
             // Redirecting to the dashboard if SUCCESSFUL
             setTimeout(() => {
-                navigate("/");
+                navigate("/verify");
             }, 2000);
         } catch (err) {
             console.error("Login error:", err);
             setError("Something went wrong. Please try again.");
-            setLoginLoading(false);
+            setLoading(false);
         }
     };
 
@@ -145,12 +145,12 @@ const Login = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            disabled={loginLoading}
+                            disabled={loading}
                             className="flex w-full items-center justify-center rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            {loginLoading ? (
+                            {loading ? (
                                 <>
-                                    Logging in...
+                                    Authenticating...
                                     <Spinner />
                                 </>
                             ) : (
@@ -158,7 +158,7 @@ const Login = () => {
                             )}
                         </button>
 
-                        {/* Links */}
+                        {/* Forgot Password button */}
                         <div className="mt-2 text-center text-sm text-blue-200">
                             <a
                                 href="/forgot-password"

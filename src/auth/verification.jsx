@@ -10,15 +10,52 @@ export default function Verify() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [code, setCode] = useState("");
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const Spinner = () => (
+        <svg
+            className="ml-2 h-5 w-5 animate-spin text-blue-900"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+        >
+            <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+            />
+            <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+        </svg>
+    );
 
     const handleVerify = (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
 
-        // TODO: Replace with actual backend 2FA code validation
-        if (code === "123456") {
-            navigate("/");
-        } else {
-            alert("Invalid verification code");
+        try {
+            if (code === "123456") {
+                setTimeout(() => {
+                    alert("Verification successful!");
+                    navigate("/");
+                }, 2000);
+            } else {
+                alert("Invalid verification code");
+                setLoading(false);
+            }
+        } catch (err) {
+            console.error("Verification error:", err);
+            setError("An error occurred during verification");
+            alert("An error occurred during verification: " + err.message);
+            setLoading(false);
         }
     };
 
@@ -49,7 +86,7 @@ export default function Verify() {
                 >
                     <h2 className="mb-2 text-center text-3xl font-bold md:text-left">Two-Factor Authentication</h2>
                     <p className="mb-6 text-center text-sm text-blue-200 md:text-left">
-                        Enter the 6-digit code sent to <span className="font-medium">{user.email}</span>
+                        Enter the 6-digit code sent to <span className="font-semibold underline">{user.user_email}</span>
                     </p>
 
                     <form
@@ -71,9 +108,17 @@ export default function Verify() {
 
                         <button
                             type="submit"
-                            className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
+                            disabled={loading}
+                            className="flex w-full items-center justify-center rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Verify
+                            {loading ? (
+                                <>
+                                    Verifying
+                                    <Spinner />
+                                </>
+                            ) : (
+                                "Verify"
+                            )}
                         </button>
 
                         <div className="mt-2 text-center text-sm text-blue-200">
