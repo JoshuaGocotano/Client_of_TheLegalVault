@@ -94,18 +94,19 @@ const Users = () => {
                     placeholder="Search users..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-transparent px-4 py-2 text-gray-900 dark:border-slate-600 dark:text-white md:flex-1"
+                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600 md:flex-1"
                 />
+
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                    className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
                 >
                     Add User
                 </button>
             </div>
 
             {/* Users Table */}
-            <div className="overflow-x-auto rounded-xl border shadow dark:border-slate-700">
+            <div className="card overflow-x-auto rounded-xl border shadow-md dark:border-slate-700">
                 <table className="w-full table-auto text-left text-sm">
                     <thead className="text-xs uppercase dark:text-slate-400">
                         <tr>
@@ -121,9 +122,9 @@ const Users = () => {
                             filteredUsers.map((user) => (
                                 <tr
                                     key={user.id}
-                                    className="border-t hover:bg-blue-50 dark:hover:bg-blue-950"
+                                    className="border-t border-gray-200 hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-950"
                                 >
-                                    <td className="flex items-center gap-3 px-4 py-5">
+                                    <td className="flex items-center gap-3 px-4 py-3">
                                         <img
                                             src={user.image}
                                             alt={user.name}

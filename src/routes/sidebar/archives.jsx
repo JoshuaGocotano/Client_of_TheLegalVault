@@ -89,13 +89,13 @@ const Archives = () => {
             </div>
 
             {/* Search and Filter */}
-            <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
+            <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
                 <input
                     type="text"
                     placeholder="Search archives..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 md:flex-1"
+                    className="focus:ring-0.5 h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900 outline-none placeholder:text-slate-500 focus:border-blue-600 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
                 />
                 <button
                     onClick={() => setIsFilterOpen(true)}
@@ -107,7 +107,7 @@ const Archives = () => {
             </div>
 
             {/* Table */}
-            <div className="card overflow-x-auto rounded-lg bg-white p-4 shadow-md dark:bg-slate-800">
+            <div className="card overflow-x-auto shadow-md">
                 <table className="min-w-full table-auto text-left text-sm">
                     <thead className="text-xs uppercase dark:text-slate-300">
                         <tr>

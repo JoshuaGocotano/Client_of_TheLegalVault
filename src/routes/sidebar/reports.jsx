@@ -93,7 +93,11 @@ const ChartPlaceholder = ({ title, dataKey, theme }) => (
                         stroke={theme === "light" ? "#94a3b8" : "#cbd5e1"}
                         strokeWidth={0}
                     />
-                    <Tooltip />
+                    <Tooltip
+                        cursor={false}
+                        formatter={(value) => `${value}`}
+                        active={true}
+                    />
                     <Area
                         type="monotone"
                         dataKey={dataKey}
