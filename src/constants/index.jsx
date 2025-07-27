@@ -1,10 +1,5 @@
 import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText } from "lucide-react";
 
-import profile1 from "@/assets/JoshuaG..jpg";
-import profile2 from "../../../uploads/joshua.png";
-import profile3 from "../../../uploads/angelie.png";
-import profile4 from "../../../uploads/user_profile-1752223125848-455598027.jpg";
-
 export const navbarLinks = [
     {
         label: "Home",
@@ -77,48 +72,5 @@ export const overviewData = [
     {
         name: "Special Courts",
         total: 20,
-    },
-];
-
-export const userRecentActivity = [
-    {
-        id: 1,
-        user: {
-            name: "Joshua Garcia",
-            image: profile1,
-        },
-        user_log_description: "Logged in from a new device",
-        user_log_datetime: "2025-07-21T08:45:00Z",
-        user_log_type: "login",
-    },
-    {
-        id: 2,
-        user: {
-            name: "Joshua Gocotano",
-            image: profile2,
-        },
-        user_log_description: "Updated profile information",
-        user_log_datetime: "2025-07-20T14:22:00Z",
-        user_log_type: "profile update",
-    },
-    {
-        id: 3,
-        user: {
-            name: "Angelie Panganiban",
-            image: profile3,
-        },
-        user_log_description: "Reset password",
-        user_log_datetime: "2025-07-19T19:10:00Z",
-        user_log_type: "password reset",
-    },
-    {
-        id: 4,
-        user: {
-            name: "Ivo Ajeas Gecole",
-            image: profile4,
-        },
-        user_log_description: "Logged out successfully",
-        user_log_datetime: "2025-07-18T23:55:00Z",
-        user_log_type: "logout",
     },
 ];

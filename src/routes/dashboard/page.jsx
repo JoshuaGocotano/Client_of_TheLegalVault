@@ -16,7 +16,10 @@ const DashboardPage = () => {
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/user-logs", {
+                const endpoint =
+                    user?.user_role === "Admin" ? "http://localhost:3000/api/user-logs" : `http://localhost:3000/api/user-logs/${user.user_id}`;
+
+                const res = await fetch(endpoint, {
                     method: "GET",
                     credentials: "include",
                 });
@@ -224,7 +227,7 @@ const DashboardPage = () => {
                         </div>
                         <div className="card-body h-[300px] overflow-auto p-0">
                             {userLogs.length > 0 ? (
-                                userLogs.map((log) => (
+                                userLogs.slice(0, 10).map((log) => (
                                     <div
                                         key={log.user_log_id}
                                         className="flex items-center justify-between gap-x-4 rounded-lg py-2 pr-2 hover:bg-slate-100 dark:hover:bg-slate-800"
@@ -237,10 +240,10 @@ const DashboardPage = () => {
                                             />
                                             <div className="flex flex-col gap-y-1">
                                                 <p className="font-medium text-slate-900 dark:text-slate-50">
-                                                    {`${log.user_fname || ""} ${log.user_mname || ""} ${log.user_lname || ""}`.trim() ||
-                                                        "Unknown User"}
+                                                    {`${log.user_fullname}` || "Unknown User"}
                                                 </p>
                                                 <p className="text-sm text-slate-500 dark:text-slate-400">{log.user_log_action}</p>
+                                                {/* <span>{log.user_log_type}</span> */}
                                             </div>
                                         </div>
                                         <div className="text-right">
