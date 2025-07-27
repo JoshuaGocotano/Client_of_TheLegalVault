@@ -8,7 +8,7 @@ const Userlogs = () => {
     const [selectedUser, setSelectedUser] = useState("All Users");
     const [selectedDate, setSelectedDate] = useState("");
 
-    // 🔁 Fetch logs from backend
+    // Fetch logs
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
