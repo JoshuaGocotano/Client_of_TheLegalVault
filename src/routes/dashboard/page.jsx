@@ -1,19 +1,43 @@
+import React, { useEffect, useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-
 import { useTheme } from "@/hooks/use-theme";
-
 import { overviewData, userRecentActivity } from "@/constants";
-
 import { FileCheck, Users, ShieldUser, Archive, FolderOpen, FileMinus, UserRoundMinus, ListTodo } from "lucide-react";
+import default_avatar from "@/assets/default-avatar.png";
+
+import { useAuth } from "@/context/auth-context";
 
 const DashboardPage = () => {
     const { theme, setTheme } = useTheme();
+    const { user } = useAuth();
+    const [userLogs, setUserLogs] = useState([]);
+
+    // fetching all user logs
+    useEffect(() => {
+        const fetchUserLogs = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/user-logs", {
+                    method: "GET",
+                    credentials: "include",
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch user logs");
+
+                const data = await res.json();
+                setUserLogs(data);
+            } catch (error) {
+                console.error("Failed to fetch user logs:", error);
+            }
+        };
+
+        fetchUserLogs();
+    }, []);
 
     return (
         <>
             <div className="flex flex-col gap-y-3">
                 <h1 className="title">Dashboard</h1>
-                <p className="dark:text-slate-300">Welcome back! Here's your overview.</p>
+                <p className="dark:text-slate-300">Welcome back {user.user_fname}! Here's your overview.</p>
 
                 {/* first row */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -199,32 +223,42 @@ const DashboardPage = () => {
                             <p className="card-title">Recent Activity</p>
                         </div>
                         <div className="card-body h-[300px] overflow-auto p-0">
-                            {userRecentActivity.map((log) => (
-                                <div
-                                    key={log.id}
-                                    className="flex items-center justify-between gap-x-4 py-2 pr-2"
-                                >
-                                    <div className="flex items-center gap-x-4">
-                                        <img
-                                            src={log.user.image}
-                                            alt={log.user.name}
-                                            className="size-10 flex-shrink-0 rounded-full object-cover"
-                                        />
-                                        <div className="flex flex-col gap-y-1">
-                                            <p className="font-medium text-slate-900 dark:text-slate-50">{log.user.name}</p>
-                                            <p className="text-sm text-slate-500 dark:text-slate-400">{log.user_log_description}</p>
+                            {userLogs.length > 0 ? (
+                                userLogs.map((log) => (
+                                    <div
+                                        key={log.user_log_id}
+                                        className="flex items-center justify-between gap-x-4 rounded-lg py-2 pr-2 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                    >
+                                        <div className="flex items-center gap-x-4">
+                                            <img
+                                                src={log.user_profile ? `http://localhost:3000${log.user_profile}` : "/default-avatar.png"}
+                                                alt={`${log.user_fname || "User"}`}
+                                                className="ml-2 size-10 flex-shrink-0 rounded-full object-cover"
+                                            />
+                                            <div className="flex flex-col gap-y-1">
+                                                <p className="font-medium text-slate-900 dark:text-slate-50">
+                                                    {`${log.user_fname || ""} ${log.user_mname || ""} ${log.user_lname || ""}`.trim() ||
+                                                        "Unknown User"}
+                                                </p>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">{log.user_log_action}</p>
+                                            </div>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
+                                                {new Date(log.user_log_time).toLocaleTimeString([], {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                })}
+                                            </p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                {new Date(log.user_log_time).toLocaleDateString()}
+                                            </p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-50">
-                                            {new Date(log.user_log_datetime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                                        </p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                                            {new Date(log.user_log_datetime).toLocaleDateString()}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                                ))
+                            ) : (
+                                <div className="p-4 text-center text-slate-500 dark:text-slate-400">No recent activity found.</div>
+                            )}
                         </div>
                     </div>
                 </div>
