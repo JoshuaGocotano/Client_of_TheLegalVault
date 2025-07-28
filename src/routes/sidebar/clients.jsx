@@ -197,20 +197,31 @@ const Client = () => {
                                             <th className="whitespace-nowrap px-4 py-3">Name</th>
                                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
-                                            <th className="whitespace-nowrap px-4 py-3">Role</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-700 dark:text-white">
-                                        {clientContacts
-                                            .filter((contact) => contact.client_id === viewClient.client_id)
-                                            .map((contact) => (
-                                                <tr key={contact.client_id}>
-                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_fullname}</td>
-                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_email}</td>
-                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_phone}</td>
-                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_role}</td>
-                                                </tr>
-                                            ))}
+                                        {clientContacts.filter((contact) => contact.client_id === viewClient.client_id).length > 0 ? (
+                                            clientContacts
+                                                .filter((contact) => contact.client_id === viewClient.client_id)
+                                                .map((contact) => (
+                                                    <tr key={contact.contact_id}>
+                                                        <td className="whitespace-nowrap px-4 py-2">{contact.contact_fullname}</td>
+                                                        <td className="whitespace-nowrap px-4 py-2">{contact.contact_email}</td>
+                                                        <td className="whitespace-nowrap px-4 py-2">{contact.contact_phone}</td>
+                                                        <td className="whitespace-nowrap px-4 py-2">{contact.contact_role}</td>
+                                                    </tr>
+                                                ))
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan="4"
+                                                    className="py-3 text-center text-gray-500"
+                                                >
+                                                    No contacts available for this client.
+                                                </td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
