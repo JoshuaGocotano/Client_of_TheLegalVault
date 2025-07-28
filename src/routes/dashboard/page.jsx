@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { useTheme } from "@/hooks/use-theme";
-import { overviewData, userRecentActivity } from "@/constants";
+import { overviewData } from "@/constants";
 import { FileCheck, Users, ShieldUser, Archive, FolderOpen, FileMinus, UserRoundMinus, ListTodo } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
 
@@ -234,7 +234,7 @@ const DashboardPage = () => {
                                     >
                                         <div className="flex items-center gap-x-4">
                                             <img
-                                                src={log.user_profile ? `http://localhost:3000${log.user_profile}` : "/default-avatar.png"}
+                                                src={log.user_profile ? `http://localhost:3000${log.user_profile}` : default_avatar}
                                                 alt={`${log.user_fname || "User"}`}
                                                 className="ml-2 size-10 flex-shrink-0 rounded-full object-cover"
                                             />

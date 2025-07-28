@@ -101,7 +101,11 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     {open && (
                         <div className="absolute right-0 mt-2 w-48 rounded-md bg-white p-2 shadow-lg dark:bg-slate-800">
                             <div className="max-w-full truncate px-2 py-1 text-sm font-bold text-gray-500 dark:text-gray-300">
-                                {loading ? "Loading..." : user ? `${user.user_fname} ${user.user_lname}` : "No user"}
+                                {loading
+                                    ? "Loading..."
+                                    : user
+                                      ? `${user.user_fname} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname}`
+                                      : "No user"}
                             </div>
                             <button
                                 onClick={handleProfile}
@@ -121,11 +125,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
             </div>
 
             {/* Profile Modal */}
-            {showProfileModal && (
-                <ProfileModal
-                    onClose={() => setShowProfileModal(false)}
-                />
-            )}
+            {showProfileModal && <ProfileModal onClose={() => setShowProfileModal(false)} />}
         </header>
     );
 };
