@@ -8,7 +8,7 @@ import default_avatar from "@/assets/default-avatar.png";
 import { useAuth } from "@/context/auth-context";
 
 const DashboardPage = () => {
-    const { theme, setTheme } = useTheme();
+    const { theme } = useTheme();
     const { user } = useAuth();
     const [userLogs, setUserLogs] = useState([]);
 
