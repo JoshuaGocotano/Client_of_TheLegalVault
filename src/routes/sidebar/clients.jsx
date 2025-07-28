@@ -8,37 +8,32 @@ const Client = () => {
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [users, setUsers] = useState([]);
+    const [clientContacts, setClientContacts] = useState([]);
 
     // Fetching all clients and users to get the name of the user who created the client
     useEffect(() => {
-        const fetchClientsAndUsers = async () => {
+        const fetchAll = async () => {
             try {
-                const [clientsRes, usersRes] = await Promise.all([
-                    fetch("http://localhost:3000/api/clients", {
-                        method: "GET",
-                        credentials: "include",
-                    }),
-                    fetch("http://localhost:3000/api/users", {
-                        method: "GET",
-                        credentials: "include",
-                    }),
+                const [clientsRes, usersRes, contactsRes] = await Promise.all([
+                    fetch("http://localhost:3000/api/clients", { credentials: "include" }),
+                    fetch("http://localhost:3000/api/users", { credentials: "include" }),
+                    fetch("http://localhost:3000/api/client-contacts", { credentials: "include" }),
                 ]);
 
-                if (!clientsRes.ok) throw new Error("Failed to fetch clients");
-                if (!usersRes.ok) throw new Error("Failed to fetch users");
+                if (!clientsRes.ok || !usersRes.ok || !contactsRes.ok) throw new Error("Failed to fetch one or more resources");
 
-                const clientsData = await clientsRes.json();
-                const usersData = await usersRes.json();
+                const [clients, users, contacts] = await Promise.all([clientsRes.json(), usersRes.json(), contactsRes.json()]);
 
-                setTableData(clientsData);
-                setUsers(usersData);
-            } catch (error) {
-                console.error("Failed to fetch clients or users", error);
-                setError(error);
+                setTableData(clients);
+                setUsers(users);
+                setClientContacts(contacts); // 🔹 save contacts in state
+            } catch (err) {
+                console.error("Fetching error:", err);
+                setError(err);
             }
         };
 
-        fetchClientsAndUsers();
+        fetchAll();
     }, []);
 
     const getUserFullName = (createdBy) => {
@@ -61,7 +56,7 @@ const Client = () => {
     });
 
     const handleEditSave = () => {
-        setData((prev) => prev.map((item) => (item.id === editClient.id ? { ...item, ...editClient } : item)));
+        setTableData((prev) => prev.map((item) => (item.id === editClient.id ? { ...item, ...editClient } : item)));
         setEditClient(null);
     };
 
@@ -85,7 +80,7 @@ const Client = () => {
     };
 
     const confirmRemoveUser = () => {
-        setTableData((prev) => prev.filter((client) => client.id !== userToRemove.id));
+        // Logic to remove the user
         closeRemoveModal();
     };
 
@@ -178,32 +173,35 @@ const Client = () => {
                         <h3 className="mb-4 text-xl font-bold text-blue-900">Client Information</h3>
                         <div className="grid grid-cols-2 gap-4 text-sm text-blue-900">
                             <div>
-                                <p className="font-semibold">Name</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.client}</p>
+                                <p className="font-semibold">Name / Company</p>
+                                <p className="text-gray-600 dark:text-white">{viewClient.client_fullname}</p>
                             </div>
                             <div>
                                 <p className="font-semibold">Email</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.email || "-"}</p>
+                                <p className="text-gray-600 dark:text-white">{viewClient.client_email || "-"}</p>
                             </div>
                             <div>
                                 <p className="font-semibold">Phone</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.phone || "-"}</p>
+                                <p className="text-gray-600 dark:text-white">{viewClient.client_phonenum || "-"}</p>
                             </div>
                             <div>
-                                <p className="font-semibold">Emergency</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.emergency || "-"}</p>
+                                <p className="font-semibold">Date Added</p>
+                                <p className="text-gray-600 dark:text-white">{new Date(viewClient.client_date_created).toLocaleDateString()}</p>
                             </div>
-                            <div>
-                                <p className="font-semibold">Contact Person Name</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.ContactPersonName || "-"}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Contact Person Number</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.ContactPersonNumber || "-"}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold">Relation / Role</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.RelationRole || "-"}</p>
+
+                            <div className="w-full">
+                                <p className="font-semibold">Contact</p>
+                                <table className="min-w-full table-auto text-left text-sm">
+                                    <thead className="text-xs uppercase text-slate-500">
+                                        <tr>
+                                            <th className="whitespace-nowrap px-4 py-3">Name</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Email</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Phone</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-gray-700 dark:text-white"></tbody>
+                                </table>
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end gap-2">
