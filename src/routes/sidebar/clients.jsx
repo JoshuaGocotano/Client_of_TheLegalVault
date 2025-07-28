@@ -169,9 +169,9 @@ const Client = () => {
             {/* View Client Modal */}
             {viewClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
+                    <div className="w-full max-w-screen-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-4 text-xl font-bold text-blue-900">Client Information</h3>
-                        <div className="grid grid-cols-2 gap-4 text-sm text-blue-900">
+                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
                                 <p className="font-semibold">Name / Company</p>
                                 <p className="text-gray-600 dark:text-white">{viewClient.client_fullname}</p>
@@ -189,21 +189,33 @@ const Client = () => {
                                 <p className="text-gray-600 dark:text-white">{new Date(viewClient.client_date_created).toLocaleDateString()}</p>
                             </div>
 
-                            <div className="w-full">
-                                <p className="font-semibold">Contact</p>
+                            <div className="col-span-2 mt-4 w-full">
+                                <p className="mb-2 font-semibold">Contact(s)</p>
                                 <table className="min-w-full table-auto text-left text-sm">
                                     <thead className="text-xs uppercase text-slate-500">
                                         <tr>
                                             <th className="whitespace-nowrap px-4 py-3">Name</th>
                                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
-                                            <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Role</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="text-gray-700 dark:text-white"></tbody>
+                                    <tbody className="text-gray-700 dark:text-white">
+                                        {clientContacts
+                                            .filter((contact) => contact.client_id === viewClient.client_id)
+                                            .map((contact) => (
+                                                <tr key={contact.client_id}>
+                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_fullname}</td>
+                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_email}</td>
+                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_phone}</td>
+                                                    <td className="whitespace-nowrap px-4 py-2">{contact.contact_role}</td>
+                                                </tr>
+                                            ))}
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
+
                         <div className="mt-6 flex justify-end gap-2">
                             <button
                                 onClick={() => setViewClient(null)}
