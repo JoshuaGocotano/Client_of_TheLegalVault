@@ -10,7 +10,7 @@ const Client = () => {
     const [users, setUsers] = useState([]);
     const [clientContacts, setClientContacts] = useState([]);
 
-    // Fetching all clients and users to get the name of the user who created the client
+    // Fetching clients, users, and contacts data for their relations
     useEffect(() => {
         const fetchAll = async () => {
             try {
@@ -170,29 +170,29 @@ const Client = () => {
             {viewClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-screen-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
-                        <h3 className="mb-4 text-xl font-bold text-blue-900">Client Information</h3>
+                        <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">Client Information</h3>
                         <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
-                                <p className="font-semibold">Name / Company</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.client_fullname}</p>
+                                <p className="font-semibold dark:text-blue-700">Name / Company</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_fullname}</p>
                             </div>
                             <div>
-                                <p className="font-semibold">Email</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.client_email || "-"}</p>
+                                <p className="font-semibold dark:text-blue-700">Email</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_email || "-"}</p>
                             </div>
                             <div>
-                                <p className="font-semibold">Phone</p>
-                                <p className="text-gray-600 dark:text-white">{viewClient.client_phonenum || "-"}</p>
+                                <p className="font-semibold dark:text-blue-700">Phone</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_phonenum || "-"}</p>
                             </div>
                             <div>
-                                <p className="font-semibold">Date Added</p>
-                                <p className="text-gray-600 dark:text-white">{new Date(viewClient.client_date_created).toLocaleDateString()}</p>
+                                <p className="font-semibold dark:text-blue-700">Date Added</p>
+                                <p className="text-gray-600 dark:text-slate-200">{new Date(viewClient.client_date_created).toLocaleDateString()}</p>
                             </div>
 
                             <div className="col-span-2 mt-4 w-full">
-                                <p className="mb-2 font-semibold">Contact(s)</p>
+                                <p className="mb-2 font-semibold dark:text-blue-700">Contact(s)</p>
                                 <table className="min-w-full table-auto text-left text-sm">
-                                    <thead className="text-xs uppercase text-slate-500">
+                                    <thead className="text-xs uppercase text-slate-500 dark:text-slate-400">
                                         <tr>
                                             <th className="whitespace-nowrap px-4 py-3">Name</th>
                                             <th className="whitespace-nowrap px-4 py-3">Email</th>
@@ -200,7 +200,7 @@ const Client = () => {
                                             <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="text-gray-700 dark:text-white">
+                                    <tbody className="text-gray-600 dark:text-slate-200">
                                         {clientContacts.filter((contact) => contact.client_id === viewClient.client_id).length > 0 ? (
                                             clientContacts
                                                 .filter((contact) => contact.client_id === viewClient.client_id)

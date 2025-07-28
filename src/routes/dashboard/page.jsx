@@ -227,7 +227,7 @@ const DashboardPage = () => {
                         </div>
                         <div className="card-body h-[300px] overflow-auto p-0">
                             {userLogs.length > 0 ? (
-                                userLogs.slice(0, 10).map((log) => (
+                                userLogs.slice(0, 4).map((log) => (
                                     <div
                                         key={log.user_log_id}
                                         className="flex items-center justify-between gap-x-4 rounded-lg py-2 pr-2 hover:bg-slate-100 dark:hover:bg-slate-800"
