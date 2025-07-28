@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
+import defaultAvatar from "../../assets/default-avatar.png";
+import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity } from "lucide-react";
 
 const Userlogs = () => {
-    const [logs, setLogs] = useState([]);
-    const [filteredLogs, setFilteredLogs] = useState([]);
-
+    const [tableData, setTableData] = useState([]);
+    const [error, setError] = useState(null);
     const [search, setSearch] = useState("");
-    const [selectedUser, setSelectedUser] = useState("All Users");
     const [selectedDate, setSelectedDate] = useState("");
 
-    // Fetch logs
+    const [visibleCount, setVisibleCount] = useState(5);
+
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
@@ -20,79 +21,70 @@ const Userlogs = () => {
                 if (!res.ok) throw new Error("Failed to fetch user logs");
 
                 const data = await res.json();
-
-                // Format logs for UI consistency
-                const formattedLogs = data.map((log) => ({
-                    icon: getLogIcon(log.user_log_action),
-                    user: log.user_fullname,
-                    action: log.user_log_action,
-                    tag: getLogTag(log.user_log_action),
-                    tagColor: getTagColor(log.user_log_action),
-                    time: new Date(log.user_log_time).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
-                    avatar: log.user_profile ? `http://localhost:3000${log.user_profile}` : "/default-avatar.png",
-                }));
-
-                setLogs(formattedLogs);
-                setFilteredLogs(formattedLogs);
+                setTableData(data);
             } catch (error) {
-                console.error("Failed to fetch user logs:", error);
+                console.error("Failed to fetch logs", error);
+                setError(error);
             }
         };
 
         fetchUserLogs();
     }, []);
 
-    // 🎯 Filter function
-    const handleApplyFilters = () => {
-        const filtered = logs.filter((log) => {
-            const matchUser = selectedUser === "All Users" || log.user === selectedUser;
-            const matchSearch = log.action.toLowerCase().includes(search.toLowerCase());
-            const matchDate = !selectedDate || log.time.startsWith(formatDate(selectedDate));
-            return matchUser && matchSearch && matchDate;
-        });
+    const getLogIcon = (log) => {
+        const type = log.user_log_type?.toLowerCase();
+        const action = log.user_log_action?.toLowerCase();
 
-        setFilteredLogs(filtered);
-    };
+        if (type === "user log") return <User className="h-5 w-5" />;
+        if (type === "document log") return <FileText className="h-5 w-5" />;
+        if (type === "case log") return <Scale className="h-5 w-5" />;
+        if (type === "archive log") return <Archive className="h-5 w-5" />;
 
-    const formatDate = (input) => {
-        const date = new Date(input);
-        const options = { year: "numeric", month: "long", day: "numeric" };
-        return date.toLocaleDateString("en-US", options);
-    };
+        if (/login/.test(action)) return <LogIn className="h-5 w-5" />;
+        if (/logout/.test(action)) return <LogOut className="h-5 w-5" />;
+        if (/fail|error/.test(action)) return <AlertTriangle className="h-5 w-5 text-red-500" />;
 
-    // 🛠 Helpers
-    const getLogIcon = (action) => {
-        if (/login/i.test(action)) return "https://img.icons8.com/fluency/48/lock.png";
-        if (/logout/i.test(action)) return "https://img.icons8.com/fluency/48/export.png";
-        if (/fail|error/i.test(action)) return "https://img.icons8.com/fluency/48/error.png";
-        return "https://img.icons8.com/fluency/48/activity-history.png";
-    };
-
-    const getLogTag = (action) => {
-        if (/login|logout/i.test(action)) return "Login";
-        if (/fail|error/i.test(action)) return "Error";
-        return "Action";
+        return <Activity className="h-5 w-5" />;
     };
 
     const getTagColor = (action) => {
-        if (/login|logout/i.test(action)) return "bg-blue-100 text-blue-700";
+        if (/login/i.test(action)) return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+        if (/logout/i.test(action)) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
         if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
         return "bg-green-100 text-green-700";
     };
 
-    // 🔁 Extract unique users for dropdown
-    const userOptions = ["All Users", ...new Set(logs.map((log) => log.user))];
+    const getLogTag = (action) => {
+        if (/login/i.test(action)) return "Login";
+        if (/logout/i.test(action)) return "Logout";
+        if (/fail|error/i.test(action)) return "Error";
+        return "Action";
+    };
+
+    // Filtered directly in render
+    const filteredLogs = tableData.filter((log) => {
+        const matchSearch =
+            log.user_fullname?.toLowerCase().includes(search.toLowerCase()) ||
+            log.user_log_type?.toLowerCase().includes(search.toLowerCase()) ||
+            log.user_log_action?.toLowerCase().includes(search.toLowerCase());
+
+        const matchDate = !selectedDate || log.user_log_time?.startsWith(selectedDate);
+
+        return matchSearch && matchDate;
+    });
 
     return (
         <div className="min-h-screen">
+            {error && (
+                <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
+                    <div>
+                        <span>{error.message}</span>
+                    </div>
+                </div>
+            )}
+
             <div className="mb-6 flex flex-col gap-y-1">
-                <h2 className="title">User Logs</h2>
+                <h2 className="title">Logs</h2>
                 <p className="text-sm dark:text-slate-300">Track and monitor user activities across the platform.</p>
             </div>
 
@@ -103,74 +95,78 @@ const Userlogs = () => {
                     placeholder="Search..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="card w-full rounded border px-3 py-2 text-slate-950 dark:text-slate-50 sm:w-64"
+                    className="input flex-grow bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 focus:border-blue-600 dark:text-slate-50"
                 />
-                <select
-                    value={selectedUser}
-                    onChange={(e) => setSelectedUser(e.target.value)}
-                    className="card rounded border border-gray-300 bg-white px-3 py-2 text-black dark:border-slate-600 dark:bg-slate-800 dark:text-white"
-                >
-                    {userOptions.map((user, idx) => (
-                        <option key={idx}>{user}</option>
-                    ))}
-                </select>
+
                 <input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="card rounded border border-gray-300 bg-white px-3 py-2 text-black dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+                    className="input w-[150px] bg-transparent px-2 py-1 text-sm text-slate-900 outline-0 placeholder:text-slate-500 focus:border-blue-600 dark:text-slate-50"
                 />
-                <button
-                    className="ml-auto rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                    onClick={handleApplyFilters}
-                >
-                    Apply Filters
-                </button>
             </div>
 
             {/* Logs Section */}
             {filteredLogs.length > 0 ? (
                 <div className="space-y-4">
-                    {filteredLogs.map((log, index) => (
-                        <div
-                            key={index}
-                            className="flex items-start rounded-lg bg-white p-4 text-black shadow-md dark:bg-slate-800 dark:text-white"
-                        >
-                            {/* Avatar */}
-                            <img
-                                src={log.avatar}
-                                alt={log.user}
-                                className="mr-4 h-12 w-12 rounded-full border"
-                            />
+                    {filteredLogs.slice(0, visibleCount).map((log, index) => {
+                        const fullName = `${log.user_fullname ? log.user_fullname : "Unknown User"}`;
+                        const avatar = log.user_profile ? `http://localhost:3000${log.user_profile}` : defaultAvatar;
+                        const icon = getLogIcon(log);
+                        const tag = getLogTag(log.user_log_action);
+                        const tagColor = getTagColor(log.user_log_action);
+                        const formattedTime = new Date(log.user_log_time).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                        });
 
-                            {/* Details */}
-                            <div className="flex-1 dark:text-white">
-                                <div className="mb-1 flex items-center gap-3">
-                                    <span className="font-semibold">{log.user}</span>
+                        return (
+                            <div
+                                key={index}
+                                className="flex items-start rounded-lg bg-white p-4 text-black shadow-sm hover:shadow-md dark:bg-slate-800 dark:text-white"
+                            >
+                                {/* Avatar */}
+                                <img
+                                    src={avatar}
+                                    alt={fullName}
+                                    className="mr-4 h-12 w-12 rounded-full border"
+                                />
+
+                                {/* Details */}
+                                <div className="flex-1">
+                                    <div className="mb-1 flex items-center gap-3">
+                                        <span className="font-semibold">{fullName}</span>
+                                        <span className={`rounded px-2 py-1 text-xs font-medium ${tagColor}`}>{tag}</span>
+                                    </div>
+                                    <div className="text-dark-700 mb-1 flex items-center gap-2 text-sm">
+                                        {icon}
+                                        {log.user_log_type || "Unknown Type"}
+                                    </div>
                                 </div>
-                                <div className="text-dark-700 mb-1 flex items-center gap-2 text-sm">
-                                    <img
-                                        src={log.icon}
-                                        alt="icon"
-                                        className="h-5 w-5"
-                                    />
-                                    {log.action}
-                                </div>
-                                <span className={`rounded px-2 py-1 text-xs font-medium ${log.tagColor}`}>{log.tag}</span>
+
+                                {/* Timestamp */}
+                                <div className="ml-auto whitespace-nowrap text-sm">{formattedTime}</div>
                             </div>
-
-                            {/* Timestamp */}
-                            <div className="ml-auto whitespace-nowrap text-sm dark:text-white">{log.time}</div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             ) : (
                 <p className="text-center text-gray-300">No logs available.</p>
             )}
 
-            <div className="mt-6 text-center">
-                <button className="text-gray-800 underline hover:text-blue-300 dark:text-white">Load More</button>
-            </div>
+            {visibleCount < filteredLogs.length && (
+                <div className="mt-6 text-center">
+                    <button
+                        className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
+                        onClick={() => setVisibleCount((prev) => prev + 5)}
+                    >
+                        Load More
+                    </button>
+                </div>
+            )}
         </div>
     );
 };

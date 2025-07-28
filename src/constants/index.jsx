@@ -37,7 +37,7 @@ export const navbarLinks = [
         path: "/reports",
     },
     {
-        label: "User Logs",
+        label: "Logs",
         icon: Logs,
         path: "/user-logs",
     },

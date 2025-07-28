@@ -36,7 +36,7 @@
     }
 
     .card {
-        @apply flex flex-col gap-y-2 border border-slate-300 rounded-lg bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-900;
+        @apply flex flex-col gap-y-2 border border-slate-300 rounded-lg bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-900 hover:shadow-md;
     }
 
     .card-header {
