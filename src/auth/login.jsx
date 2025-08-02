@@ -2,41 +2,17 @@ import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/context/auth-context";
+import Spinner from "@/components/loading";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
-
+    
     const [loading, setLoading] = useState(false);
-
-    const Spinner = () => (
-        <svg
-            className="ml-2 h-5 w-5 animate-spin text-blue-900"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-        >
-            <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-            />
-            <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-            />
-        </svg>
-    );
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -61,13 +37,12 @@ const Login = () => {
                 return;
             }
 
-            // Save to context
-            login(data.user);
+            // Temporarily store user_id and email in session/localStorage
+            localStorage.setItem("pendingUserId", data.user_id);
+            localStorage.setItem("pendingUserEmail", email);
 
-            // Redirecting to the dashboard if SUCCESSFUL
-            setTimeout(() => {
-                navigate("/verify");
-            }, 2000);
+            // Redirect to OTP verification
+            navigate("/verify");
         } catch (err) {
             console.error("Login error:", err);
             setError("Something went wrong. Please try again.");
