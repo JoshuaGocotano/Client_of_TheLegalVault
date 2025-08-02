@@ -11,7 +11,7 @@ export default function ForgotPassword() {
         e.preventDefault();
         // TODO: Call backend to initiate password reset
         alert(`Password reset link sent to ${email}`);
-        navigate("/verify");
+        navigate("/change-password");
     };
 
     return (

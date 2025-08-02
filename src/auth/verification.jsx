@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
 import { ShieldCheck } from "lucide-react";
+import { UnauthorizedAccess } from "./unauthorized";
 
 export default function Verify() {
     const { user } = useAuth();
@@ -60,11 +61,7 @@ export default function Verify() {
     };
 
     if (!user) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-blue-50">
-                <p className="text-xl text-red-500">Unauthorized</p>
-            </div>
-        );
+        return <UnauthorizedAccess />;
     }
 
     return (
