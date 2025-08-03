@@ -80,7 +80,7 @@ export default function App() {
         <ThemeProvider storageKey="theme">
             <AuthProvider>
                 <Toaster
-                    position="top-right"
+                    position="top-center"
                     reverseOrder={false}
                 />
                 <RouterProvider router={router} />

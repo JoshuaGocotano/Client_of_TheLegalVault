@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
 import { Mail, Phone, BadgeCheck, UserCheck, Building2, Pencil, Save, X, User, LockIcon } from "lucide-react";
+import toast from "react-hot-toast";
+import { showToastWithTimer } from "./toast-design";
 
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
@@ -75,11 +77,14 @@ export const ProfileModal = ({ onClose }) => {
             const { user: updatedUser } = await verifyRes.json();
             setUser(updatedUser);
 
-            alert("Profile updated successfully.");
+            // showToastWithTimer("Profile update successful!", "success", 3000);
+            toast.success("Profile updated successfully.", {
+                duration: 4000,
+            });
             setIsEditing(false);
         } catch (err) {
             console.error(err);
-            alert("An error occurred while updating.");
+            toast.error("Fail profile update!");
         }
     };
 

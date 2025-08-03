@@ -8,6 +8,7 @@ import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import toast from "react-hot-toast";
 
 export const Header = ({ collapsed, setCollapsed }) => {
     const { theme, setTheme } = useTheme();
@@ -26,6 +27,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
         const confirmLogout = window.confirm("Are you sure you want to logout?");
         if (confirmLogout) {
             await logout();
+            toast.success("Successful logout!");
         }
     };
 

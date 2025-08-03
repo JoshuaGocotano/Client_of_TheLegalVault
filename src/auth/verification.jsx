@@ -108,7 +108,9 @@ export default function Verify() {
             }
 
             login(data.user);
-            toast.success("Login successful!");
+            toast.success("Login successful!", {
+                duration: 5000,
+            });
 
             localStorage.removeItem("pendingUserId");
             localStorage.removeItem("pendingUserEmail");
@@ -150,10 +152,12 @@ export default function Verify() {
                 setResendTimer(30);
                 setOtp(Array(6).fill(""));
                 inputRefs.current[0]?.focus();
+                toast.success("New OTP sent!");
             }
         } catch (err) {
             console.error("Resend OTP error:", err);
             setError("Something went wrong.");
+            toast.error(err, { duration: 7000 });
         }
 
         setLoading(false);
