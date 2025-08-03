@@ -2,6 +2,7 @@ import { useAuth } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import boslogo from "@/assets/light_logo.png";
+import toast from "react-hot-toast";
 
 export default function Verify() {
     const { login } = useAuth();
@@ -11,7 +12,7 @@ export default function Verify() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState(`Enter the 6-digit code sent to ${localStorage.getItem("pendingUserEmail")}`);
-    const [resendTimer, setResendTimer] = useState(30);
+    const [resendTimer, setResendTimer] = useState(60);
 
     const inputRefs = useRef([]);
 
@@ -27,6 +28,10 @@ export default function Verify() {
             handleVerify();
         }
     }, [otp]);
+
+    useEffect(() => {
+        inputRefs.current[0]?.focus();
+    }, []);
 
     // Handle single digit change
     const handleChange = (e, index) => {
@@ -103,6 +108,8 @@ export default function Verify() {
             }
 
             login(data.user);
+            toast.success("Login successful!");
+
             localStorage.removeItem("pendingUserId");
             localStorage.removeItem("pendingUserEmail");
             navigate("/");

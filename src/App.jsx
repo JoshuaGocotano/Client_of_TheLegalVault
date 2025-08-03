@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@/context/theme-context";
 import { AuthProvider } from "@/context/auth-context";
+import { Toaster } from "react-hot-toast";
 
 import Layout from "./routes/layout";
 import ProtectedRoute from "./components/protected-route";
@@ -78,6 +79,10 @@ export default function App() {
     return (
         <ThemeProvider storageKey="theme">
             <AuthProvider>
+                <Toaster
+                    position="top-right"
+                    reverseOrder={false}
+                />
                 <RouterProvider router={router} />
             </AuthProvider>
         </ThemeProvider>
