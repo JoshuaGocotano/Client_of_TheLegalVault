@@ -185,12 +185,12 @@ const Client = () => {
                 </table>
             </div>
 
-            <div>
+            <div className="mt-10">
                 <a
                     href="/clients/contacts"
                     className="text-blue-600 underline"
                 >
-                    Go to Client Contact
+                    Go to Client Contacts
                 </a>
             </div>
 
