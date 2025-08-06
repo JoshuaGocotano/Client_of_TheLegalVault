@@ -1,19 +1,26 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
 import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
-    const [tableData, setTableData] = useState([]);
+    const { user } = useAuth();
+
+    const [userLogs, setUserLogs] = useState([]);
     const [error, setError] = useState(null);
     const [search, setSearch] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
 
     const [visibleCount, setVisibleCount] = useState(5);
 
+    // fetching user logs
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/user-logs", {
+                const endpoint =
+                    user?.user_role === "Admin" ? "http://localhost:3000/api/user-logs" : `http://localhost:3000/api/user-logs/${user.user_id}`;
+
+                const res = await fetch(endpoint, {
                     method: "GET",
                     credentials: "include",
                 });
@@ -21,10 +28,9 @@ const Userlogs = () => {
                 if (!res.ok) throw new Error("Failed to fetch user logs");
 
                 const data = await res.json();
-                setTableData(data);
+                setUserLogs(data);
             } catch (error) {
-                console.error("Failed to fetch logs", error);
-                setError(error);
+                console.error("Failed to fetch user logs:", error);
             }
         };
 
@@ -62,7 +68,7 @@ const Userlogs = () => {
     };
 
     // Filtered directly in render
-    const filteredLogs = tableData.filter((log) => {
+    const filteredLogs = userLogs.filter((log) => {
         const matchSearch =
             log.user_fullname?.toLowerCase().includes(search.toLowerCase()) ||
             log.user_log_type?.toLowerCase().includes(search.toLowerCase()) ||

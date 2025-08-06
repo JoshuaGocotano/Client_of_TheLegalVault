@@ -7,6 +7,7 @@ import user2 from "../../../../uploads/joshua.png";
 import user3 from "../../../../uploads/user_profile-1752223125848-455598027.jpg";
 
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/context/auth-context";
 
 const initialUsers = [
     {
@@ -112,8 +113,13 @@ const ChartPlaceholder = ({ title, dataKey, theme }) => (
 );
 
 export const Reports = () => {
+    const { user } = useAuth();
     const navigate = useNavigate();
     const { theme } = useTheme(); // ✅ Hook is now correctly used inside component
+
+    if (user.user_role !== "Admin") {
+        navigate("unauthorized");
+    }
 
     return (
         <div className="space-y-6">

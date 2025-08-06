@@ -1,52 +1,35 @@
 import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText } from "lucide-react";
 
-export const navbarLinks = [
-    {
-        label: "Home",
-        icon: Home,
-        path: "/",
-    },
-    {
-        label: "Cases",
-        icon: Folders,
-        path: "/cases",
-    },
-    {
-        label: "Documents",
-        icon: FileText,
-        path: "/documents",
-    },
-    {
-        label: "Clients",
-        icon: Users,
-        path: "/clients",
-    },
-    {
-        label: "Tasks",
-        icon: ListTodo,
-        path: "/tasks",
-    },
-    {
-        label: "Users",
-        icon: ShieldUser,
-        path: "/users",
-    },
-    {
-        label: "Reports",
-        icon: ChartColumn,
-        path: "/reports",
-    },
-    {
-        label: "Logs",
-        icon: Logs,
-        path: "/user-logs",
-    },
-    {
-        label: "Case Archive",
-        icon: Archive,
-        path: "/case-archive",
-    },
+const allNavbarLinks = [
+    { label: "Home", icon: Home, path: "/" },
+    { label: "Cases", icon: Folders, path: "/cases" },
+    { label: "Documents", icon: FileText, path: "/documents" },
+    { label: "Clients", icon: Users, path: "/clients" },
+    { label: "Tasks", icon: ListTodo, path: "/tasks" },
+    { label: "Users", icon: ShieldUser, path: "/users" },
+    { label: "Reports", icon: ChartColumn, path: "/reports" },
+    { label: "Logs", icon: Logs, path: "/user-logs" },
+    { label: "Case Archive", icon: Archive, path: "/case-archive" },
 ];
+
+// 🔧 Export a function to get filtered links based on role
+export const getNavbarLinks = (role) => {
+    if (role === "Admin") {
+        return allNavbarLinks;
+    }
+
+    if (role === "Lawyer") {
+        // Hide Users and Logs
+        return allNavbarLinks.filter((link) => link.label !== "Users" && link.label !== "Reports");
+    }
+
+    if (role === "Paralegal" || role === "Staff") {
+        // Only allow Home, Clients, Tasks, and Logs
+        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Logs"].includes(link.label));
+    }
+
+    return []; // default fallback (no links)
+};
 
 export const overviewData = [
     {

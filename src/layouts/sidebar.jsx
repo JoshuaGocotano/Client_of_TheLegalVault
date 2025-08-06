@@ -2,12 +2,17 @@ import { forwardRef } from "react";
 import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { navbarLinks } from "../constants";
+import { getNavbarLinks } from "../constants";
 import light_logo2 from "@/assets/light_logo2.png";
 import light_logo from "@/assets/light_logo.png";
 import { cn } from "@/utils/cn";
 
+import { useAuth } from "@/context/auth-context";
+
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
+    const { user } = useAuth();
+    const navbarLinks = getNavbarLinks(user?.user_role);
+
     return (
         <aside
             ref={ref}

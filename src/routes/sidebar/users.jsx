@@ -4,6 +4,8 @@ import user1 from "@/assets/JoshuaG..jpg";
 import user2 from "../../../../uploads/joshua.png";
 import user3 from "../../../../uploads/user_profile-1752223125848-455598027.jpg";
 import AddUserModal from "@/components/add-users";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/context/auth-context";
 
 const initialUsers = [
     { id: 1, name: "Sarah Wilson", username: "admin", email: "admin@example.com", role: "admin", image: user1 },
@@ -14,6 +16,13 @@ const initialUsers = [
 const roles = ["All", "Admin", "Lawyer", "Paralegal", "Staff"];
 
 const Users = () => {
+    const { user } = useAuth();
+    const navigate = useNavigate();
+
+    if (user.user_role !== "Admin") {
+        navigate("unauthorized");
+    }
+
     const [search, setSearch] = useState("");
     const [users, setUsers] = useState(initialUsers);
     const [selectedRole, setSelectedRole] = useState("All");

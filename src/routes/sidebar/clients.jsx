@@ -2,8 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import AddClient from "../../components/add-client";
+import { useAuth } from "@/context/auth-context";
 
 const Client = () => {
+    const { user } = useAuth();
+
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -14,8 +17,11 @@ const Client = () => {
     useEffect(() => {
         const fetchAll = async () => {
             try {
+                const clients_endpoint =
+                    user?.user_role === "Admin" ? "http://localhost:3000/api/clients" : `http://localhost:3000/api/clients/${user.user_id}`;
+
                 const [clientsRes, usersRes, contactsRes] = await Promise.all([
-                    fetch("http://localhost:3000/api/clients", { credentials: "include" }),
+                    fetch(clients_endpoint, { credentials: "include" }),
                     fetch("http://localhost:3000/api/users", { credentials: "include" }),
                     fetch("http://localhost:3000/api/client-contacts", { credentials: "include" }),
                 ]);
@@ -56,7 +62,7 @@ const Client = () => {
     });
 
     const handleEditSave = () => {
-        setTableData((prev) => prev.map((item) => (item.id === editClient.id ? { ...item, ...editClient } : item)));
+        // setTableData((prev) => prev.map((item) => (item.id === editClient.id ? { ...item, ...editClient } : item))); // this logic is incorrect
         setEditClient(null);
     };
 
@@ -66,7 +72,7 @@ const Client = () => {
             client.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_phonenum.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_date_created.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            client.created_by.toString().includes(searchTerm),
+            getUserFullName(client.created_by).includes(searchTerm),
     );
 
     const openRemoveModal = (client) => {
@@ -97,7 +103,7 @@ const Client = () => {
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="title">Clients</h1>
-                    <p className="text-sm text-gray-500">Manage all client information here...</p>
+                    <p className="text-sm text-gray-500">Manage all client information here.</p>
                 </div>
             </div>
 
@@ -107,7 +113,7 @@ const Client = () => {
                     placeholder="Search clients..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 md:flex-1"
+                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
                 />
                 <button
                     onClick={() => setAddClients(true)}
@@ -124,44 +130,57 @@ const Client = () => {
                             <th className="whitespace-nowrap px-4 py-3">Client</th>
                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
+                            <th className="whitespace-nowrap px-4 py-3">Date Created</th>
                             <th className="whitespace-nowrap px-4 py-3">Created by</th>
                             <th className="whitespace-nowrap px-4 py-3">Action</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700 dark:text-white">
-                        {filteredClients.map((client) => (
-                            <tr
-                                key={client.id}
-                                className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
-                            >
-                                <td className="whitespace-nowrap px-4 py-3">{client.client_fullname}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{client.client_email}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{client.client_phonenum}</td>
-                                <td className="whitespace-nowrap px-4 py-3">{getUserFullName(client.created_by)}</td>
-                                <td className="px-4 py-3">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        <button
-                                            className="p-1.5 text-blue-600 hover:text-blue-800"
-                                            onClick={() => setViewClient(client)}
-                                        >
-                                            <Eye className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                            onClick={() => setEditClient({ ...client })}
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                        </button>
-                                        <button
-                                            className="p-1.5 text-red-600 hover:text-red-800"
-                                            onClick={() => openRemoveModal(client)}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </button>
-                                    </div>
+                        {filteredClients.length > 0 ? (
+                            filteredClients.map((client) => (
+                                <tr
+                                    key={client.id}
+                                    className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
+                                >
+                                    <td className="whitespace-nowrap px-4 py-3">{client.client_fullname}</td>
+                                    <td className="whitespace-nowrap px-4 py-3">{client.client_email}</td>
+                                    <td className="whitespace-nowrap px-4 py-3">{client.client_phonenum}</td>
+                                    <td className="whitespace-nowrap px-4 py-3">{new Date(client.client_date_created).toLocaleDateString()}</td>
+                                    <td className="whitespace-nowrap px-4 py-3">{getUserFullName(client.created_by)}</td>
+                                    <td className="px-4 py-3">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                            <button
+                                                className="p-1.5 text-blue-600 hover:text-blue-800"
+                                                onClick={() => setViewClient(client)}
+                                            >
+                                                <Eye className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                className="p-1.5 text-yellow-500 hover:text-yellow-700"
+                                                onClick={() => setEditClient({ ...client })}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </button>
+                                            <button
+                                                className="p-1.5 text-red-600 hover:text-red-800"
+                                                onClick={() => openRemoveModal(client)}
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td
+                                    colSpan="6"
+                                    className="px-4 py-6 text-center text-slate-500 dark:text-slate-400"
+                                >
+                                    No clients found.
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
@@ -243,19 +262,35 @@ const Client = () => {
             {editClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
-                        <h3 className="mb-6 text-xl font-bold text-blue-900">Edit Client</h3>
+                        <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">Edit Client Info</h3>
                         <div className="grid grid-cols-1 gap-4">
-                            {["client", "email", "phone", "emergency", "ContactPersonName", "ContactPersonNumber", "RelationRole"].map((field) => (
-                                <div key={field}>
-                                    <label className="mb-1 block text-sm font-medium capitalize text-gray-700 dark:text-gray-300">{field}</label>
-                                    <input
-                                        type="text"
-                                        value={editClient[field]}
-                                        onChange={(e) => setEditClient({ ...editClient, [field]: e.target.value })}
-                                        className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
-                                    />
-                                </div>
-                            ))}
+                            <div>
+                                <label className="mb-1 block text-sm font-semibold text-blue-900 dark:text-blue-700">Full Name</label>
+                                <input
+                                    type="text"
+                                    value={editClient.client_fullname}
+                                    onChange={(e) => setEditClient({ ...editClient, client_fullname: e.target.value })}
+                                    className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-sm font-semibold text-blue-900 dark:text-blue-700">Email</label>
+                                <input
+                                    type="email"
+                                    value={editClient.client_email}
+                                    onChange={(e) => setEditClient({ ...editClient, client_email: e.target.value })}
+                                    className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-sm font-semibold text-blue-900 dark:text-blue-700">Phone</label>
+                                <input
+                                    type="text"
+                                    value={editClient.client_phonenum}
+                                    onChange={(e) => setEditClient({ ...editClient, client_phonenum: e.target.value })}
+                                    className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
                         </div>
                         <div className="mt-6 flex justify-end gap-2">
                             <button
@@ -266,7 +301,7 @@ const Client = () => {
                             </button>
                             <button
                                 onClick={handleEditSave}
-                                className="rounded-lg bg-blue-900 px-4 py-2 text-sm text-white hover:bg-blue-800"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                             >
                                 Save
                             </button>
@@ -279,7 +314,7 @@ const Client = () => {
             {isRemoveModalOpen && userToRemove && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800">
-                        <h2 className="mb-4 text-lg font-semibold dark:text-white">Are you sure?</h2>
+                        <h2 className="mb-4 text-lg font-semibold dark:text-white">Confirm Client Removal</h2>
                         <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">Are you sure you want to remove this client?</p>
                         <div className="flex justify-end gap-3">
                             <button

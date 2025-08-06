@@ -32,6 +32,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                     className="space-y-6"
                     onSubmit={handleSubmit}
                 >
+                    <h2>Information</h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <input
                             type="text"
@@ -49,20 +50,30 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         />
                         <input
+                            type="password"
+                            placeholder="Password"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
+                    </div>
+
+                    <h2>Contact Person</h2>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                        <input
                             type="text"
-                            placeholder="Contact Person Name"
+                            placeholder="Fullname"
                             className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         />
                         <input
                             type="tel"
-                            placeholder="Contact Person Number"
+                            placeholder="Contact Number"
                             className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         />
                         <input
                             type="tel"
-                            placeholder="Relation/Role"
+                            placeholder="Relation / Role"
                             className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         />
+                        <button className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">+</button>
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
@@ -70,7 +81,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             type="submit"
                             className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                         >
-                            Save
+                            Add Client
                         </button>
                     </div>
                 </form>

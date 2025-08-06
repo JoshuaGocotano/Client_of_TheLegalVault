@@ -12,7 +12,7 @@ const DashboardPage = () => {
     const { user } = useAuth();
     const [userLogs, setUserLogs] = useState([]);
 
-    // fetching all user logs
+    // fetching user logs
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
