@@ -1,31 +1,38 @@
 import { useState, useRef } from "react";
 import { X, Trash2 } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 const AddClient = ({ AddClients, setAddClients }) => {
+    const { user } = useAuth();
     const modalRef = useRef(null);
+
     useClickOutside([modalRef], () => setAddClients(null));
 
     const [clientData, setClientData] = useState({
-        fullname: "",
-        email: "",
-        phone: "",
-        password: "",
+        client_fullname: "",
+        client_email: "",
+        client_phonenum: "",
+        client_password: "",
+        created_by: user?.user_id,
     });
 
     const [contact, setContact] = useState({
-        fullname: "",
-        email: "",
-        phone: "",
-        role: "",
+        contact_fullname: "",
+        contact_email: "",
+        contact_phone: "",
+        contact_role: "",
     });
 
     const [contacts, setContacts] = useState([]);
 
     const handleAddContact = () => {
-        if (!contact.fullname || !contact.email || !contact.phone || !contact.role) return;
+        const { contact_fullname, contact_email, contact_phone, contact_role } = contact;
+        if (!contact_fullname || !contact_email || !contact_phone || !contact_role) return;
+
         setContacts([...contacts, contact]);
-        setContact({ fullname: "", email: "", phone: "", role: "" });
+        setContact({ contact_fullname: "", contact_email: "", contact_phone: "", contact_role: "" });
     };
 
     const handleRemoveContact = (index) => {
@@ -36,22 +43,38 @@ const AddClient = ({ AddClients, setAddClients }) => {
         e.preventDefault();
 
         try {
-            const res = await fetch("http://localhost:3000/api/clients", {
+            // 1. Create client
+            const resClient = await fetch("http://localhost:3000/api/clients", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({
-                    client: clientData,
-                    contacts: contacts,
-                }),
+                body: JSON.stringify(clientData),
             });
 
-            if (!res.ok) throw new Error("Failed to add client");
+            if (!resClient.ok) throw new Error("Failed to add client");
 
-            setAddClients(null);
+            const newClient = await resClient.json(); // assuming it returns the newly created client with `client_id`
+
+            // 2. Create contacts
+            for (const contact of contacts) {
+                const resContact = await fetch("http://localhost:3000/api/client-contacts", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({
+                        ...contact,
+                        client_id: newClient.client_id, // set correct relation
+                    }),
+                });
+
+                if (!resContact.ok) throw new Error("Failed to add one or more contacts");
+            }
+
+            toast.success("Client added successfully!");
+            setAddClients(null); // Close modal
         } catch (err) {
             console.error(err);
-            alert("Error adding client");
+            alert("Error adding client and contacts: ", err);
         }
     };
 
@@ -80,30 +103,30 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             <input
                                 type="text"
                                 placeholder="Full Name"
-                                value={clientData.fullname}
-                                onChange={(e) => setClientData({ ...clientData, fullname: e.target.value })}
+                                value={clientData.client_fullname}
+                                onChange={(e) => setClientData({ ...clientData, client_fullname: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                                 required
                             />
                             <input
                                 type="email"
                                 placeholder="Email"
-                                value={clientData.email}
-                                onChange={(e) => setClientData({ ...clientData, email: e.target.value })}
+                                value={clientData.client_email}
+                                onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
                                 type="tel"
                                 placeholder="Phone Number"
-                                value={clientData.phone}
-                                onChange={(e) => setClientData({ ...clientData, phone: e.target.value })}
+                                value={clientData.client_phonenum}
+                                onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
                                 type="password"
                                 placeholder="Password"
-                                value={clientData.password}
-                                onChange={(e) => setClientData({ ...clientData, password: e.target.value })}
+                                value={clientData.client_password}
+                                onChange={(e) => setClientData({ ...clientData, client_password: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                                 required
                             />
@@ -116,29 +139,29 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             <input
                                 type="text"
                                 placeholder="Full Name"
-                                value={contact.fullname}
-                                onChange={(e) => setContact({ ...contact, fullname: e.target.value })}
+                                value={contact.contact_fullname}
+                                onChange={(e) => setContact({ ...contact, contact_fullname: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
                                 type="email"
                                 placeholder="Email"
-                                value={contact.email}
-                                onChange={(e) => setContact({ ...contact, email: e.target.value })}
+                                value={contact.contact_email}
+                                onChange={(e) => setContact({ ...contact, contact_email: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
                                 type="tel"
                                 placeholder="Phone"
-                                value={contact.phone}
-                                onChange={(e) => setContact({ ...contact, phone: e.target.value })}
+                                value={contact.contact_phone}
+                                onChange={(e) => setContact({ ...contact, contact_phone: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
                                 type="text"
                                 placeholder="Relation / Role"
-                                value={contact.role}
-                                onChange={(e) => setContact({ ...contact, role: e.target.value })}
+                                value={contact.contact_role}
+                                onChange={(e) => setContact({ ...contact, contact_role: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <button
@@ -150,12 +173,11 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             </button>
                         </div>
 
-                        {/* Temporary contact table */}
                         {contacts.length > 0 && (
-                            <div className="mt-4">
-                                <table className="w-full table-auto text-sm">
-                                    <thead>
-                                        <tr className="text-left">
+                            <div className="mt-4 overflow-x-auto">
+                                <table className="w-full table-auto text-sm dark:text-slate-100">
+                                    <thead className="dark:text-slate-500">
+                                        <tr className="text-left uppercase">
                                             <th className="px-2 py-1">Name</th>
                                             <th className="px-2 py-1">Email</th>
                                             <th className="px-2 py-1">Phone</th>
@@ -169,12 +191,13 @@ const AddClient = ({ AddClients, setAddClients }) => {
                                                 key={idx}
                                                 className="border-t"
                                             >
-                                                <td className="px-2 py-1">{c.fullname}</td>
-                                                <td className="px-2 py-1">{c.email}</td>
-                                                <td className="px-2 py-1">{c.phone}</td>
-                                                <td className="px-2 py-1">{c.role}</td>
+                                                <td className="px-2 py-1">{c.contact_fullname}</td>
+                                                <td className="px-2 py-1">{c.contact_email}</td>
+                                                <td className="px-2 py-1">{c.contact_phone}</td>
+                                                <td className="px-2 py-1">{c.contact_role}</td>
                                                 <td className="px-2 py-1">
                                                     <button
+                                                        type="button"
                                                         onClick={() => handleRemoveContact(idx)}
                                                         className="text-red-500 hover:text-red-700"
                                                     >
@@ -194,7 +217,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             type="submit"
                             className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                         >
-                            Save Client
+                            Save
                         </button>
                     </div>
                 </form>
