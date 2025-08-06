@@ -25,6 +25,7 @@ import Archives from "./routes/sidebar/archives";
 import Notifications from "./components/notifications";
 import NotificationSettings from "./components/notif-settings";
 import { UnauthorizedAccess } from "./auth/unauthorized";
+import { ClientContact } from "./components/client-contacts";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -63,6 +64,7 @@ export default function App() {
                         { path: "cases", element: <Cases /> },
                         { path: "documents", element: <Documents /> },
                         { path: "clients", element: <Clients /> },
+                        { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
                         { path: "reports", element: <Reports /> },

@@ -185,6 +185,15 @@ const Client = () => {
                 </table>
             </div>
 
+            <div>
+                <a
+                    href="/clients/contacts"
+                    className="text-blue-600 underline"
+                >
+                    Go to Client Contact
+                </a>
+            </div>
+
             {/* View Client Modal */}
             {viewClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
