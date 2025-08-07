@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from "react";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { Pencil, Trash2, Eye, EyeOff } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import AddClient from "../../components/add-client";
 import { useAuth } from "@/context/auth-context";
@@ -13,34 +13,40 @@ const Client = () => {
     const [users, setUsers] = useState([]);
     const [clientContacts, setClientContacts] = useState([]);
 
+    const [showAllClients, setShowAllClients] = useState(false);
+
     // Fetching clients, users, and contacts data for their relations
+    const fetchAll = useCallback(async () => {
+        try {
+            const clients_endpoint =
+                user?.user_role === "Admin"
+                    ? showAllClients
+                        ? "http://localhost:3000/api/all-clients"
+                        : "http://localhost:3000/api/clients"
+                    : `http://localhost:3000/api/clients/${user.user_id}`;
+
+            const [clientsRes, usersRes, contactsRes] = await Promise.all([
+                fetch(clients_endpoint, { credentials: "include" }),
+                fetch("http://localhost:3000/api/users", { credentials: "include" }),
+                fetch("http://localhost:3000/api/client-contacts", { credentials: "include" }),
+            ]);
+
+            if (!clientsRes.ok || !usersRes.ok || !contactsRes.ok) throw new Error("Failed to fetch one or more resources");
+
+            const [clients, users, contacts] = await Promise.all([clientsRes.json(), usersRes.json(), contactsRes.json()]);
+
+            setTableData(clients);
+            setUsers(users);
+            setClientContacts(contacts);
+        } catch (err) {
+            console.error("Fetching error:", err);
+            setError(err);
+        }
+    }, [user, showAllClients]);
+
     useEffect(() => {
-        const fetchAll = async () => {
-            try {
-                const clients_endpoint =
-                    user?.user_role === "Admin" ? "http://localhost:3000/api/clients" : `http://localhost:3000/api/clients/${user.user_id}`;
-
-                const [clientsRes, usersRes, contactsRes] = await Promise.all([
-                    fetch(clients_endpoint, { credentials: "include" }),
-                    fetch("http://localhost:3000/api/users", { credentials: "include" }),
-                    fetch("http://localhost:3000/api/client-contacts", { credentials: "include" }),
-                ]);
-
-                if (!clientsRes.ok || !usersRes.ok || !contactsRes.ok) throw new Error("Failed to fetch one or more resources");
-
-                const [clients, users, contacts] = await Promise.all([clientsRes.json(), usersRes.json(), contactsRes.json()]);
-
-                setTableData(clients);
-                setUsers(users);
-                setClientContacts(contacts); // 🔹 save contacts in state
-            } catch (err) {
-                console.error("Fetching error:", err);
-                setError(err);
-            }
-        };
-
         fetchAll();
-    }, []);
+    }, [fetchAll]);
 
     const getUserFullName = (createdBy) => {
         const user = users.find((u) => u.user_id === createdBy);
@@ -75,7 +81,7 @@ const Client = () => {
             client.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_phonenum.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_date_created.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            client.client_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.client_st6atus.toLowerCase().includes(searchTerm.toLowerCase()) ||
             getUserFullName(client.created_by).includes(searchTerm),
     );
 
@@ -122,6 +128,17 @@ const Client = () => {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
                 />
+
+                {user?.user_role === "Admin" && (
+                    <button
+                        className="btn-ghost flex items-center gap-2"
+                        onClick={() => setShowAllClients((prev) => !prev)}
+                        title={showAllClients ? "Show Clients" : "Show All Clients"}
+                    >
+                        {showAllClients ? <Eye size={18} /> : <EyeOff size={18} />}
+                    </button>
+                )}
+
                 <button
                     onClick={() => setAddClients(true)}
                     className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
@@ -130,7 +147,7 @@ const Client = () => {
                 </button>
             </div>
 
-            <div className="card w-full overflow-x-auto shadow-lg">
+            <div className="card w-full overflow-x-auto">
                 <table className="min-w-full table-auto text-left text-sm">
                     <thead className="card-title text-xs uppercase">
                         <tr>
@@ -257,14 +274,34 @@ const Client = () => {
                                 <p className="font-semibold dark:text-blue-700">Phone</p>
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_phonenum || "-"}</p>
                             </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Date Added</p>
-                                <p className="text-gray-600 dark:text-slate-200">{new Date(viewClient.client_date_created).toLocaleDateString()}</p>
+                            <div className="grid grid-cols-2">
+                                <div>
+                                    <p className="font-semibold dark:text-blue-700">Date Added</p>
+                                    <p className="text-gray-600 dark:text-slate-200">
+                                        {new Date(viewClient.client_date_created).toLocaleDateString()}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="font-semibold dark:text-blue-700">Status</p>
+                                    <p className="text-gray-600 dark:text-slate-200">
+                                        <span
+                                            className={`rounded-full px-3 py-0.5 text-xs text-white ${
+                                                viewClient.client_status === "Active"
+                                                    ? "bg-green-500"
+                                                    : viewClient.client_status === "Pending"
+                                                      ? "bg-yellow-400"
+                                                      : "bg-red-500"
+                                            }`}
+                                        >
+                                            {viewClient.client_status}
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
 
                             <div className="col-span-2 mt-4 w-full">
                                 <p className="mb-2 font-semibold dark:text-blue-700">Contact(s)</p>
-                                <table className="min-w-full table-auto text-left text-sm">
+                                <table className="min-w-full table-auto overflow-x-auto text-left text-sm">
                                     <thead className="text-xs uppercase text-slate-500 dark:text-slate-400">
                                         <tr>
                                             <th className="whitespace-nowrap px-4 py-3">Name</th>
