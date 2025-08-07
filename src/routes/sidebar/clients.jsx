@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { Pencil, Trash2, Eye, EyeOff, RefreshCcw } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import AddClient from "../../components/add-client";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 const Client = () => {
     const { user } = useAuth();
@@ -59,7 +60,7 @@ const Client = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [viewClient, setViewClient] = useState(null);
     const [editClient, setEditClient] = useState(null);
-    const [userToRemove, setUserToRemove] = useState(null);
+    const [userToBeRemoved, setUserToBeRemoved] = useState(null);
     const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
 
     const modalRef = useRef(null);
@@ -88,18 +89,38 @@ const Client = () => {
     const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
     const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
+    const handleRestoreClient = async (client) => {
+        try {
+            toast.loading(`Restoring client: ${client.client_fullname}`, {
+                duration: 7000,
+            });
+        } catch (err) {
+            console.error(err);
+            toast.error("Error restoring client!", {
+                duration: 7000,
+            });
+        }
+    };
+
     const openRemoveModal = (client) => {
-        setUserToRemove(client);
+        setUserToBeRemoved(client);
         setIsRemoveModalOpen(true);
     };
 
     const closeRemoveModal = () => {
-        setUserToRemove(null);
+        setUserToBeRemoved(null);
         setIsRemoveModalOpen(false);
     };
 
-    const confirmRemoveUser = () => {
+    const confirmRemoveClient = (client) => {
         // Logic to remove the user
+        try {
+            toast.success(`Removing client: ${client.client_fullname}`);
+        } catch (err) {
+            console.log(err);
+            toast.error("Error removing client!");
+        }
+
         closeRemoveModal();
     };
 
@@ -171,8 +192,8 @@ const Client = () => {
                                             className={`mr-2 inline-block h-2 w-4 rounded-full ${
                                                 client.client_status === "Active"
                                                     ? "bg-green-500"
-                                                    : client.client_status === "Pending"
-                                                      ? "bg-yellow-400"
+                                                    : client.client_status === "Inactive"
+                                                      ? "bg-gray-400"
                                                       : "bg-red-500"
                                             }`}
                                         ></span>
@@ -196,12 +217,22 @@ const Client = () => {
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
-                                            <button
-                                                className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => openRemoveModal(client)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </button>
+
+                                            {client.client_status !== "Removed" ? (
+                                                <button
+                                                    className="p-1.5 text-red-600 hover:text-red-800"
+                                                    onClick={() => openRemoveModal(client)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    className="p-1.5 text-green-600 hover:text-green-800"
+                                                    onClick={() => handleRestoreClient(client)}
+                                                >
+                                                    <RefreshCcw className="h-4 w-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -288,8 +319,8 @@ const Client = () => {
                                             className={`rounded-full px-3 py-0.5 text-xs text-white ${
                                                 viewClient.client_status === "Active"
                                                     ? "bg-green-500"
-                                                    : viewClient.client_status === "Pending"
-                                                      ? "bg-yellow-400"
+                                                    : viewClient.client_status === "Inactive"
+                                                      ? "bg-gray-400"
                                                       : "bg-red-500"
                                             }`}
                                         >
@@ -474,11 +505,13 @@ const Client = () => {
             )}
 
             {/* Remove Modal */}
-            {isRemoveModalOpen && userToRemove && (
+            {isRemoveModalOpen && userToBeRemoved && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800">
                         <h2 className="mb-4 text-lg font-semibold dark:text-white">Confirm Client Removal</h2>
-                        <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">Are you sure you want to remove this client?</p>
+                        <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
+                            Are you sure you want to remove <span className="font-semibold underline">{userToBeRemoved.client_fullname}</span>?
+                        </p>
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={closeRemoveModal}
@@ -487,7 +520,7 @@ const Client = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={confirmRemoveUser}
+                                onClick={() => confirmRemoveClient(userToBeRemoved)}
                                 className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                             >
                                 Remove
@@ -496,9 +529,7 @@ const Client = () => {
                         <button
                             onClick={closeRemoveModal}
                             className="absolute right-2 top-2 text-xl text-gray-400 hover:text-gray-600"
-                        >
-                            &times;
-                        </button>
+                        ></button>
                     </div>
                 </div>
             )}
