@@ -15,7 +15,6 @@ const ClientContact = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [editContact, setEditContact] = useState(null);
 
-    // For Delete Confirmation Modal
     const [removeContactModalOpen, setRemoveContactModalOpen] = useState(false);
     const [contactToBeRemoved, setContactToBeRemoved] = useState(null);
 
@@ -279,8 +278,9 @@ const ClientContact = () => {
                 <EditContactModal
                     contact={editContact}
                     onClose={() => setEditContact(null)}
+                    clients={clients}
                     onSave={(updatedContact) => {
-                        setTableData((prevData) => prevData.map((item) => (item.id === updatedContact.id ? updatedContact : item)));
+                        setTableData((prevData) => prevData.map((item) => (item.contact_id === updatedContact.contact_id ? updatedContact : item)));
                         setEditContact(null);
                     }}
                 />
@@ -330,70 +330,122 @@ const ClientContact = () => {
 export default ClientContact;
 
 // EditContactModal Component
-const EditContactModal = ({ contact, onClose, onSave }) => {
-    const [formData, setFormData] = useState({ ...contact });
+const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
+    const [formData, setFormData] = useState(contact || {});
+
+    // Sync when contact prop changes
+    useEffect(() => {
+        if (contact) {
+            setFormData(contact);
+        }
+    }, [contact]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleSave = async () => {
+        const toastId = toast.loading("Updating contact...");
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/client-contacts/${formData.contact_id}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(formData),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update contact.");
+            }
+
+            const updatedContact = await res.json();
+            onSave(updatedContact); // update state in parent
+
+            toast.success("Contact successfully updated!", {
+                id: toastId,
+                duration: 3000,
+            });
+
+            onClose();
+        } catch (err) {
+            console.error(err);
+            toast.error("Error updating contact.", {
+                id: toastId,
+                duration: 3000,
+            });
+        }
+    };
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-md dark:bg-slate-800">
                 <h2 className="mb-4 text-xl font-bold text-gray-800 dark:text-white">Edit Contact</h2>
                 <div className="space-y-3">
                     <input
-                        name="clientContact_fullname"
-                        value={formData.clientContact_fullname}
+                        name="contact_fullname"
+                        value={formData.contact_fullname || ""}
                         onChange={handleChange}
-                        className="w-full rounded border px-3 py-2"
+                        className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                         placeholder="Full Name"
                     />
                     <input
-                        name="clientContact_email"
-                        value={formData.clientContact_email}
+                        name="contact_email"
+                        value={formData.contact_email || ""}
                         onChange={handleChange}
-                        className="w-full rounded border px-3 py-2"
+                        className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                         placeholder="Email"
                     />
                     <input
-                        name="clientContact_phonenum"
-                        value={formData.clientContact_phonenum}
+                        name="contact_phone"
+                        value={formData.contact_phone || ""}
                         onChange={handleChange}
-                        className="w-full rounded border px-3 py-2"
+                        className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                         placeholder="Phone Number"
                     />
                     <input
-                        name="clientContact_relation"
-                        value={formData.clientContact_relation}
+                        name="contact_role"
+                        value={formData.contact_role || ""}
                         onChange={handleChange}
-                        className="w-full rounded border px-3 py-2"
-                        placeholder="Relation"
+                        className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+                        placeholder="Role / Relation"
                     />
-                    <input
-                        name="clientContact_client"
-                        value={formData.clientContact_client}
+                    <select
+                        name="client_id"
+                        value={formData.client_id}
                         onChange={handleChange}
-                        className="w-full rounded border px-3 py-2"
-                        placeholder="Client"
-                    />
+                        required
+                        className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+                    >
+                        <option
+                            value=""
+                            disabled
+                        >
+                            Select Client
+                        </option>
+                        {clients.map((client) => (
+                            <option
+                                key={client.client_id}
+                                value={client.client_id}
+                            >
+                                {client.client_fullname}
+                            </option>
+                        ))}
+                    </select>
                 </div>
                 <div className="mt-5 flex justify-end gap-2">
                     <button
                         onClick={onClose}
-                        className="rounded bg-gray-300 px-4 py-2 text-sm text-black hover:bg-gray-400"
+                        className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                     >
                         Cancel
                     </button>
                     <button
-                        onClick={() => {
-                            onSave(formData);
-                            toast.success("Contact successfully updated", {
-                                id: "update-success",
-                            });
-                        }}
-                        className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                        onClick={handleSave}
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                     >
                         Save Changes
                     </button>
