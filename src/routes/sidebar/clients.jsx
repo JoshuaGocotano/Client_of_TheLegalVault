@@ -117,15 +117,34 @@ const Client = () => {
     const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     const handleRestoreClient = async (client) => {
-        try {
-            toast.loading(`Restoring client: ${client.client_fullname}`, {
-                duration: 7000,
+        const confirmRestore = window.confirm(`Are you sure you want to restore ${client.client_fullname}?`);
+
+        if (confirmRestore) {
+            const toastId = toast.loading(`Restoring client: ${client.client_fullname}`, {
+                duration: Infinity,
             });
-        } catch (err) {
-            console.error(err);
-            toast.error("Error restoring client!", {
-                duration: 7000,
-            });
+
+            try {
+                const res = await fetch(`http://localhost:3000/api/clients/${client.client_id}`, {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ...client, client_status: "Active" }),
+                });
+
+                if (!res.ok) {
+                    throw new Error("Failed to restore client");
+                }
+
+                toast.success("Client restored successfully!", { id: toastId, duration: 4000 });
+
+                await fetchAll();
+            } catch (err) {
+                console.error(err);
+                toast.error("Error restoring client", { id: toastId });
+            }
         }
     };
 
@@ -146,20 +165,23 @@ const Client = () => {
 
         try {
             const res = await fetch(`http://localhost:3000/api/clients/${client.client_id}`, {
-                method: "DELETE",
+                method: "PUT",
                 credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ ...client, client_status: "Removed" }),
             });
 
             if (!res.ok) {
                 throw new Error("Failed to remove client");
             }
 
-            toast.success("Client removed successfully!", { id: toastId });
+            toast.success("Client removed successfully!", { id: toastId, duration: 4000 });
 
             // Refresh data
             await fetchAll();
 
-            // Close modal
             closeRemoveModal();
         } catch (err) {
             console.error(err);
