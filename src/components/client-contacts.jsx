@@ -70,6 +70,44 @@ const ClientContact = () => {
     const totalPages = Math.ceil(filteredData.length / rowsPerPage);
     const paginatedContacts = filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
+    const handleAddNewContact = async (newContact) => {
+        const toastId = toast.loading("Adding new contact...");
+
+        try {
+            const res = await fetch("http://localhost:3000/api/client-contacts", {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(newContact),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to add new contact.");
+            }
+
+            const createdContact = await res.json();
+
+            // Update UI instantly
+            setTableData((prev) => [createdContact, ...prev]);
+
+            toast.success("Contact successfully added!", {
+                id: toastId,
+                duration: 4000,
+            });
+
+            // Close modal
+            setShowAddContacts(false);
+        } catch (err) {
+            console.error("Error adding new contact:", err);
+            toast.error("Error adding new contact.", {
+                id: toastId,
+                duration: 3000,
+            });
+        }
+    };
+
     const handleContactRemoval = async (contact) => {
         const toastId = toast.loading(`Removing contact: ${contact.contact_fullname}...`);
 
@@ -135,7 +173,7 @@ const ClientContact = () => {
                     }}
                     className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
                 >
-                    Add Contacts
+                    Add Contact
                 </button>
             </div>
 
@@ -230,12 +268,9 @@ const ClientContact = () => {
             {/* Add Contact Modal */}
             {showAddContacts && (
                 <AddContact
+                    onAdd={(newContact) => handleAddNewContact(newContact)}
                     onClose={() => setShowAddContacts(false)}
-                    onAdd={(newContact) => {
-                        setTableData((prev) => [...prev, { id: Date.now(), ...newContact }]);
-                        setCurrentPage(1);
-                        setShowAddContacts(false);
-                    }}
+                    clients={clients}
                 />
             )}
 
@@ -251,7 +286,7 @@ const ClientContact = () => {
                 />
             )}
 
-            {/* Delete Confirmation Modal */}
+            {/* Removal Confirmation Modal */}
             {removeContactModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">

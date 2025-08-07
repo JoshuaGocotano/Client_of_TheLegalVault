@@ -1,13 +1,13 @@
 import React, { useState, useRef } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
-const AddContact = ({ onAdd, onClose }) => {
+const AddContact = ({ onAdd, onClose, clients = [] }) => {
     const [formData, setFormData] = useState({
-        clientContact_fullname: "",
-        clientContact_email: "",
-        clientContact_phonenum: "",
-        clientContact_relation: "",
-        clientContact_client: "",
+        contact_fullname: "",
+        contact_email: "",
+        contact_phone: "",
+        contact_role: "",
+        client_id: "",
     });
 
     const modalRef = useRef(null);
@@ -21,18 +21,22 @@ const AddContact = ({ onAdd, onClose }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!formData.clientContact_fullname || !formData.clientContact_email || !formData.clientContact_phonenum) {
-            alert("Please fill in all required fields.");
-            return;
+        const confirmAddingContact = window.confirm("Are you sure you want to add this contact?");
+        if (confirmAddingContact) {
+            const { contact_fullname, contact_email, contact_phone, client_id } = formData;
+
+            if (!contact_fullname || !contact_email || !contact_phone || !client_id) {
+                alert("Please fill in all required fields.");
+                return;
+            }
+
+            const newContact = {
+                ...formData,
+            };
+
+            onAdd(newContact);
+            onClose();
         }
-
-        const newContact = {
-            id: Date.now(),
-            ...formData,
-        };
-
-        alert("Contact added successfully!");
-        onAdd(newContact);
     };
 
     return (
@@ -41,47 +45,62 @@ const AddContact = ({ onAdd, onClose }) => {
                 ref={modalRef}
                 className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800"
             >
-                <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Contact</h2>
+                <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add Client Contact Person</h2>
                 <form
                     onSubmit={handleSubmit}
                     className="space-y-3"
                 >
+                    <select
+                        name="client_id"
+                        value={formData.client_id}
+                        onChange={handleChange}
+                        required
+                        className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+                    >
+                        <option
+                            value=""
+                            disabled
+                        >
+                            Select Client
+                        </option>
+                        {clients.map((client) => (
+                            <option
+                                key={client.client_id}
+                                value={client.client_id}
+                            >
+                                {client.client_fullname || `Client ${client.client_id}`}
+                            </option>
+                        ))}
+                    </select>
                     <input
-                        name="clientContact_fullname"
-                        placeholder="Company Name / Name"
-                        value={formData.clientContact_fullname}
+                        name="contact_fullname"
+                        placeholder="Full Name"
+                        value={formData.contact_fullname}
                         onChange={handleChange}
                         required
                         className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                     />
                     <input
-                        name="clientContact_email"
+                        name="contact_email"
                         placeholder="Email"
-                        value={formData.clientContact_email}
-                        onChange={handleChange}
-                        required
                         type="email"
-                        className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                    />
-                    <input
-                        name="clientContact_phonenum"
-                        placeholder="Phone"
-                        value={formData.clientContact_phonenum}
+                        value={formData.contact_email}
                         onChange={handleChange}
                         required
                         className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                     />
                     <input
-                        name="clientContact_relation"
-                        placeholder="Relation"
-                        value={formData.clientContact_relation}
+                        name="contact_phone"
+                        placeholder="Phone Number"
+                        value={formData.contact_phone}
                         onChange={handleChange}
+                        required
                         className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                     />
                     <input
-                        name="clientContact_client"
-                        placeholder="Client Name"
-                        value={formData.clientContact_client}
+                        name="contact_role"
+                        placeholder="Role (e.g. Manager, Secretary)"
+                        value={formData.contact_role}
                         onChange={handleChange}
                         className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                     />
@@ -90,15 +109,15 @@ const AddContact = ({ onAdd, onClose }) => {
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded bg-gray-300 px-4 py-2 dark:bg-slate-600 dark:text-white"
+                            className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
-                            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                         >
-                            Add
+                            Save
                         </button>
                     </div>
                 </form>
