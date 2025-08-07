@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import AddContact from "../components/add-contact";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { Eye, Pencil, Trash2 } from "lucide-react";
 
 const ClientContact = () => {
     const [tableData, setTableData] = useState([
@@ -127,6 +128,7 @@ const ClientContact = () => {
                             <th className="px-4 py-3">Phone</th>
                             <th className="px-4 py-3">Role/Relation</th>
                             <th className="px-4 py-3">Client</th>
+                            <th className="px-4 py-3">Action</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700 dark:text-white">
@@ -140,6 +142,23 @@ const ClientContact = () => {
                                 <td className="px-4 py-3">{contact.clientContact_phonenum}</td>
                                 <td className="px-4 py-3">{contact.clientContact_relation}</td>
                                 <td className="px-4 py-3">{contact.clientContact_client}</td>
+                                <td className="px-4 py-3">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <button
+                                            className="p-1.5 text-yellow-500 hover:text-yellow-700"
+                                            // onClick={() => setEditClient({ ...client })}
+                                        >
+                                            <Pencil className="h-4 w-4" />
+                                        </button>
+
+                                        <button
+                                            className="p-1.5 text-red-600 hover:text-red-800"
+                                            // onClick={() => openRemoveModal(client)}
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
@@ -148,34 +167,28 @@ const ClientContact = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="mt-4 flex items-center justify-end gap-3">
-                    <button
-                        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                        disabled={currentPage === 1}
-                        className={`rounded border px-3 py-1 ${
-                            currentPage === 1
-                                ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                        }`}
-                    >
-                        &lt;
-                    </button>
+                <div className="mt-2 flex items-center justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &lt;
+                        </button>
 
-                    <span className="text-sm text-gray-700 dark:text-white">
-                        Page {currentPage} of {totalPages}
-                    </span>
+                        <div>
+                            Page {currentPage} of {totalPages}
+                        </div>
 
-                    <button
-                        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                        disabled={currentPage === totalPages}
-                        className={`rounded border px-3 py-1 ${
-                            currentPage === totalPages
-                                ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                        }`}
-                    >
-                        &gt;
-                    </button>
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &gt;
+                        </button>
+                    </div>
                 </div>
             )}
 
@@ -192,7 +205,7 @@ const ClientContact = () => {
             )}
 
             {/* Go to Clients */}
-            <div className="mt-6">
+            <div className="mt-4">
                 <a
                     href="/clients"
                     className="text-blue-600 hover:underline"

@@ -68,9 +68,36 @@ const Client = () => {
         if (isModalOpen) setIsModalOpen(false);
     });
 
-    const handleEditSave = () => {
-        // handling update of client here
-        setEditClient(null);
+    const handleClientInfoUpdate = async (client) => {
+        const toastId = toast.loading(`Updating client: ${client.client_fullname}`, {
+            duration: Infinity,
+        });
+
+        try {
+            const res = await fetch(`http://localhost:3000/api/clients/${client.client_id}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(editClient),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to update client");
+            }
+
+            toast.success("Client updated successfully!", { id: toastId, duration: 4000 });
+
+            // Refresh data
+            await fetchAll();
+
+            // Close modal
+            setEditClient(null);
+        } catch (err) {
+            console.error(err);
+            toast.error("Error updating client information", { id: toastId, duration: 4000 });
+        }
     };
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -112,16 +139,32 @@ const Client = () => {
         setIsRemoveModalOpen(false);
     };
 
-    const confirmRemoveClient = (client) => {
-        // Logic to remove the user
-        try {
-            toast.success(`Removing client: ${client.client_fullname}`);
-        } catch (err) {
-            console.log(err);
-            toast.error("Error removing client!");
-        }
+    const confirmRemoveClient = async (client) => {
+        const toastId = toast.loading(`Removing client: ${client.client_fullname}`, {
+            duration: Infinity,
+        });
 
-        closeRemoveModal();
+        try {
+            const res = await fetch(`http://localhost:3000/api/clients/${client.client_id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to remove client");
+            }
+
+            toast.success("Client removed successfully!", { id: toastId });
+
+            // Refresh data
+            await fetchAll();
+
+            // Close modal
+            closeRemoveModal();
+        } catch (err) {
+            console.error(err);
+            toast.error("Error removing client", { id: toastId, duration: 4000 });
+        }
     };
 
     return (
@@ -172,7 +215,7 @@ const Client = () => {
                 <table className="min-w-full table-auto text-left text-sm">
                     <thead className="card-title text-xs uppercase">
                         <tr>
-                            <th className="whitespace-nowrap px-4 py-3">Client</th>
+                            <th className="whitespace-nowrap px-4 py-3">Name / Company</th>
                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
                             <th className="whitespace-nowrap px-4 py-3">Date Created</th>
@@ -184,7 +227,7 @@ const Client = () => {
                         {paginatedClients.length > 0 ? (
                             paginatedClients.map((client) => (
                                 <tr
-                                    key={client.id}
+                                    key={client.client_id}
                                     className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                                 >
                                     <td className="whitespace-nowrap px-4 py-3">
@@ -414,75 +457,16 @@ const Client = () => {
                                 />
                             </div>
                             <div>
-                                <p className="font-semibold dark:text-blue-700">Date Added</p>
-                                <p className="py-2 text-slate-900 dark:text-slate-50">
-                                    {new Date(editClient.client_date_created).toLocaleDateString()}
-                                </p>
-                            </div>
-
-                            <div className="col-span-2 mt-4 w-full">
-                                <p className="mb-2 font-semibold dark:text-blue-700">Contact(s)</p>
-                                <table className="min-w-full table-auto text-left text-sm">
-                                    <thead className="text-xs uppercase text-slate-500 dark:text-slate-400">
-                                        <tr>
-                                            <th className="whitespace-nowrap px-4 py-3">Name</th>
-                                            <th className="whitespace-nowrap px-4 py-3">Email</th>
-                                            <th className="whitespace-nowrap px-4 py-3">Phone</th>
-                                            <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="text-gray-600 dark:text-slate-200">
-                                        {clientContacts.filter((c) => c.client_id === editClient.client_id).length > 0 ? (
-                                            clientContacts
-                                                .filter((c) => c.client_id === editClient.client_id)
-                                                .map((c, i) => (
-                                                    <tr key={i}>
-                                                        <td className="px-4 py-2">
-                                                            <input
-                                                                type="text"
-                                                                defaultValue={c.contact_fullname}
-                                                                readOnly
-                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <input
-                                                                type="email"
-                                                                defaultValue={c.contact_email}
-                                                                readOnly
-                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <input
-                                                                type="text"
-                                                                defaultValue={c.contact_phone}
-                                                                readOnly
-                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-2">
-                                                            <input
-                                                                type="text"
-                                                                defaultValue={c.contact_role}
-                                                                readOnly
-                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
-                                                            />
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                        ) : (
-                                            <tr>
-                                                <td
-                                                    colSpan="4"
-                                                    className="py-3 text-center text-gray-500"
-                                                >
-                                                    No contacts available for this client.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                                <p className="font-semibold dark:text-blue-700">Status</p>
+                                <select
+                                    value={editClient.client_status}
+                                    onChange={(e) => setEditClient({ ...editClient, client_status: e.target.value })}
+                                    className="w-full rounded-md border px-3 py-2 text-slate-900 dark:bg-slate-700 dark:text-slate-50"
+                                >
+                                    <option value="Active">Active</option>
+                                    <option value="Inactive">Inactive</option>
+                                    {showAllClients && <option value="Removed">Removed</option>}
+                                </select>
                             </div>
                         </div>
 
@@ -494,7 +478,7 @@ const Client = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleEditSave}
+                                onClick={() => handleClientInfoUpdate(editClient)}
                                 className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                             >
                                 Save
