@@ -62,9 +62,12 @@ const Client = () => {
     });
 
     const handleEditSave = () => {
-        // setTableData((prev) => prev.map((item) => (item.id === editClient.id ? { ...item, ...editClient } : item))); // this logic is incorrect
+        // handling update of client here
         setEditClient(null);
     };
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 5;
 
     const filteredClients = tableData.filter(
         (client) =>
@@ -72,8 +75,12 @@ const Client = () => {
             client.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_phonenum.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_date_created.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.client_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
             getUserFullName(client.created_by).includes(searchTerm),
     );
+
+    const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
+    const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     const openRemoveModal = (client) => {
         setUserToRemove(client);
@@ -123,7 +130,7 @@ const Client = () => {
                 </button>
             </div>
 
-            <div className="card shadow-lg">
+            <div className="card w-full overflow-x-auto shadow-lg">
                 <table className="min-w-full table-auto text-left text-sm">
                     <thead className="card-title text-xs uppercase">
                         <tr>
@@ -136,13 +143,24 @@ const Client = () => {
                         </tr>
                     </thead>
                     <tbody className="text-gray-700 dark:text-white">
-                        {filteredClients.length > 0 ? (
-                            filteredClients.map((client) => (
+                        {paginatedClients.length > 0 ? (
+                            paginatedClients.map((client) => (
                                 <tr
                                     key={client.id}
                                     className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                                 >
-                                    <td className="whitespace-nowrap px-4 py-3">{client.client_fullname}</td>
+                                    <td className="whitespace-nowrap px-4 py-3">
+                                        <span
+                                            className={`mr-2 inline-block h-2 w-4 rounded-full ${
+                                                client.client_status === "Active"
+                                                    ? "bg-green-500"
+                                                    : client.client_status === "Pending"
+                                                      ? "bg-yellow-400"
+                                                      : "bg-red-500"
+                                            }`}
+                                        ></span>
+                                        {client.client_fullname}
+                                    </td>
                                     <td className="whitespace-nowrap px-4 py-3">{client.client_email}</td>
                                     <td className="whitespace-nowrap px-4 py-3">{client.client_phonenum}</td>
                                     <td className="whitespace-nowrap px-4 py-3">{new Date(client.client_date_created).toLocaleDateString()}</td>
@@ -185,12 +203,39 @@ const Client = () => {
                 </table>
             </div>
 
-            <div className="mt-10">
+            {totalPages > 1 && (
+                <div className="mt-2 flex items-center justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &lt;
+                        </button>
+
+                        <div>
+                            Page {currentPage} of {totalPages}
+                        </div>
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Client Contacts link */}
+            <div className="mt-4">
                 <a
                     href="/clients/contacts"
-                    className="text-blue-600 underline"
+                    className="text-blue-600 hover:underline"
                 >
-                    Go to Client Contacts
+                    Go to Client Contacts {">"}
                 </a>
             </div>
 
@@ -270,37 +315,109 @@ const Client = () => {
             {/* Edit Client Modal */}
             {editClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
+                    <div className="w-full max-w-screen-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">Edit Client Info</h3>
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
-                                <label className="mb-1 block text-sm font-semibold text-blue-900 dark:text-blue-700">Full Name</label>
+                                <p className="font-semibold dark:text-blue-700">Name / Company</p>
                                 <input
                                     type="text"
                                     value={editClient.client_fullname}
                                     onChange={(e) => setEditClient({ ...editClient, client_fullname: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                    className="w-full rounded-md border px-3 py-2 text-slate-900 dark:bg-slate-700 dark:text-slate-50"
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-semibold text-blue-900 dark:text-blue-700">Email</label>
+                                <p className="font-semibold dark:text-blue-700">Email</p>
                                 <input
                                     type="email"
                                     value={editClient.client_email}
                                     onChange={(e) => setEditClient({ ...editClient, client_email: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                    className="w-full rounded-md border px-3 py-2 text-slate-900 dark:bg-slate-700 dark:text-slate-50"
                                 />
                             </div>
                             <div>
-                                <label className="mb-1 block text-sm font-semibold text-blue-900 dark:text-blue-700">Phone</label>
+                                <p className="font-semibold dark:text-blue-700">Phone</p>
                                 <input
                                     type="text"
                                     value={editClient.client_phonenum}
                                     onChange={(e) => setEditClient({ ...editClient, client_phonenum: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                    className="w-full rounded-md border px-3 py-2 text-slate-900 dark:bg-slate-700 dark:text-slate-50"
                                 />
                             </div>
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Date Added</p>
+                                <p className="py-2 text-slate-900 dark:text-slate-50">
+                                    {new Date(editClient.client_date_created).toLocaleDateString()}
+                                </p>
+                            </div>
+
+                            <div className="col-span-2 mt-4 w-full">
+                                <p className="mb-2 font-semibold dark:text-blue-700">Contact(s)</p>
+                                <table className="min-w-full table-auto text-left text-sm">
+                                    <thead className="text-xs uppercase text-slate-500 dark:text-slate-400">
+                                        <tr>
+                                            <th className="whitespace-nowrap px-4 py-3">Name</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Email</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Phone</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="text-gray-600 dark:text-slate-200">
+                                        {clientContacts.filter((c) => c.client_id === editClient.client_id).length > 0 ? (
+                                            clientContacts
+                                                .filter((c) => c.client_id === editClient.client_id)
+                                                .map((c, i) => (
+                                                    <tr key={i}>
+                                                        <td className="px-4 py-2">
+                                                            <input
+                                                                type="text"
+                                                                defaultValue={c.contact_fullname}
+                                                                readOnly
+                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2">
+                                                            <input
+                                                                type="email"
+                                                                defaultValue={c.contact_email}
+                                                                readOnly
+                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2">
+                                                            <input
+                                                                type="text"
+                                                                defaultValue={c.contact_phone}
+                                                                readOnly
+                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
+                                                            />
+                                                        </td>
+                                                        <td className="px-4 py-2">
+                                                            <input
+                                                                type="text"
+                                                                defaultValue={c.contact_role}
+                                                                readOnly
+                                                                className="w-full rounded-md border px-2 py-1 dark:bg-slate-700 dark:text-white"
+                                                            />
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan="4"
+                                                    className="py-3 text-center text-gray-500"
+                                                >
+                                                    No contacts available for this client.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+
                         <div className="mt-6 flex justify-end gap-2">
                             <button
                                 onClick={() => setEditClient(null)}

@@ -168,7 +168,6 @@ const Cases = () => {
                             <th className="px-4 py-3">Category</th>
                             <th className="px-4 py-3">Status</th>
                             <th className="px-4 py-3">Lawyer</th>
-                            <th className="px-4 py-3">Fee</th>
                             <th className="px-4 py-3">Balance</th>
                             <th className="px-4 py-3">Actions</th>
                         </tr>
@@ -190,7 +189,6 @@ const Cases = () => {
                                         </span>
                                     </td>
                                     <td className="px-4 py-3">{item.lawyer}</td>
-                                    <td className="px-4 py-3">{item.fee}</td>
                                     <td className="px-4 py-3">{item.balance}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex flex-wrap items-center gap-1">
