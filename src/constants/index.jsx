@@ -19,16 +19,14 @@ export const getNavbarLinks = (role) => {
     }
 
     if (role === "Lawyer") {
-        // Hide Users and Logs
         return allNavbarLinks.filter((link) => link.label !== "Users" && link.label !== "Reports");
     }
 
     if (role === "Paralegal" || role === "Staff") {
-        // Only allow Home, Clients, Tasks, and Logs
         return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Logs"].includes(link.label));
     }
 
-    return []; // default fallback (no links)
+    return [];
 };
 
 export const overviewData = [

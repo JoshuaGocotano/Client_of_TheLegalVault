@@ -1,30 +1,19 @@
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Pencil, Trash2 } from "lucide-react";
-import user1 from "@/assets/JoshuaG..jpg";
-import user2 from "../../../../uploads/joshua.png";
-import user3 from "../../../../uploads/user_profile-1752223125848-455598027.jpg";
 import AddUserModal from "@/components/add-users";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
-
-const initialUsers = [
-    { id: 1, name: "Sarah Wilson", username: "admin", email: "admin@example.com", role: "admin", image: user1 },
-    { id: 2, name: "John Cooper", username: "john.cooper", email: "john@example.com", role: "paralegal", image: user2 },
-    { id: 3, name: "Emma Thompson", username: "emma.thompson", email: "emma@example.com", role: "lawyer", image: user3 },
-];
+import default_avatar from "@/assets/default-avatar.png";
 
 const roles = ["All", "Admin", "Lawyer", "Paralegal", "Staff"];
+const API_BASE = "http://localhost:3000";
 
 const Users = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    if (user.user_role !== "Admin") {
-        navigate("unauthorized");
-    }
-
+    const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
-    const [users, setUsers] = useState(initialUsers);
     const [selectedRole, setSelectedRole] = useState("All");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
@@ -32,8 +21,38 @@ const Users = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
 
-    const openRemoveModal = (user) => {
-        setUserToRemove(user);
+    // redirect non-admins -> perform navigation as an effect (avoid side effects during render)
+    useEffect(() => {
+        if (!user) return; // wait until auth state is known
+        if (user.user_role !== "Admin") {
+            navigate("/unauthorized", { replace: true });
+        }
+    }, [user, navigate]);
+
+    // fetch users (extract so we can call after adding/updating/removing)
+    const fetchUsers = useCallback(async () => {
+        try {
+            const res = await fetch(`${API_BASE}/api/users`, {
+                method: "GET",
+                credentials: "include",
+            });
+
+            if (!res.ok) throw new Error("Failed to fetch users");
+
+            const data = await res.json();
+            setUsers(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Failed to fetch users:", error);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
+
+    // open/close modals
+    const openRemoveModal = (u) => {
+        setUserToRemove(u);
         setIsRemoveModalOpen(true);
     };
 
@@ -42,13 +61,8 @@ const Users = () => {
         setUserToRemove(null);
     };
 
-    const confirmRemoveUser = () => {
-        setUsers((prev) => prev.filter((u) => u.id !== userToRemove.id));
-        closeRemoveModal();
-    };
-
-    const openEditModal = (user) => {
-        setUserToEdit(user);
+    const openEditModal = (u) => {
+        setUserToEdit(u);
         setIsEditModalOpen(true);
     };
 
@@ -57,18 +71,75 @@ const Users = () => {
         setUserToEdit(null);
     };
 
-    const saveEditedUser = (updatedUser) => {
-        setUsers((prev) => prev.map((u) => (u.id === updatedUser.id ? updatedUser : u)));
-        closeEditModal();
+    // Delete user (calls API, then updates local state)
+    const confirmRemoveUser = async () => {
+        if (!userToRemove) return;
+
+        try {
+            const res = await fetch(`${API_BASE}/api/users/${userToRemove.user_id}`, {
+                method: "DELETE",
+                credentials: "include",
+            });
+
+            if (!res.ok) {
+                // fallback: log and don't remove locally
+                console.error("Failed to delete user");
+                return;
+            }
+
+            setUsers((prev) => prev.filter((u) => u.user_id !== userToRemove.user_id));
+            closeRemoveModal();
+        } catch (err) {
+            console.error("Error deleting user:", err);
+        }
     };
 
-    const filteredUsers = users.filter((user) => {
-        const matchesSearch =
-            user.name.toLowerCase().includes(search.toLowerCase()) ||
-            user.username.toLowerCase().includes(search.toLowerCase()) ||
-            user.email.toLowerCase().includes(search.toLowerCase());
+    // Save edited user (PUT to API, then update local state)
+    const handleSaveEditedUser = async (e) => {
+        e.preventDefault();
+        if (!userToEdit) return;
 
-        const matchesRole = selectedRole === "All" || user.role.toLowerCase() === selectedRole.toLowerCase();
+        try {
+            const payload = {
+                // send the fields you expect your API to accept
+                user_fname: userToEdit.user_fname,
+                user_mname: userToEdit.user_mname,
+                user_lname: userToEdit.user_lname,
+                user_email: userToEdit.user_email,
+                user_phonenum: userToEdit.user_phonenum,
+                user_role: userToEdit.user_role,
+            };
+
+            const res = await fetch(`${API_BASE}/api/users/${userToEdit.user_id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                credentials: "include",
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                console.error("Failed to update user");
+                return;
+            }
+
+            const updated = await res.json();
+
+            // update local copy (if your API returns the updated user, use it; otherwise use userToEdit)
+            setUsers((prev) => prev.map((u) => (u.user_id === updated.user_id ? updated : u)));
+            closeEditModal();
+        } catch (err) {
+            console.error("Error updating user:", err);
+        }
+    };
+
+    // Filter logic — search + role must both match (AND). Use safe optional chaining.
+    const filteredUsers = users.filter((u) => {
+        const q = search.trim().toLowerCase();
+
+        const fields = [u.user_email, u.user_fname, u.user_mname, u.user_lname, u.user_phonenum, u.user_role, u.user_status];
+
+        const matchesSearch = q === "" || fields.some((f) => f && f.toLowerCase().includes(q));
+        const matchesRole = selectedRole === "All" || (u.user_role && u.user_role.toLowerCase() === selectedRole.toLowerCase());
 
         return matchesSearch && matchesRole;
     });
@@ -120,40 +191,46 @@ const Users = () => {
                     <thead className="text-xs uppercase dark:text-slate-400">
                         <tr>
                             <th className="px-4 py-3">User</th>
-                            <th className="px-4 py-3">Username</th>
                             <th className="px-4 py-3">Email</th>
+                            <th className="px-4 py-3">Phone</th>
                             <th className="px-4 py-3">Role</th>
+                            <th className="px-4 py-3">Status</th>
+                            <th className="px-4 py-3">Branch</th>
                             <th className="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody className="dark:text-slate-50">
                         {filteredUsers.length > 0 ? (
-                            filteredUsers.map((user) => (
+                            filteredUsers.map((u) => (
                                 <tr
-                                    key={user.id}
+                                    key={u.user_id}
                                     className="border-t border-gray-200 hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-950"
                                 >
                                     <td className="flex items-center gap-3 px-4 py-3">
                                         <img
-                                            src={user.image}
-                                            alt={user.name}
+                                            src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
+                                            alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
                                             className="h-8 w-8 rounded-full object-cover"
                                         />
-                                        <span className="font-medium">{user.name}</span>
+                                        <span className="font-medium">
+                                            {`${u.user_fname || ""} ${u.user_mname || ""} ${u.user_lname || ""}`.replace(/\s+/g, " ").trim()}
+                                        </span>
                                     </td>
-                                    <td className="px-4 py-3">{user.username}</td>
-                                    <td className="px-4 py-3">{user.email}</td>
-                                    <td className="px-4 py-3 capitalize">{user.role}</td>
+                                    <td className="px-4 py-3">{u.user_email}</td>
+                                    <td className="px-4 py-3">{u.user_phonenum}</td>
+                                    <td className="px-4 py-3 capitalize">{u.user_role}</td>
+                                    <td className="px-4 py-3 capitalize">{u.user_status}</td>
+                                    <td className="px-4 py-3 capitalize">{u.branch_id}</td>
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button
-                                                onClick={() => openEditModal(user)}
+                                                onClick={() => openEditModal(u)}
                                                 className="text-blue-600 hover:text-blue-800"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
                                             <button
-                                                onClick={() => openRemoveModal(user)}
+                                                onClick={() => openRemoveModal(u)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -165,7 +242,7 @@ const Users = () => {
                         ) : (
                             <tr>
                                 <td
-                                    colSpan="5"
+                                    colSpan={5}
                                     className="py-6 text-center text-gray-400"
                                 >
                                     No users found.
@@ -177,7 +254,15 @@ const Users = () => {
             </div>
 
             {/* Add User Modal */}
-            {isModalOpen && <AddUserModal onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && (
+                <AddUserModal
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        // refresh list after modal closes (in case a user was added)
+                        fetchUsers();
+                    }}
+                />
+            )}
 
             {/* Edit Modal */}
             {isEditModalOpen && userToEdit && (
@@ -185,52 +270,79 @@ const Users = () => {
                     <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
                         <h2 className="mb-4 text-lg font-semibold dark:text-white">Edit User</h2>
                         <form
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                saveEditedUser(userToEdit);
-                            }}
+                            onSubmit={handleSaveEditedUser}
                             className="space-y-4"
                         >
                             <div>
-                                <label className="text-sm font-medium dark:text-white">Name</label>
+                                <label className="text-sm font-medium dark:text-white">First name</label>
                                 <input
                                     type="text"
-                                    value={userToEdit.name}
-                                    onChange={(e) => setUserToEdit({ ...userToEdit, name: e.target.value })}
+                                    value={userToEdit.user_fname || ""}
+                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_fname: e.target.value }))}
                                     className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                 />
                             </div>
+
                             <div>
-                                <label className="text-sm font-medium dark:text-white">Username</label>
+                                <label className="text-sm font-medium dark:text-white">Middle name</label>
                                 <input
                                     type="text"
-                                    value={userToEdit.username}
-                                    onChange={(e) => setUserToEdit({ ...userToEdit, username: e.target.value })}
+                                    value={userToEdit.user_mname || ""}
+                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_mname: e.target.value }))}
                                     className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                 />
                             </div>
+
+                            <div>
+                                <label className="text-sm font-medium dark:text-white">Last name</label>
+                                <input
+                                    type="text"
+                                    value={userToEdit.user_lname || ""}
+                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_lname: e.target.value }))}
+                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+
                             <div>
                                 <label className="text-sm font-medium dark:text-white">Email</label>
                                 <input
                                     type="email"
-                                    value={userToEdit.email}
-                                    onChange={(e) => setUserToEdit({ ...userToEdit, email: e.target.value })}
+                                    value={userToEdit.user_email || ""}
+                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_email: e.target.value }))}
                                     className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                 />
                             </div>
+
+                            <div>
+                                <label className="text-sm font-medium dark:text-white">Phone</label>
+                                <input
+                                    type="text"
+                                    value={userToEdit.user_phonenum || ""}
+                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_phonenum: e.target.value }))}
+                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+
                             <div>
                                 <label className="text-sm font-medium dark:text-white">Role</label>
                                 <select
-                                    value={userToEdit.role}
-                                    onChange={(e) => setUserToEdit({ ...userToEdit, role: e.target.value })}
+                                    value={userToEdit.user_role || ""}
+                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_role: e.target.value }))}
                                     className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                 >
-                                    <option value="admin">Admin</option>
-                                    <option value="lawyer">Lawyer</option>
-                                    <option value="paralegal">Paralegal</option>
-                                    <option value="staff">Staff</option>
+                                    {roles
+                                        .filter((r) => r !== "All")
+                                        .map((r) => (
+                                            <option
+                                                key={r}
+                                                value={r}
+                                            >
+                                                {r}
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
+
                             <div className="flex justify-end gap-2 pt-4">
                                 <button
                                     type="button"
@@ -247,6 +359,7 @@ const Users = () => {
                                 </button>
                             </div>
                         </form>
+
                         <button
                             onClick={closeEditModal}
                             className="absolute right-2 top-2 text-xl text-gray-400 hover:text-gray-600"
@@ -262,10 +375,11 @@ const Users = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800">
                         <h2 className="mb-4 text-lg font-semibold dark:text-white">
-                            {userToRemove.role.charAt(0).toUpperCase() + userToRemove.role.slice(1)} Removal
+                            {userToRemove.user_role ? userToRemove.user_role.charAt(0).toUpperCase() + userToRemove.user_role.slice(1) : "User"}{" "}
+                            Removal
                         </h2>
                         <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-                            Are you sure you want to remove this {userToRemove.role.toLowerCase()}?
+                            Are you sure you want to remove this {userToRemove.user_role ? userToRemove.user_role.toLowerCase() : "user"}?
                         </p>
                         <div className="flex justify-end gap-3">
                             <button
@@ -281,6 +395,7 @@ const Users = () => {
                                 Remove
                             </button>
                         </div>
+
                         <button
                             onClick={closeRemoveModal}
                             className="absolute right-2 top-2 text-xl text-gray-400 hover:text-gray-600"
