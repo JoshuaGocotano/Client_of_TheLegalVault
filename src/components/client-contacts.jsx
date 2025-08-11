@@ -205,7 +205,7 @@ const ClientContact = () => {
                             paginatedContacts.map((contact) => (
                                 <tr
                                     key={contact.contact_id}
-                                    className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-slate-800"
+                                    className="border-t border-gray-200 hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                                 >
                                     <td className="px-4 py-3">{contact.contact_fullname}</td>
                                     <td className="px-4 py-3">{contact.contact_email}</td>
