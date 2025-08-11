@@ -3,8 +3,11 @@ import AddContact from "../components/add-contact";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useAuth } from "@/context/auth-context";
 
 const ClientContact = () => {
+    const { user } = useAuth();
+
     const [tableData, setTableData] = useState([]);
     const [clients, setClients] = useState([]);
 
@@ -22,12 +25,20 @@ const ClientContact = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const client_contacts_endpoint =
+                    user?.user_role === "Admin"
+                        ? "http://localhost:3000/api/client-contacts"
+                        : `http://localhost:3000/api/a-lawyer-client-contacts/${user.user_id}`;
+
+                const clients_endpoint =
+                    user?.user_role === "Admin" ? "http://localhost:3000/api/clients" : `http://localhost:3000/api/clients/${user.user_id}`;
+
                 // Fetch both contacts and clients in parallel
                 const [contactsRes, clientsRes] = await Promise.all([
-                    fetch("http://localhost:3000/api/client-contacts", {
+                    fetch(client_contacts_endpoint, {
                         credentials: "include",
                     }),
-                    fetch("http://localhost:3000/api/clients", {
+                    fetch(clients_endpoint, {
                         credentials: "include",
                     }),
                 ]);
@@ -194,7 +205,7 @@ const ClientContact = () => {
                             paginatedContacts.map((contact) => (
                                 <tr
                                     key={contact.contact_id}
-                                    className="border-t hover:bg-blue-50 dark:hover:bg-slate-800"
+                                    className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-slate-800"
                                 >
                                     <td className="px-4 py-3">{contact.contact_fullname}</td>
                                     <td className="px-4 py-3">{contact.contact_email}</td>
