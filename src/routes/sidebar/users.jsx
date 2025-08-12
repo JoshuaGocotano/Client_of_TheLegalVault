@@ -107,7 +107,7 @@ const Users = () => {
                 user_lname: userToEdit.user_lname,
                 user_email: userToEdit.user_email,
                 user_phonenum: userToEdit.user_phonenum,
-                user_role: userToEdit.user_role,
+                // user_role: userToEdit.user_role,
             };
 
             const res = await fetch(`${API_BASE}/api/users/${userToEdit.user_id}`, {
@@ -281,34 +281,36 @@ const Users = () => {
                             onSubmit={handleSaveEditedUser}
                             className="space-y-4"
                         >
-                            <div>
-                                <label className="text-sm font-medium dark:text-white">First name</label>
-                                <input
-                                    type="text"
-                                    value={userToEdit.user_fname || ""}
-                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_fname: e.target.value }))}
-                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                                />
-                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label className="text-sm font-medium dark:text-white">First name</label>
+                                    <input
+                                        type="text"
+                                        value={userToEdit.user_fname || ""}
+                                        onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_fname: e.target.value }))}
+                                        className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="text-sm font-medium dark:text-white">Middle name</label>
-                                <input
-                                    type="text"
-                                    value={userToEdit.user_mname || ""}
-                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_mname: e.target.value }))}
-                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                                />
-                            </div>
+                                <div>
+                                    <label className="text-sm font-medium dark:text-white">Middle name</label>
+                                    <input
+                                        type="text"
+                                        value={userToEdit.user_mname || ""}
+                                        onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_mname: e.target.value }))}
+                                        className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    />
+                                </div>
 
-                            <div>
-                                <label className="text-sm font-medium dark:text-white">Last name</label>
-                                <input
-                                    type="text"
-                                    value={userToEdit.user_lname || ""}
-                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_lname: e.target.value }))}
-                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                                />
+                                <div>
+                                    <label className="text-sm font-medium dark:text-white">Last name</label>
+                                    <input
+                                        type="text"
+                                        value={userToEdit.user_lname || ""}
+                                        onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_lname: e.target.value }))}
+                                        className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    />
+                                </div>
                             </div>
 
                             <div>
@@ -317,7 +319,7 @@ const Users = () => {
                                     type="email"
                                     value={userToEdit.user_email || ""}
                                     onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_email: e.target.value }))}
-                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                 />
                             </div>
 
@@ -327,11 +329,11 @@ const Users = () => {
                                     type="text"
                                     value={userToEdit.user_phonenum || ""}
                                     onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_phonenum: e.target.value }))}
-                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
                                 />
                             </div>
 
-                            <div>
+                            {/* <div>
                                 <label className="text-sm font-medium dark:text-white">Role</label>
                                 <select
                                     value={userToEdit.user_role || ""}
@@ -349,19 +351,19 @@ const Users = () => {
                                             </option>
                                         ))}
                                 </select>
-                            </div>
+                            </div> */}
 
                             <div className="flex justify-end gap-2 pt-4">
                                 <button
                                     type="button"
                                     onClick={closeEditModal}
-                                    className="rounded-lg bg-gray-300 px-4 py-2 text-gray-800 hover:bg-gray-400"
+                                    className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
-                                    className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                                 >
                                     Save Changes
                                 </button>
