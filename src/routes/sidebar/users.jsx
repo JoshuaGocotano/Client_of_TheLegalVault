@@ -161,9 +161,9 @@ const Users = () => {
         e.preventDefault();
         if (!userToEdit) return;
 
-        const fullName = [userToSuspend.user_fname, userToSuspend.user_mname, userToSuspend.user_lname].filter(Boolean).join(" ");
+        const fullName = [userToEdit.user_fname, userToEdit.user_mname, userToEdit.user_lname].filter(Boolean).join(" ");
 
-        const toastId = toast.loading(`Updating: ${userToEdit.user_fname} ${fullName}`, {
+        const toastId = toast.loading(`Updating: ${fullName}`, {
             duration: Infinity,
         });
 
