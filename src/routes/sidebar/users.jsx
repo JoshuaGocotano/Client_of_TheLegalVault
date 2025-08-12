@@ -1,9 +1,10 @@
 import { useEffect, useState, useCallback } from "react";
-import { Pencil, Trash2, UserRoundX } from "lucide-react";
+import { Pencil, UserRoundX, UserRoundPlus } from "lucide-react";
 import AddUserModal from "@/components/add-users";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
 import default_avatar from "@/assets/default-avatar.png";
+import toast from "react-hot-toast";
 
 const roles = ["All", "Admin", "Lawyer", "Paralegal", "Staff"];
 const API_BASE = "http://localhost:3000";
@@ -12,6 +13,7 @@ const Users = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
+    const [error, setError] = useState([]);
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [selectedRole, setSelectedRole] = useState("All");
@@ -21,7 +23,7 @@ const Users = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
 
-    // redirect non-admins -> perform navigation as an effect (avoid side effects during render)
+    // redirect non-admins
     useEffect(() => {
         if (!user) return; // wait until auth state is known
         if (user.user_role !== "Admin") {
@@ -29,7 +31,6 @@ const Users = () => {
         }
     }, [user, navigate]);
 
-    // fetch users (extract so we can call after adding/updating/removing)
     const fetchUsers = useCallback(async () => {
         try {
             const res = await fetch(`${API_BASE}/api/users`, {
@@ -88,22 +89,70 @@ const Users = () => {
     const confirmSuspendUser = async () => {
         if (!userToSuspend) return;
 
+        const fullName = [userToSuspend.user_fname, userToSuspend.user_mname, userToSuspend.user_lname].filter(Boolean).join(" ");
+
+        const toastId = toast.loading(`Updating user: ${fullName}`, {
+            duration: Infinity,
+        });
+
         try {
             const res = await fetch(`${API_BASE}/api/users/${userToSuspend.user_id}`, {
-                method: "DELETE",
+                method: "PUT",
                 credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ ...userToSuspend, user_status: "Suspended" }),
             });
 
             if (!res.ok) {
-                // fallback: log and don't remove locally
-                console.error("Failed to delete user");
-                return;
+                throw new Error("Failed to suspend user");
             }
 
-            setUsers((prev) => prev.filter((u) => u.user_id !== userToSuspend.user_id));
+            toast.success("User suspension successful!", { id: toastId, duration: 4000 });
+            const updated = await res.json();
+
+            setUsers((prev) => prev.map((u) => (u.user_id === updated.user_id ? updated : u)));
+
             closeRemoveModal();
         } catch (err) {
-            console.error("Error deleting user:", err);
+            console.error("Error suspending user:", err);
+            setError(err);
+        }
+    };
+
+    const handleUserActivation = async (u) => {
+        const fullName = [u.user_fname, u.user_mname, u.user_lname].filter(Boolean).join(" ");
+
+        const confirmActivate = window.confirm(`Are you sure you want to activate ${fullName}?`);
+
+        if (confirmActivate) {
+            const toastId = toast.loading(`Activating: ${fullName}`, {
+                duration: Infinity,
+            });
+
+            try {
+                const res = await fetch(`${API_BASE}/api/users/${u.user_id}`, {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ ...u, user_status: "Active" }),
+                });
+
+                if (!res.ok) {
+                    throw new Error("Failed to activate user");
+                }
+
+                toast.success("User activation successful!", { id: toastId, duration: 4000 });
+                const updated = await res.json();
+
+                setUsers((prev) => prev.map((u) => (u.user_id === updated.user_id ? updated : u)));
+            } catch (err) {
+                console.error("Error updating user:", err);
+                setError(err);
+            }
         }
     };
 
@@ -111,6 +160,12 @@ const Users = () => {
     const handleSaveEditedUser = async (e) => {
         e.preventDefault();
         if (!userToEdit) return;
+
+        const fullName = [userToSuspend.user_fname, userToSuspend.user_mname, userToSuspend.user_lname].filter(Boolean).join(" ");
+
+        const toastId = toast.loading(`Updating: ${userToEdit.user_fname} ${fullName}`, {
+            duration: Infinity,
+        });
 
         try {
             const payload = {
@@ -120,7 +175,8 @@ const Users = () => {
                 user_lname: userToEdit.user_lname,
                 user_email: userToEdit.user_email,
                 user_phonenum: userToEdit.user_phonenum,
-                // user_role: userToEdit.user_role,
+                user_role: userToEdit.user_role,
+                user_status: userToEdit.user_status,
             };
 
             const res = await fetch(`${API_BASE}/api/users/${userToEdit.user_id}`, {
@@ -135,9 +191,9 @@ const Users = () => {
                 return;
             }
 
+            toast.success("User updated successfully!", { id: toastId, duration: 4000 });
             const updated = await res.json();
 
-            // update local copy (if your API returns the updated user, use it; otherwise use userToEdit)
             setUsers((prev) => prev.map((u) => (u.user_id === updated.user_id ? updated : u)));
             closeEditModal();
         } catch (err) {
@@ -159,6 +215,14 @@ const Users = () => {
 
     return (
         <div className="dark:bg-slate-950">
+            {error && (
+                <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
+                    <div>
+                        <span>{error.message}</span>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="mb-6">
                 <h2 className="title">Users</h2>
@@ -241,34 +305,57 @@ const Users = () => {
                                     <td className="px-4 py-3">{u.user_phonenum}</td>
                                     <td className="px-4 py-3 capitalize">{u.user_role}</td>
                                     <td className="px-4 py-3 capitalize">{formatDateTime(u.user_date_created)}</td>
-                                    <td
-                                        className={`px-4 py-3 capitalize ${
-                                            u.user_status === "Active"
-                                                ? "bg-green-500"
-                                                : u.user_status === "Pending"
-                                                  ? "bg-yellow-500"
-                                                  : u.user_status === "Suspended"
-                                                    ? "bg-red-500"
-                                                    : "bg-gray-300"
-                                        }`}
-                                    >
-                                        {u.user_status}
+                                    <td className="px-4 py-3">
+                                        <span
+                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                                u.user_status === "Active"
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                    : u.user_status === "Pending"
+                                                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                      : u.user_status === "Suspended"
+                                                        ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                            }`}
+                                        >
+                                            {u.user_status}
+                                        </span>
                                     </td>
                                     <td className="px-4 py-3 text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                onClick={() => openEditModal(u)}
-                                                className="text-blue-600 hover:text-blue-800"
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </button>
-                                            <button
-                                                onClick={() => openRemoveModal(u)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <UserRoundX className="h-4 w-4" />
-                                            </button>
-                                        </div>
+                                        {u.user_status !== "Suspended" ? (
+                                            <div className="flex justify-center gap-2">
+                                                <button
+                                                    onClick={() => openEditModal(u)}
+                                                    className="text-blue-600 hover:text-blue-800"
+                                                    title="Edit User Info"
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => openRemoveModal(u)}
+                                                    className="text-red-500 hover:text-red-700"
+                                                    title="Suspend User"
+                                                >
+                                                    <UserRoundX className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex justify-center gap-2">
+                                                <button
+                                                    onClick={() => openEditModal(u)}
+                                                    className="text-blue-600 hover:text-blue-800"
+                                                    title="Edit User Info"
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleUserActivation(u)}
+                                                    className="text-green-600 hover:text-blue-800"
+                                                    title="Activate User"
+                                                >
+                                                    <UserRoundPlus className="h-4 w-4" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </td>
                                 </tr>
                             ))
@@ -301,12 +388,14 @@ const Users = () => {
             {isEditModalOpen && userToEdit && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="relative w-full max-w-md rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800">
-                        <h2 className="mb-4 text-lg font-semibold dark:text-white">Edit User</h2>
+                        <h2 className="mb-4 text-lg font-semibold dark:text-white">
+                            Edit User <span className="text-sm text-slate-400">(User ID: {userToEdit.user_id})</span>{" "}
+                        </h2>
                         <form
                             onSubmit={handleSaveEditedUser}
                             className="space-y-4"
                         >
-                            <div className="grid grid-cols-3 gap-2">
+                            <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-3">
                                 <div>
                                     <label className="text-sm font-medium dark:text-white">First name</label>
                                     <input
@@ -358,25 +447,37 @@ const Users = () => {
                                 />
                             </div>
 
-                            {/* Commenting this out for now for future development */}
-                            {/* <div> 
-                                <label className="text-sm font-medium dark:text-white">Role</label>
-                                <select
-                                    value={userToEdit.user_role || ""}
-                                    onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_role: e.target.value }))}
-                                    className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
-                                >
-                                    {roles
-                                        .filter((r) => r !== "All")
-                                        .map((r) => (
-                                            <option
-                                                key={r}
-                                                value={r}
-                                            >
-                                                {r}
-                                            </option>
-                                        ))}
-                                </select>
+                            {/* Role and Status */}
+                            {/* <div className="grid gap-2 sm:grid-cols-1 md:grid-cols-2">
+                                <div>
+                                    <label className="text-sm font-medium dark:text-white">Role</label>
+                                    <select
+                                        value={userToEdit.user_role || ""}
+                                        onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_role: e.target.value }))}
+                                        className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    >
+                                        {roles
+                                            .filter((r) => r !== "All")
+                                            .map((r) => (
+                                                <option
+                                                    key={r}
+                                                    value={r}
+                                                >
+                                                    {r}
+                                                </option>
+                                            ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="text-sm font-medium dark:text-white">Status</label>
+                                    <input
+                                        type="text"
+                                        value={userToEdit.user_status || ""}
+                                        onChange={(e) => setUserToEdit((prev) => ({ ...prev, user_status: e.target.value }))}
+                                        className="mt-1 w-full rounded-md border border-gray-300 bg-gray-100 px-3 py-2 text-gray-900 dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                                    />
+                                </div>
                             </div> */}
 
                             <div className="flex justify-end gap-2 pt-4">
