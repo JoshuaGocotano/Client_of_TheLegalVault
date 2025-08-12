@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
-import { Mail, Phone, BadgeCheck, UserCheck, Building2, Pencil, Save, X, User, LockIcon } from "lucide-react";
+import { Mail, Phone, UserCheck, Building2, Pencil, Save, X, User, LockIcon, Clock } from "lucide-react";
 import toast from "react-hot-toast";
-import { showToastWithTimer } from "./toast-design";
 
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
@@ -10,19 +9,36 @@ import { useAuth } from "@/context/auth-context";
 export const ProfileModal = ({ onClose }) => {
     const { user, setUser } = useAuth();
 
-    const [formData, setFormData] = useState({ ...user });
+    const [formData, setFormData] = useState(user || {});
     const [isEditing, setIsEditing] = useState(false);
     const [branchName, setBranchName] = useState("Loading...");
     const [loadingBranch, setLoadingBranch] = useState(true);
 
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
     const modalRef = useRef(null);
     useClickOutside([modalRef], onClose);
 
+    // Keep form data in sync with user
     useEffect(() => {
-        setFormData({ ...user });
+        setFormData(user || {});
     }, [user]);
 
+    // Fetch branch name
     useEffect(() => {
+        if (!user?.branch_id) return;
+
         const fetchBranchName = async () => {
             try {
                 const res = await fetch("http://localhost:3000/api/branches", {
@@ -40,17 +56,16 @@ export const ProfileModal = ({ onClose }) => {
             }
         };
 
-        if (user?.branch_id) fetchBranchName();
-    }, [user]);
+        fetchBranchName();
+    }, [user?.branch_id]);
 
+    // Conditional outline color for profile image
     const outlineColor =
-        formData.user_status === "Active"
-            ? "outline-green-600"
-            : formData.user_status === "Pending"
-              ? "outline-yellow-500"
-              : formData.user_status === "Suspended"
-                ? "outline-red-500"
-                : "outline-gray-300";
+        {
+            Active: "outline-green-600",
+            Pending: "outline-yellow-500",
+            Suspended: "outline-red-500",
+        }[formData.user_status] || "outline-gray-300";
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -62,9 +77,7 @@ export const ProfileModal = ({ onClose }) => {
             const res = await fetch(`http://localhost:3000/api/users/${user.user_id}`, {
                 method: "PUT",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
@@ -77,48 +90,29 @@ export const ProfileModal = ({ onClose }) => {
             const { user: updatedUser } = await verifyRes.json();
             setUser(updatedUser);
 
-            // showToastWithTimer("Profile update successful!", "success", 3000);
-            toast.success("Profile updated successfully.", {
-                duration: 4000,
-            });
+            toast.success("Profile updated successfully.", { duration: 4000 });
             setIsEditing(false);
         } catch (err) {
             console.error(err);
-            toast.error("Fail profile update!");
+            toast.error("Profile update failed!");
         }
     };
 
     const infoItems = [
-        {
-            label: "User ID",
-            name: "user_id",
-            icon: <User size={16} />,
-            editable: false,
-        },
-        {
-            label: "Email",
-            name: "user_email",
-            icon: <Mail size={16} />,
-            editable: true,
-        },
-        {
-            label: "Password",
-            name: "user_password",
-            icon: <LockIcon size={16} />,
-            editable: true,
-        },
-        {
-            label: "Phone",
-            name: "user_phonenum",
-            icon: <Phone size={16} />,
-            editable: true,
-        },
-        {
-            label: "Status",
-            name: "user_status",
-            icon: <UserCheck size={16} />,
-            editable: false,
-        },
+        [
+            { label: "User ID", name: "user_id", icon: <User size={16} />, editable: false },
+            {
+                label: "Date Created",
+                name: "user_date_created",
+                icon: <Clock size={16} />,
+                editable: false,
+                value: formatDateTime(formData.user_date_created),
+            },
+        ],
+        { label: "Email", name: "user_email", icon: <Mail size={16} />, editable: true },
+        { label: "Password", name: "user_password", icon: <LockIcon size={16} />, editable: true },
+        { label: "Phone", name: "user_phonenum", icon: <Phone size={16} />, editable: true },
+        { label: "Status", name: "user_status", icon: <UserCheck size={16} />, editable: false },
         {
             label: "Branch",
             name: "branchName",
@@ -134,6 +128,7 @@ export const ProfileModal = ({ onClose }) => {
                 ref={modalRef}
                 className="relative w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-slate-900 sm:p-6 md:p-8"
             >
+                {/* Close Button */}
                 <button
                     className="btn-ghost absolute right-2 top-2"
                     onClick={onClose}
@@ -141,44 +136,76 @@ export const ProfileModal = ({ onClose }) => {
                     <X size={20} />
                 </button>
 
-                <div className="flex flex-col items-center justify-center">
+                {/* Profile Header */}
+                <div className="flex flex-col items-center">
                     <img
-                        src={`http://localhost:3000${user.user_profile}`}
+                        src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : "/default-avatar.png"}
                         alt="Profile"
                         className={`mb-3 h-32 w-32 rounded-full object-cover p-1 outline outline-4 ${outlineColor}`}
                     />
                     <h2 className="text-center text-lg font-bold text-gray-800 dark:text-white">
-                        {`${formData.user_fname} ${formData.user_mname} ${formData.user_lname}`}
+                        {[formData.user_fname, formData.user_mname, formData.user_lname].filter(Boolean).join(" ")}
                     </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{formData.user_role}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{formData.user_role || ""}</p>
                 </div>
 
+                {/* Info List */}
                 <div className="mt-6 space-y-3">
-                    {infoItems.map(({ label, name, icon, editable, value }) => (
-                        <div
-                            key={label}
-                            className="flex items-start gap-3 rounded bg-gray-100 px-3 py-2 text-sm text-gray-700 dark:bg-slate-800 dark:text-gray-200"
-                        >
-                            <div className="mt-1 text-blue-600 dark:text-blue-400">{icon}</div>
-                            <div className="flex w-full flex-col">
-                                <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</span>
-                                {isEditing && editable ? (
-                                    <input
-                                        type={name == "user_password" ? "password" : "text"}
-                                        name={name}
-                                        value={formData[name] || ""}
-                                        placeholder={name == "user_password" ? "Enter new password" : formData[name]}
-                                        onChange={handleInputChange}
-                                        className="rounded bg-white px-2 py-1 text-sm text-gray-800 outline-none dark:bg-slate-700 dark:text-white"
-                                    />
-                                ) : (
-                                    <span>{name == "user_password" ? "●●●●●●●●" : (value ?? formData[name])}</span>
-                                )}
+                    {infoItems.map((item, idx) =>
+                        Array.isArray(item) ? (
+                            <div
+                                key={idx}
+                                className="grid grid-cols-2 gap-3"
+                            >
+                                {item.map(({ label, name, icon, editable, value }) => (
+                                    <div
+                                        key={label}
+                                        className="flex items-start gap-3 rounded bg-gray-100 px-3 py-2 text-xs text-gray-700 dark:bg-slate-800 dark:text-gray-200"
+                                    >
+                                        <div className="mt-1 text-blue-600 dark:text-blue-400">{icon}</div>
+                                        <div className="flex flex-col">
+                                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</span>
+                                            {isEditing && editable ? (
+                                                <input
+                                                    type={name === "user_password" ? "password" : "text"}
+                                                    name={name}
+                                                    value={formData[name] || ""}
+                                                    onChange={handleInputChange}
+                                                    className="rounded bg-white px-2 py-1 text-gray-800 outline-none dark:bg-slate-700 dark:text-white"
+                                                />
+                                            ) : (
+                                                <span>{name === "user_password" ? "●●●●●●●●" : (value ?? formData[name] ?? "")}</span>
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
-                        </div>
-                    ))}
+                        ) : (
+                            <div
+                                key={item.label}
+                                className="flex items-start gap-3 rounded bg-gray-100 px-3 py-2 text-xs text-gray-700 dark:bg-slate-800 dark:text-gray-200"
+                            >
+                                <div className="mt-1 text-blue-600 dark:text-blue-400">{item.icon}</div>
+                                <div className="flex flex-col">
+                                    <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{item.label}</span>
+                                    {isEditing && item.editable ? (
+                                        <input
+                                            type={item.name === "user_password" ? "password" : "text"}
+                                            name={item.name}
+                                            value={formData[item.name] || ""}
+                                            onChange={handleInputChange}
+                                            className="rounded bg-white px-2 py-1 text-sm text-gray-800 outline-1 dark:bg-slate-700 dark:text-white"
+                                        />
+                                    ) : (
+                                        <span>{item.name === "user_password" ? "●●●●●●●●" : (item.value ?? formData[item.name] ?? "")}</span>
+                                    )}
+                                </div>
+                            </div>
+                        ),
+                    )}
                 </div>
 
+                {/* Actions */}
                 <div className="mt-6 flex justify-center gap-4">
                     {isEditing ? (
                         <>
@@ -186,18 +213,16 @@ export const ProfileModal = ({ onClose }) => {
                                 onClick={handleSave}
                                 className="flex items-center gap-2 rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
                             >
-                                <Save size={16} />
-                                Save
+                                <Save size={16} /> Save
                             </button>
                             <button
                                 onClick={() => {
                                     setIsEditing(false);
-                                    setFormData({ ...user });
+                                    setFormData(user || {});
                                 }}
                                 className="flex items-center gap-2 rounded bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
                             >
-                                <X size={16} />
-                                Cancel
+                                <X size={16} /> Cancel
                             </button>
                         </>
                     ) : (
@@ -205,8 +230,7 @@ export const ProfileModal = ({ onClose }) => {
                             onClick={() => setIsEditing(true)}
                             className="flex items-center gap-2 rounded bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700"
                         >
-                            <Pencil size={16} />
-                            Edit
+                            <Pencil size={16} /> Edit
                         </button>
                     )}
                 </div>
