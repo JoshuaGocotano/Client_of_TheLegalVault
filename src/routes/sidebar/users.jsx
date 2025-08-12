@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, UserRoundX } from "lucide-react";
 import AddUserModal from "@/components/add-users";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -210,7 +210,15 @@ const Users = () => {
                                         <img
                                             src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
                                             alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
-                                            className="h-8 w-8 rounded-full object-cover"
+                                            className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${
+                                                u.user_status === "Active"
+                                                    ? "border-green-500"
+                                                    : u.user_status === "Pending"
+                                                      ? "border-yellow-500"
+                                                      : u.user_status === "Suspended"
+                                                        ? "border-red-500"
+                                                        : "border-gray-300"
+                                            }`}
                                         />
                                         <span className="font-medium">
                                             {`${u.user_fname || ""} ${u.user_mname || ""} ${u.user_lname || ""}`.replace(/\s+/g, " ").trim()}
@@ -233,7 +241,7 @@ const Users = () => {
                                                 onClick={() => openRemoveModal(u)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <UserRoundX className="h-4 w-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -376,10 +384,14 @@ const Users = () => {
                     <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800">
                         <h2 className="mb-4 text-lg font-semibold dark:text-white">
                             {userToRemove.user_role ? userToRemove.user_role.charAt(0).toUpperCase() + userToRemove.user_role.slice(1) : "User"}{" "}
-                            Removal
+                            Suspension
                         </h2>
                         <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
-                            Are you sure you want to remove this {userToRemove.user_role ? userToRemove.user_role.toLowerCase() : "user"}?
+                            Are you sure you want to suspend{" "}
+                            <span className="font-semibold underline">
+                                {userToRemove.user_fname} {userToRemove.user_mname} {userToRemove.user_lname}
+                            </span>
+                            ?
                         </p>
                         <div className="flex justify-end gap-3">
                             <button

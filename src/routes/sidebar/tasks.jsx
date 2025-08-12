@@ -134,7 +134,7 @@ export default function Tasks() {
                 {currentTasks.map((task) => (
                     <div
                         key={task.id}
-                        className="relative rounded-lg border border-gray-200 bg-white p-4 shadow-lg dark:border-slate-700 dark:bg-slate-800"
+                        className="card"
                     >
                         <div className="absolute right-4 top-3 text-sm font-medium">
                             <span className={statusColor[task.status]}>{task.status}</span>
