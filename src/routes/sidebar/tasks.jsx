@@ -12,6 +12,7 @@ const initialTasks = [
         dueDate: "Dec 1, 2022",
         completedDate: "Nov 25, 2022",
         attachment: null,
+        prioLevel: "High",
     },
     {
         id: 2,
@@ -23,6 +24,7 @@ const initialTasks = [
         dueDate: "Apr 1, 2023",
         completedDate: null,
         attachment: null,
+        prioLevel: "Low",
     },
     {
         id: 3,
@@ -34,6 +36,7 @@ const initialTasks = [
         dueDate: "Apr 1, 2023",
         completedDate: null,
         attachment: null,
+        prioLevel: "Mid",
     },
     {
         id: 4,
@@ -45,6 +48,7 @@ const initialTasks = [
         dueDate: "May 5, 2023",
         completedDate: null,
         attachment: null,
+        prioLevel: "High",
     },
     {
         id: 5,
@@ -56,6 +60,7 @@ const initialTasks = [
         dueDate: "May 10, 2023",
         completedDate: null,
         attachment: null,
+        prioLevel: "Low",
     },
     {
         id: 6,
@@ -67,6 +72,7 @@ const initialTasks = [
         dueDate: "May 15, 2023",
         completedDate: "May 12, 2023",
         attachment: null,
+        prioLevel: "Low",
     },
     {
         id: 7,
@@ -78,6 +84,7 @@ const initialTasks = [
         dueDate: "May 20, 2023",
         completedDate: null,
         attachment: null,
+        prioLevel: "Mid",
     },
 ];
 
@@ -85,6 +92,12 @@ const statusColor = {
     Completed: "text-green-600",
     Pending: "text-red-600",
     "In Progress": "text-yellow-600",
+};
+
+const prioColor = {
+    High: "text-red-600",
+    Mid: "text-yellow-600",
+    Low: "text-gray-600",
 };
 
 //  Tab colors
@@ -134,11 +147,11 @@ export default function Tasks() {
                 {currentTasks.map((task) => (
                     <div
                         key={task.id}
-                        className="card"
+                        className="relative rounded-lg border border-gray-200 bg-white p-4 shadow hover:shadow-lg dark:border-slate-700 dark:bg-slate-800"
                     >
-                        <div className="absolute right-4 top-3 text-sm font-medium">
-                            <span className={statusColor[task.status]}>{task.status}</span>
-                        </div>
+                        <span className={`absolute right-1 top-3 rounded-full px-3 py-1 text-xs font-medium ${prioColor[task.prioLevel]}`}>
+                            {task.prioLevel}
+                        </span>
 
                         <h3 className="mb-1 font-semibold text-blue-700 dark:text-blue-400">{task.title}</h3>
                         <p className="text-sm">
@@ -152,9 +165,14 @@ export default function Tasks() {
                             <strong className="text-red-600">Due:</strong> {task.dueDate}
                             {task.status !== "Completed" && task.dueDate === "Apr 1, 2023" && <span className="ml-1 text-red-500">(Overdue)</span>}
                         </p>
-                        {task.status === "Completed" && (
+
+                        {task.status === "Completed" ? (
                             <p className="mb-2 text-sm text-green-600">
-                                <strong>Completed:</strong> {task.completedDate}
+                                <strong>Date completed:</strong> {task.completedDate}
+                            </p>
+                        ) : (
+                            <p className="mb-2 text-sm text-red-600">
+                                <strong>{task.status}</strong>
                             </p>
                         )}
 

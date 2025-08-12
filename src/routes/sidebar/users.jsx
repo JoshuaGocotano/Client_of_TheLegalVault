@@ -17,7 +17,7 @@ const Users = () => {
     const [selectedRole, setSelectedRole] = useState("All");
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
-    const [userToRemove, setUserToRemove] = useState(null);
+    const [userToSuspend, setUserToSuspend] = useState(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [userToEdit, setUserToEdit] = useState(null);
 
@@ -52,13 +52,13 @@ const Users = () => {
 
     // open/close modals
     const openRemoveModal = (u) => {
-        setUserToRemove(u);
+        setUserToSuspend(u);
         setIsRemoveModalOpen(true);
     };
 
     const closeRemoveModal = () => {
         setIsRemoveModalOpen(false);
-        setUserToRemove(null);
+        setUserToSuspend(null);
     };
 
     const openEditModal = (u) => {
@@ -71,12 +71,25 @@ const Users = () => {
         setUserToEdit(null);
     };
 
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
     // Delete user (calls API, then updates local state)
-    const confirmRemoveUser = async () => {
-        if (!userToRemove) return;
+    const confirmSuspendUser = async () => {
+        if (!userToSuspend) return;
 
         try {
-            const res = await fetch(`${API_BASE}/api/users/${userToRemove.user_id}`, {
+            const res = await fetch(`${API_BASE}/api/users/${userToSuspend.user_id}`, {
                 method: "DELETE",
                 credentials: "include",
             });
@@ -87,7 +100,7 @@ const Users = () => {
                 return;
             }
 
-            setUsers((prev) => prev.filter((u) => u.user_id !== userToRemove.user_id));
+            setUsers((prev) => prev.filter((u) => u.user_id !== userToSuspend.user_id));
             closeRemoveModal();
         } catch (err) {
             console.error("Error deleting user:", err);
@@ -194,8 +207,8 @@ const Users = () => {
                             <th className="px-4 py-3">Email</th>
                             <th className="px-4 py-3">Phone</th>
                             <th className="px-4 py-3">Role</th>
+                            <th className="px-4 py-3">Date Created</th>
                             <th className="px-4 py-3">Status</th>
-                            <th className="px-4 py-3">Branch</th>
                             <th className="px-4 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -227,8 +240,20 @@ const Users = () => {
                                     <td className="px-4 py-3">{u.user_email}</td>
                                     <td className="px-4 py-3">{u.user_phonenum}</td>
                                     <td className="px-4 py-3 capitalize">{u.user_role}</td>
-                                    <td className="px-4 py-3 capitalize">{u.user_status}</td>
-                                    <td className="px-4 py-3 capitalize">{u.branch_id}</td>
+                                    <td className="px-4 py-3 capitalize">{formatDateTime(u.user_date_created)}</td>
+                                    <td
+                                        className={`px-4 py-3 capitalize ${
+                                            u.user_status === "Active"
+                                                ? "bg-green-500"
+                                                : u.user_status === "Pending"
+                                                  ? "bg-yellow-500"
+                                                  : u.user_status === "Suspended"
+                                                    ? "bg-red-500"
+                                                    : "bg-gray-300"
+                                        }`}
+                                    >
+                                        {u.user_status}
+                                    </td>
                                     <td className="px-4 py-3 text-right">
                                         <div className="flex justify-end gap-2">
                                             <button
@@ -333,7 +358,8 @@ const Users = () => {
                                 />
                             </div>
 
-                            {/* <div>
+                            {/* Commenting this out for now for future development */}
+                            {/* <div> 
                                 <label className="text-sm font-medium dark:text-white">Role</label>
                                 <select
                                     value={userToEdit.user_role || ""}
@@ -381,17 +407,17 @@ const Users = () => {
             )}
 
             {/* Remove User Modal */}
-            {isRemoveModalOpen && userToRemove && (
+            {isRemoveModalOpen && userToSuspend && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="relative w-full max-w-sm rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800">
                         <h2 className="mb-4 text-lg font-semibold dark:text-white">
-                            {userToRemove.user_role ? userToRemove.user_role.charAt(0).toUpperCase() + userToRemove.user_role.slice(1) : "User"}{" "}
+                            {userToSuspend.user_role ? userToSuspend.user_role.charAt(0).toUpperCase() + userToSuspend.user_role.slice(1) : "User"}{" "}
                             Suspension
                         </h2>
                         <p className="mb-6 text-sm text-gray-600 dark:text-gray-300">
                             Are you sure you want to suspend{" "}
                             <span className="font-semibold underline">
-                                {userToRemove.user_fname} {userToRemove.user_mname} {userToRemove.user_lname}
+                                {userToSuspend.user_fname} {userToSuspend.user_mname} {userToSuspend.user_lname}
                             </span>
                             ?
                         </p>
@@ -403,10 +429,10 @@ const Users = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={confirmRemoveUser}
+                                onClick={confirmSuspendUser}
                                 className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
                             >
-                                Remove
+                                Suspend
                             </button>
                         </div>
 
