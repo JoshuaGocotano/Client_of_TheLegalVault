@@ -13,8 +13,6 @@ import ForgotPassword from "./auth/forgotpass";
 import Registration from "./components/registration";
 import { ChangePass } from "./auth/changepass";
 
-// Testing this change to see if this github acc can push to the repo
-
 // sidebar items
 import Cases from "./routes/sidebar/cases";
 import Documents from "./routes/sidebar/documents";
