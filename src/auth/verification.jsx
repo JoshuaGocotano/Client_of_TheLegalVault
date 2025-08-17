@@ -91,6 +91,8 @@ export default function Verify() {
 
         const code = otp.join("");
 
+        const toastId = toast.loading("Logging in...");
+
         try {
             const res = await fetch("http://localhost:3000/api/verify-2fa", {
                 method: "POST",
@@ -109,7 +111,8 @@ export default function Verify() {
 
             login(data.user);
             toast.success("Login successful!", {
-                duration: 5000,
+                id: toastId,
+                duration: 4000,
             });
 
             localStorage.removeItem("pendingUserId");

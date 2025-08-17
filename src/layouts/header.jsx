@@ -24,10 +24,15 @@ export const Header = ({ collapsed, setCollapsed }) => {
     });
 
     const handleLogout = async () => {
+        const toastId = toast.loading("Logging Out...");
+
         const confirmLogout = window.confirm("Are you sure you want to logout?");
         if (confirmLogout) {
             await logout();
-            toast.success("Successful logout!");
+            toast.success("Logout successful!", {
+                id: toastId,
+                duration: 4000,
+            });
         }
     };
 

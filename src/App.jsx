@@ -11,7 +11,6 @@ import Login from "./auth/login";
 import Verify from "./auth/verification"; // 2FA
 import ForgotPassword from "./auth/forgotpass";
 import Registration from "./components/registration";
-import { ChangePass } from "./auth/changepass";
 
 // sidebar items
 import Cases from "./routes/sidebar/cases";
@@ -26,6 +25,7 @@ import Notifications from "./components/notifications";
 import NotificationSettings from "./components/notif-settings";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 import ClientContact from "./components/client-contacts";
+import ChangePass from "./auth/changepass";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -46,10 +46,6 @@ export default function App() {
             element: <ChangePass />,
         },
         {
-            path: "/register",
-            element: <Registration />,
-        },
-        {
             path: "/unauthorized",
             element: <UnauthorizedAccess />,
         },
@@ -67,6 +63,10 @@ export default function App() {
                         { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
+                        {
+                            path: "register",
+                            element: <Registration />,
+                        },
                         { path: "reports", element: <Reports /> },
                         { path: "user-logs", element: <UserLogs /> },
                         { path: "case-archive", element: <Archives /> },
