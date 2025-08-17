@@ -177,6 +177,7 @@ const Users = () => {
                 user_phonenum: userToEdit.user_phonenum,
                 user_role: userToEdit.user_role,
                 user_status: userToEdit.user_status,
+                branch_id: userToEdit.branch_id,
             };
 
             const res = await fetch(`${API_BASE}/api/users/${userToEdit.user_id}`, {

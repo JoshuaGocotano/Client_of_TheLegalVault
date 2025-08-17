@@ -52,8 +52,6 @@ const AddUser = ({ onClose }) => {
                                     className="hidden"
                                 />
                             </label>
-
-                            {profileImage && <p className="text-xs text-gray-500 dark:text-gray-400">File uploaded</p>}
                         </div>
                     </div>
 

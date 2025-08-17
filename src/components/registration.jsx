@@ -3,6 +3,7 @@ import boslogo from "@/assets/boslogo_white.png";
 import { Mail, Lock, Eye, EyeOff, User, Phone, Briefcase, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -48,6 +49,7 @@ const Register = () => {
     }, []);
 
     const handleRegistration = async (e) => {
+        const toastId = toast.loading("Adding new user...");
         e.preventDefault();
 
         const formData = new FormData();
@@ -73,8 +75,13 @@ const Register = () => {
             });
 
             const data = await res.json();
+
             if (res.ok) {
                 setMessage("✅ User successfully registered.");
+                toast.success("User successfully added!", {
+                    id: toastId,
+                    duration: 4000,
+                });
 
                 setFName("");
                 setMName("");
