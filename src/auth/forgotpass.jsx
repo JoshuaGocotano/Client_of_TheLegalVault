@@ -2,16 +2,48 @@ import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
 import { Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
+import Spinner from "@/components/loading";
 
 export default function ForgotPassword() {
     const [email, setEmail] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [message, setMessage] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    // Handle form submit
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: Call backend to initiate password reset
-        alert(`Password reset link sent to ${email}`);
-        navigate("/change-password");
+        setLoading(true);
+        setError("");
+        setMessage("");
+        try {
+            const res = await fetch("http://localhost:3000/api/forgot-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setError(data.error || "Failed to send reset link.");
+            } else {
+                setMessage(`A reset link has been sent to ${email}`);
+
+                const toastId = toast.loading("Sending reset link...", {
+                    duration: 4000,
+                });
+
+                toast.success("Reset link sent successfully!", {
+                    id: toastId,
+                    duration: 4000,
+                });
+                setEmail("");
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+        }
+        setLoading(false);
     };
 
     return (
@@ -34,6 +66,9 @@ export default function ForgotPassword() {
                     <h2 className="mb-2 text-center text-3xl font-bold md:text-left">Forgot Password</h2>
                     <p className="mb-6 text-center text-sm text-blue-200 md:text-left">Enter your email address to receive a password reset link.</p>
 
+                    {error && <div className="mb-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-red-600 shadow">{error}</div>}
+                    {message && <div className="mb-4 rounded-md bg-green-100 px-4 py-2 text-sm font-medium text-green-700 shadow">{message}</div>}
+
                     <form
                         className="space-y-6"
                         onSubmit={handleSubmit}
@@ -52,9 +87,17 @@ export default function ForgotPassword() {
 
                         <button
                             type="submit"
-                            className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
+                            className="flex w-full items-center justify-center rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                            disabled={loading}
                         >
-                            Send Reset Link
+                            {loading ? (
+                                <>
+                                    Sending...
+                                    <Spinner />
+                                </>
+                            ) : (
+                                "Send Reset Link"
+                            )}
                         </button>
 
                         <div className="mt-2 text-center text-sm text-blue-200">

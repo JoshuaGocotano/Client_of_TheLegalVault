@@ -1,4 +1,4 @@
-import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText } from "lucide-react";
+import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText, Wallet } from "lucide-react";
 
 const allNavbarLinks = [
     { label: "Home", icon: Home, path: "/" },
@@ -10,6 +10,7 @@ const allNavbarLinks = [
     { label: "Reports", icon: ChartColumn, path: "/reports" },
     { label: "Logs", icon: Logs, path: "/user-logs" },
     { label: "Case Archive", icon: Archive, path: "/case-archive" },
+    { label: "Payments", icon: Wallet, path: "/payments" },
 ];
 
 // 🔧 Export a function to get filtered links based on role

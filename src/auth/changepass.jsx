@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import boslogo from "@/assets/light_logo.png";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import Spinner from "@/components/loading";
+import toast from "react-hot-toast";
 
 export default function ChangePass() {
     const [newPassword, setNewPassword] = useState("");
@@ -12,11 +14,19 @@ export default function ChangePass() {
     const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
 
+    const navigate = useNavigate();
+
+    const { token } = useParams();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
         setSuccess("");
 
+        if (!token) {
+            setError("Invalid or missing reset token.");
+            return;
+        }
         if (newPassword.length < 6) {
             setError("Password must be at least 6 characters.");
             return;
@@ -27,13 +37,41 @@ export default function ChangePass() {
         }
 
         setLoading(true);
-        // TODO: Integrate with backend
-        setTimeout(() => {
-            setLoading(false);
-            setSuccess("Password changed successfully! (UI only)");
-            setNewPassword("");
-            setConfirmPassword("");
-        }, 1200);
+
+        try {
+            const res = await fetch("http://localhost:3000/api/reset-password", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ token, newPassword }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setError(data.error || "Failed to reset password.");
+            } else {
+                setSuccess("Password changed successfully! You may now log in.");
+
+                const toastId = toast.loading("Changing password...", {
+                    duration: 4000,
+                });
+
+                toast.success("Password changed successfully!", {
+                    id: toastId,
+                    duration: 4000,
+                });
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 4000);
+
+                setNewPassword("");
+                setConfirmPassword("");
+            }
+        } catch (err) {
+            setError("Something went wrong. Please try again.");
+        }
+        setLoading(false);
     };
 
     return (
@@ -108,11 +146,11 @@ export default function ChangePass() {
                         >
                             {loading ? (
                                 <>
-                                    Changing...
+                                    Resetting...
                                     <Spinner />
                                 </>
                             ) : (
-                                "Change Password"
+                                "Reset Password"
                             )}
                         </button>
                     </form>

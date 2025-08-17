@@ -43,19 +43,23 @@ const DashboardPage = () => {
                 <p className="dark:text-slate-300">Welcome back {user.user_fname}! Here's your overview.</p>
 
                 {/* first row */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div
+                    className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-3"}`}
+                >
                     {/* Total Cases */}
-                    <div className="card">
-                        <div className="card-header">
-                            <p className="card-title">Users</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <ShieldUser size={26} />
+                    {user.user_role === "Admin" && (
+                        <div className="card">
+                            <div className="card-header">
+                                <p className="card-title">Users</p>
+                                <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                                    <ShieldUser size={26} />
+                                </div>
+                            </div>
+                            <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
+                                <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">32</p>
                             </div>
                         </div>
-                        <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">32</p>
-                        </div>
-                    </div>
+                    )}
 
                     {/* Total Archived Cases */}
                     <div className="card">

@@ -26,6 +26,7 @@ import NotificationSettings from "./components/notif-settings";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 import ClientContact from "./components/client-contacts";
 import ChangePass from "./auth/changepass";
+import { Payments } from "./routes/sidebar/payments";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -42,7 +43,7 @@ export default function App() {
             element: <Verify />,
         },
         {
-            path: "/change-password",
+            path: "/change-password/:token",
             element: <ChangePass />,
         },
         {
@@ -72,6 +73,7 @@ export default function App() {
                         { path: "case-archive", element: <Archives /> },
                         { path: "notifications", element: <Notifications /> },
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
+                        { path: "payments", element: <Payments /> },
                     ],
                 },
             ],
