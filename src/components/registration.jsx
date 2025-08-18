@@ -209,6 +209,7 @@ const Register = () => {
                             className="w-full rounded-md border border-blue-300 px-4 py-2 pl-10 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                         >
+                            <option value="Staff">Staff</option>
                             <option value="Paralegal">Paralegal</option>
                             <option value="Lawyer">Lawyer</option>
                             <option value="Admin">Admin</option>
