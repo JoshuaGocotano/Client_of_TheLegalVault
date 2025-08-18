@@ -56,17 +56,17 @@ const AddUser = ({ onClose }) => {
         const toastId = toast.loading("Adding new user...");
 
         const formData = new FormData();
-        formData.append("first_name", user_fname);
-        formData.append("middle_name", user_mname);
-        formData.append("last_name", user_lname);
-        formData.append("email", user_email);
-        formData.append("password", user_password);
-        formData.append("phone_number", user_phonenum);
-        formData.append("role", user_role);
+        formData.append("user_email", user_email);
+        formData.append("user_password", user_password);
+        formData.append("user_fname", user_fname);
+        formData.append("user_mname", user_mname);
+        formData.append("user_lname", user_lname);
+        formData.append("user_phonenum", user_phonenum);
+        formData.append("user_role", user_role);
         formData.append("branch_id", branch_id);
         formData.append("created_by", user?.user_id);
         if (user_profile) {
-            formData.append("profile_picture", user_profile);
+            formData.append("user_profile", user_profile);
         }
 
         try {
@@ -94,22 +94,19 @@ const AddUser = ({ onClose }) => {
                 setBranchId("");
                 setProfile(null);
                 setPreview(null);
+
+                onClose();
             } else {
                 console.error("Failed to add user:", data);
-                setError(data.error || "❌ Registration failed.");
+                setError(data.error || "Fail adding user");
                 toast.error(data.error || "Failed to add user.", {
                     id: toastId,
                     duration: 4000,
                 });
             }
-
-            onClose();
         } catch (err) {
             console.error("Error adding user:", err);
             setError(err.message || "Something went wrong. Please try again.");
-            toast.error("Failed to add user.", {
-                duration: 4000,
-            });
         }
     };
 
