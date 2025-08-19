@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useRef } from "react";
 import PropTypes from "prop-types";
-import { Mail, Phone, UserCheck, Building2, Pencil, Save, X, User, LockIcon, Clock } from "lucide-react";
+import { Mail, Phone, UserCheck, Building2, Pencil, Save, X, User, LockIcon, Clock, Image } from "lucide-react";
 import toast from "react-hot-toast";
+import default_avatar from "@/assets/default-avatar.png";
 
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 
 export const ProfileModal = ({ onClose }) => {
     const { user, setUser } = useAuth();
+
+    const [preview, setPreview] = useState(user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar);
+    const [newProfile, setNewProfile] = useState(null); // for file upload
 
     const [formData, setFormData] = useState(user || {});
     const [isEditing, setIsEditing] = useState(false);
@@ -73,15 +77,32 @@ export const ProfileModal = ({ onClose }) => {
     };
 
     const handleSave = async () => {
-        try {
-            const res = await fetch(`http://localhost:3000/api/users/${user.user_id}`, {
-                method: "PUT",
-                credentials: "include",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData),
-            });
+        const toastId = toast.loading("Updating profile...");
 
-            if (!res.ok) throw new Error("Failed to update user");
+        try {
+            let response;
+            if (newProfile) {
+                const form = new FormData();
+                Object.entries(formData).forEach(([key, value]) => {
+                    form.append(key, value);
+                });
+                form.append("user_profile", newProfile);
+
+                response = await fetch(`http://localhost:3000/api/users/${user.user_id}`, {
+                    method: "PUT",
+                    credentials: "include",
+                    body: form,
+                });
+            } else {
+                response = await fetch(`http://localhost:3000/api/users/${user.user_id}`, {
+                    method: "PUT",
+                    credentials: "include",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(formData),
+                });
+            }
+
+            if (!response.ok) throw new Error("Failed to update user");
 
             const verifyRes = await fetch("http://localhost:3000/api/verify", {
                 credentials: "include",
@@ -90,7 +111,7 @@ export const ProfileModal = ({ onClose }) => {
             const { user: updatedUser } = await verifyRes.json();
             setUser(updatedUser);
 
-            toast.success("Profile updated successfully.", { duration: 4000 });
+            toast.success("Profile updated successfully.", { id: toastId, duration: 4000 });
             setIsEditing(false);
         } catch (err) {
             console.error(err);
@@ -138,11 +159,38 @@ export const ProfileModal = ({ onClose }) => {
 
                 {/* Profile Header */}
                 <div className="flex flex-col items-center">
-                    <img
-                        src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : "/default-avatar.png"}
-                        alt="Profile"
-                        className={`mb-3 h-32 w-32 rounded-full object-cover p-1 outline outline-4 ${outlineColor}`}
-                    />
+                    {isEditing ? (
+                        <div className="mb-3 flex flex-col items-center">
+                            <img
+                                src={preview}
+                                alt="Preview"
+                                className={`mb-3 h-32 w-32 rounded-full object-cover p-1 outline outline-4 ${outlineColor}`}
+                            />
+                            <label className="text-gray flex cursor-pointer items-center gap-2 hover:underline">
+                                <Image className="h-4 w-4 dark:text-slate-200" />
+                                <span className="text-xs dark:text-slate-200 dark:hover:underline">Upload new profile</span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            setNewProfile(file);
+                                            setPreview(URL.createObjectURL(file));
+                                        }
+                                    }}
+                                    className="hidden"
+                                />
+                            </label>
+                        </div>
+                    ) : (
+                        <img
+                            src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar}
+                            alt="Profile"
+                            className={`mb-3 h-32 w-32 rounded-full object-cover p-1 outline outline-4 ${outlineColor}`}
+                        />
+                    )}
+
                     <h2 className="text-center text-lg font-bold text-gray-800 dark:text-white">
                         {[formData.user_fname, formData.user_mname, formData.user_lname].filter(Boolean).join(" ")}
                     </h2>
@@ -219,6 +267,7 @@ export const ProfileModal = ({ onClose }) => {
                                 onClick={() => {
                                     setIsEditing(false);
                                     setFormData(user || {});
+                                    setPreview(user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar);
                                 }}
                                 className="flex items-center gap-2 rounded bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:bg-gray-500"
                             >

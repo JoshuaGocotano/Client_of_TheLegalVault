@@ -4,6 +4,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
+import default_avatar from "@/assets/default-avatar.png";
 
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -99,7 +100,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     >
                         <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
                         <img
-                            src={`http://localhost:3000${user.user_profile}`}
+                            src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar}
                             alt="profile"
                             className="h-11 w-11 rounded-full object-cover outline outline-2 outline-gray-200 dark:outline-gray-500"
                         />

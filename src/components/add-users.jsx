@@ -137,9 +137,9 @@ const AddUser = ({ onClose }) => {
                                 </div>
                             )}
 
-                            <label className="flex cursor-pointer items-center gap-2 text-sm text-blue-600 hover:underline">
-                                <Image className="h-4 w-4" />
-                                <span>Upload Profile Picture</span>
+                            <label className="flex cursor-pointer items-center gap-2 hover:underline">
+                                <Image className="h-4 w-4 dark:text-slate-200" />
+                                <span className="text-xs dark:text-slate-200 dark:hover:underline">Upload Profile Picture</span>
                                 <input
                                     type="file"
                                     accept="image/*"

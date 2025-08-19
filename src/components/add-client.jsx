@@ -63,7 +63,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                     credentials: "include",
                     body: JSON.stringify({
                         ...contact,
-                        client_id: newClient.client_id, // set correct relation
+                        client_id: newClient.client_id, 
                     }),
                 });
 
