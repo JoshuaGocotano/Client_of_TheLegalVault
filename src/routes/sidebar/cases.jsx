@@ -116,13 +116,12 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = data.filter((item) => {
-        return (
+    const filteredCases = data.filter(
+        (item) =>
             item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.client.toLowerCase().includes(search.toLowerCase()) ||
-            item.category.toLowerCase().includes(search.toLowerCase())
-        );
-    });
+            item.category.toLowerCase().includes(search.toLowerCase()),
+    );
 
     return (
         <div className="mx-auto">

@@ -110,7 +110,7 @@ const Client = () => {
             client.client_phonenum.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_date_created.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            getUserFullName(client.created_by).includes(searchTerm),
+            getUserFullName(client.created_by).toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
