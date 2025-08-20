@@ -124,6 +124,16 @@ const Cases = () => {
             formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
     );
 
+    // get the full name of the assigned lawyer
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = tableData.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                  .replace(/\s+/g, " ")
+                  .trim()
+            : "Unassigned";
+    };
+
     return (
         <div className="mx-auto">
             <div className="mb-6">
@@ -140,7 +150,7 @@ const Cases = () => {
                     />
                     <input
                         type="text"
-                        placeholder="Search by case name, client, date filed, status or lawyer..."
+                        placeholder="Search cases by name, client, date filed, status or lawyer..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
@@ -194,7 +204,7 @@ const Cases = () => {
                                             {cases.case_status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{cases?.user_fname ?? "To be assigned"}</td>
+                                    <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {

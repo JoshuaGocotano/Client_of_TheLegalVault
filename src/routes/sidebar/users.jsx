@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Pencil, UserRoundX, UserRoundPlus } from "lucide-react";
+import { Pencil, UserRoundX, UserRoundPlus, Search } from "lucide-react";
 import AddUserModal from "@/components/add-users";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -244,14 +244,22 @@ const Users = () => {
 
             {/* Search & Add Button */}
             <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
-                <input
-                    type="text"
-                    placeholder="Search by user name, email, phone, role or status..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-4 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600 md:flex-1"
-                />
+                {/* Search input with icon inside */}
+                <div className="relative w-full md:flex-1">
+                    <Search
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search by user name, email, phone, role or status..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="focus:ring-0.5 h-10 w-full rounded-md border border-slate-300 bg-white pl-10 pr-4 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
+                    />
+                </div>
 
+                {/* Add user button */}
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"

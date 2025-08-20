@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity } from "lucide-react";
+import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
@@ -96,19 +96,27 @@ const Userlogs = () => {
 
             {/* Filter Section */}
             <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-900">
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="input flex-grow bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 focus:border-blue-600 dark:text-slate-50"
-                />
+                {/* Search input with icon */}
+                <div className="relative flex-grow">
+                    <Search
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search logs..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="focus:ring-0.5 h-10 w-full rounded-md border border-slate-300 bg-transparent pl-10 pr-3 text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-600 dark:border-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
+                    />
+                </div>
 
+                {/* Date input */}
                 <input
                     type="date"
                     value={selectedDate}
                     onChange={(e) => setSelectedDate(e.target.value)}
-                    className="input w-[150px] bg-transparent px-2 py-1 text-sm text-slate-900 outline-0 placeholder:text-slate-500 focus:border-blue-600 dark:text-slate-50"
+                    className="focus:ring-0.5 h-10 w-[150px] rounded-md border border-slate-300 bg-transparent px-2 py-1 text-sm text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-600 dark:border-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
                 />
             </div>
 

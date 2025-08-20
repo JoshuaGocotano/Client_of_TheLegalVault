@@ -52,8 +52,8 @@ const Documents = () => {
             {/* Header */}
             <div className="flex flex-col items-start justify-between md:flex-row md:items-center">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Documents</h1>
-                    <p className="text-sm text-gray-500">Manage and organize case-related documents</p>
+                    <h1 className="title">Documents</h1>
+                    <p className="text-sm dark:text-slate-300">Manage and organize case-related documents</p>
                 </div>
                 <div className="mt-4 flex gap-2 md:mt-0">
                     <button
@@ -66,8 +66,8 @@ const Documents = () => {
             </div>
 
             {/* Search Input */}
-            <div className="card p-3 shadow-md">
-                <div className="flex items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 dark:border-slate-600">
+            <div className="card shadow-md">
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
                     <Search
                         size={18}
                         className="text-gray-600 dark:text-gray-400"
@@ -75,7 +75,7 @@ const Documents = () => {
                     <input
                         type="text"
                         placeholder="Search documents by name, type, or case..."
-                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                        className="focus:ring-0.5 w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
