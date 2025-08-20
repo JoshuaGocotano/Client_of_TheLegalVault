@@ -363,8 +363,8 @@ const Users = () => {
                         ) : (
                             <tr>
                                 <td
-                                    colSpan={5}
-                                    className="py-6 text-center text-gray-400"
+                                    colSpan={7}
+                                    className="py-6 text-center text-slate-500 dark:text-slate-400"
                                 >
                                     No users found.
                                 </td>

@@ -109,7 +109,7 @@ const Client = () => {
             client.client_email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_phonenum.toLowerCase().includes(searchTerm.toLowerCase()) ||
             client.client_date_created.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            client.client_st6atus.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            client.client_status.toLowerCase().includes(searchTerm.toLowerCase()) ||
             getUserFullName(client.created_by).includes(searchTerm),
     );
 
@@ -501,7 +501,7 @@ const Client = () => {
                             </button>
                             <button
                                 onClick={() => handleClientInfoUpdate(editClient)}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-white text-sm hover:bg-blue-700"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                             >
                                 Save
                             </button>
