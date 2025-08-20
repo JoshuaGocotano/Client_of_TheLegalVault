@@ -223,13 +223,13 @@ const Cases = () => {
                                             </button>
                                             <button
                                                 className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => alert(`Editing ${cases.name}`)}
+                                                onClick={() => alert(`Editing ${cases.ct_name} of ${cases.client_fullname}`)}
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Deleting ${cases.name}`)}
+                                                onClick={() => alert(`Deleting the case of ${cases.client_fullname}`)}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </button>

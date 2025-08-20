@@ -44,10 +44,10 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                 </button>
                 <div className="mb-6 flex items-center justify-between">
                     <div>
-                        <h2 className="text-2xl font-semibold">Case {selectedCase.id}</h2>
+                        <h2 className="text-2xl font-semibold">Case {selectedCase.case_id}</h2>
                         <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
-                            <span>Cabinet #: 001</span>
-                            <span>Drawer #: 002</span>
+                            <span>Cabinet #: {selectedCase.case_cabinet}</span>
+                            <span>Drawer #: {selectedCase.case_drawer}</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-1 text-sm text-slate-400 dark:text-white">
