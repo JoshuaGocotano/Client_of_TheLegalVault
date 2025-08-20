@@ -4,39 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
-const InitialData = [
-    {
-        id: 1,
-        name: "Davis Incorporation",
-        client: "Davis Corp",
-        date_filed: "Aug 11, 2025",
-        status: "Pending",
-        lawyer: "Sarah Wilson",
-        balance: "P 40,000.00",
-        fee: "P 50,000.00",
-    },
-    {
-        id: 2,
-        name: "Smith vs. Henderson",
-        client: "John Smith",
-        date_filed: "Jul 22, 2025",
-        status: "Processing",
-        lawyer: "John Cooper",
-        balance: "P 0.00",
-        fee: "P 10,000.00",
-    },
-    {
-        id: 3,
-        name: "Davis Incorporation",
-        client: "Davis Corp",
-        date_filed: "Feb 25, 2025",
-        status: "Completed",
-        lawyer: "Emma Thompson",
-        balance: "P 2,500.00",
-        fee: "P 12,500.00",
-    },
-];
-
 const getStatusColor = (status) => {
     switch (status) {
         case "Pending":
@@ -52,11 +19,43 @@ const getStatusColor = (status) => {
 
 const Cases = () => {
     const [search, setSearch] = useState("");
-    const [data, setData] = useState(InitialData);
+    const [tableData, setTableData] = useState([]);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
     const addCaseModalRef = useRef();
     const navigate = useNavigate();
+
+    // Fetch cases data from API
+    useEffect(() => {
+        const fetchCases = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/cases");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch cases");
+                }
+                const data = await response.json();
+                setTableData(data);
+            } catch (error) {
+                console.error("Error fetching cases:", error);
+                alert("Failed to load cases. Please try again later.");
+            }
+        };
+        fetchCases();
+    }, []);
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
 
     const [newCase, setNewCase] = useState({
         id: "",
@@ -116,11 +115,11 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = data.filter(
+    const filteredCases = tableData.filter(
         (item) =>
-            item.name.toLowerCase().includes(search.toLowerCase()) ||
-            item.client.toLowerCase().includes(search.toLowerCase()) ||
-            item.category.toLowerCase().includes(search.toLowerCase()),
+            item.ct_name.toLowerCase().includes(search.toLowerCase()) ||
+            item.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
+            item.date_filed.toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
@@ -173,39 +172,39 @@ const Cases = () => {
                     </thead>
                     <tbody className="text-slate-950 dark:text-white">
                         {filteredCases.length > 0 ? (
-                            filteredCases.map((item) => (
+                            filteredCases.map((cases) => (
                                 <tr
-                                    key={item.id}
+                                    key={cases.id}
                                     className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
-                                    <td className="px-4 py-3">C{item.id}</td>
-                                    <td className="px-4 py-3">{item.name}</td>
-                                    <td className="px-4 py-3">{item.client}</td>
-                                    <td className="px-4 py-3">{item.date_filed}</td>
+                                    <td className="px-4 py-3">{cases.case_id}</td>
+                                    <td className="px-4 py-3">{cases.ct_name}</td>
+                                    <td className="px-4 py-3">{cases.client_fullname}</td>
+                                    <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(item.status)}`}>
-                                            {item.status}
+                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(cases.status)}`}>
+                                            {cases.status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{item.lawyer}</td>
-                                    <td className="px-4 py-3">{item.balance}</td>
+                                    <td className="px-4 py-3">{cases.lawyer}</td>
+                                    <td className="px-4 py-3">{cases.balance}</td>
                                     <td className="px-4 py-3">
                                         <div className="flex flex-wrap items-center gap-1">
                                             <button
                                                 className="p-1.5 text-blue-600 hover:text-blue-800"
-                                                onClick={() => setSelectedCase(item)}
+                                                onClick={() => setSelectedCase(cases)}
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => alert(`Editing ${item.name}`)}
+                                                onClick={() => alert(`Editing ${cases.name}`)}
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Deleting ${item.name}`)}
+                                                onClick={() => alert(`Deleting ${cases.name}`)}
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </button>

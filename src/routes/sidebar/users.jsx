@@ -79,9 +79,6 @@ const Users = () => {
             month: "long",
             day: "numeric",
             year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
         });
     };
 
@@ -304,8 +301,8 @@ const Users = () => {
                                     </td>
                                     <td className="px-4 py-3">{u.user_email}</td>
                                     <td className="px-4 py-3">{u.user_phonenum}</td>
-                                    <td className="px-4 py-3 capitalize">{u.user_role}</td>
-                                    <td className="px-4 py-3 capitalize">{formatDateTime(u.user_date_created)}</td>
+                                    <td className="px-4 py-3">{u.user_role}</td>
+                                    <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
                                     <td className="px-4 py-3">
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
