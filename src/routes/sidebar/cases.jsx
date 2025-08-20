@@ -124,7 +124,7 @@ const Cases = () => {
             formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
     );
 
-    // get the full name of the assigned lawyer
+    // get the full name of the (assigned) lawyer
     const getLawyerFullName = (lawyerId) => {
         const lawyer = tableData.find((u) => u.user_id === lawyerId);
         return lawyer
