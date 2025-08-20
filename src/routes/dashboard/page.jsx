@@ -102,7 +102,7 @@ const DashboardPage = () => {
                 </div>
 
                 {/* second row */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
                     {/* Total Clients */}
                     <div className="card">
                         <div className="card-header">
@@ -116,7 +116,7 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Total Archived Documents */}
+                    {/* Total Archived Documents
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Archived Documents</p>
@@ -127,7 +127,7 @@ const DashboardPage = () => {
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
                             <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">723</p>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Total Pending Approvals */}
                     <div className="card">
