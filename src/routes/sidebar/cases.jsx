@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
@@ -116,10 +116,12 @@ const Cases = () => {
     };
 
     const filteredCases = tableData.filter(
-        (item) =>
-            item.ct_name.toLowerCase().includes(search.toLowerCase()) ||
-            item.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
-            item.date_filed.toLowerCase().includes(search.toLowerCase()),
+        (cases) =>
+            cases.case_id.toString().includes(search) ||
+            cases.ct_name.toLowerCase().includes(search.toLowerCase()) ||
+            cases.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
+            cases.case_status.toLowerCase().includes(search.toLowerCase()) ||
+            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
@@ -131,13 +133,19 @@ const Cases = () => {
 
             {/* Search and Buttons */}
             <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
-                <input
-                    type="text"
-                    placeholder="Search by case name, client, or category..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
-                />
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search
+                        size={18}
+                        className="text-gray-600 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search by case name, client, date filed, status or lawyer..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                    />
+                </div>
 
                 <div className="flex flex-shrink-0 gap-2 whitespace-nowrap">
                     <button
@@ -182,12 +190,19 @@ const Cases = () => {
                                     <td className="px-4 py-3">{cases.client_fullname}</td>
                                     <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(cases.status)}`}>
-                                            {cases.status}
+                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(cases.case_status)}`}>
+                                            {cases.case_status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{cases.lawyer}</td>
-                                    <td className="px-4 py-3">{cases.balance}</td>
+                                    <td className="px-4 py-3">{cases?.user_fname ?? "To be assigned"}</td>
+                                    <td className="px-4 py-3">
+                                        {cases?.case_balance !== null && cases?.case_balance !== undefined
+                                            ? new Intl.NumberFormat("en-PH", {
+                                                  style: "currency",
+                                                  currency: "PHP",
+                                              }).format(Number(cases.case_balance))
+                                            : "₱0.00"}
+                                    </td>
                                     <td className="px-4 py-3">
                                         <div className="flex flex-wrap items-center gap-1">
                                             <button
