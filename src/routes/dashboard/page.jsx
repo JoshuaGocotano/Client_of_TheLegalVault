@@ -102,7 +102,9 @@ const DashboardPage = () => {
                 </div>
 
                 {/* second row */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                <div
+                    className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3" : "lg:grid-cols-3 xl:grid-cols-3"}`}
+                >
                     {/* Total Clients */}
                     <div className="card">
                         <div className="card-header">

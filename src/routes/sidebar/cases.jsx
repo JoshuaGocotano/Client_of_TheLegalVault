@@ -9,7 +9,7 @@ const InitialData = [
         id: 1,
         name: "Davis Incorporation",
         client: "Davis Corp",
-        category: "Corporate",
+        date_filed: "Aug 11, 2025",
         status: "Pending",
         lawyer: "Sarah Wilson",
         balance: "P 40,000.00",
@@ -19,7 +19,7 @@ const InitialData = [
         id: 2,
         name: "Smith vs. Henderson",
         client: "John Smith",
-        category: "Property",
+        date_filed: "Jul 22, 2025",
         status: "Processing",
         lawyer: "John Cooper",
         balance: "P 0.00",
@@ -29,7 +29,7 @@ const InitialData = [
         id: 3,
         name: "Davis Incorporation",
         client: "Davis Corp",
-        category: "Corporate",
+        date_filed: "Feb 25, 2025",
         status: "Completed",
         lawyer: "Emma Thompson",
         balance: "P 2,500.00",
@@ -165,7 +165,7 @@ const Cases = () => {
                             <th className="px-4 py-3">Case ID</th>
                             <th className="px-4 py-3">Name</th>
                             <th className="px-4 py-3">Client</th>
-                            <th className="px-4 py-3">Category</th>
+                            <th className="px-4 py-3">Date Filed</th>
                             <th className="px-4 py-3">Status</th>
                             <th className="px-4 py-3">Lawyer</th>
                             <th className="px-4 py-3">Balance</th>
@@ -182,7 +182,7 @@ const Cases = () => {
                                     <td className="px-4 py-3">C{item.id}</td>
                                     <td className="px-4 py-3">{item.name}</td>
                                     <td className="px-4 py-3">{item.client}</td>
-                                    <td className="px-4 py-3">{item.category}</td>
+                                    <td className="px-4 py-3">{item.date_filed}</td>
                                     <td className="px-4 py-3">
                                         <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(item.status)}`}>
                                             {item.status}
