@@ -31,6 +31,7 @@ const Userlogs = () => {
                 setUserLogs(data);
             } catch (error) {
                 console.error("Failed to fetch user logs:", error);
+                setError(error.message || "An error occurred while fetching logs.");
             }
         };
 
@@ -82,9 +83,9 @@ const Userlogs = () => {
     return (
         <div className="min-h-screen">
             {error && (
-                <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
+                <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
                     <div>
-                        <span>{error.message}</span>
+                        <span>{error}</span>
                     </div>
                 </div>
             )}

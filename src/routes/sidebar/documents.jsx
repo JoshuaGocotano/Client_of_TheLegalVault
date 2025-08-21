@@ -14,6 +14,7 @@ const initialDocuments = [
 ];
 
 const Documents = () => {
+    const [error, setError] = useState("");
     const [documents, setDocuments] = useState(initialDocuments);
     const [search, setSearch] = useState("");
     const [showFilterModal, setShowFilterModal] = useState(false);
@@ -49,6 +50,7 @@ const Documents = () => {
 
     return (
         <div className="space-y-6">
+            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
             {/* Header */}
             <div className="flex flex-col items-start justify-between md:flex-row md:items-center">
                 <div>

@@ -41,7 +41,7 @@ const Client = () => {
             setClientContacts(contacts);
         } catch (err) {
             console.error("Fetching error:", err);
-            setError(err);
+            setError(err + ". You might want to check you server connection.");
         }
     }, [user, showAllClients]);
 
@@ -191,13 +191,7 @@ const Client = () => {
 
     return (
         <div className="bg-blue rounded-xl">
-            {error && (
-                <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
-                    <div>
-                        <span>{error.message}</span>
-                    </div>
-                </div>
-            )}
+            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
 
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>

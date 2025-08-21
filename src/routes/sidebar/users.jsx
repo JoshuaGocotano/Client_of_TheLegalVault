@@ -13,7 +13,7 @@ const Users = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
 
-    const [error, setError] = useState([]);
+    const [error, setError] = useState(null);
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [selectedRole, setSelectedRole] = useState("All");
@@ -44,6 +44,7 @@ const Users = () => {
             setUsers(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error("Failed to fetch users:", error);
+            setError(error);
         }
     }, []);
 
@@ -214,9 +215,9 @@ const Users = () => {
     return (
         <div className="dark:bg-slate-950">
             {error && (
-                <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
+                <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
                     <div>
-                        <span>{error.message}</span>
+                        <span>{error}</span>
                     </div>
                 </div>
             )}
@@ -233,8 +234,8 @@ const Users = () => {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`rounded-full border px-4 py-1.5 text-sm ${
-                            selectedRole === role ? "bg-blue-600 text-white" : "border-gray-300 text-gray-800 dark:text-white"
+                        className={`rounded-full border border-slate-400 px-4 py-1.5 text-sm ${
+                            selectedRole === role ? "border-none bg-blue-600 text-white" : "border-gray-300 text-gray-800 dark:text-white"
                         }`}
                     >
                         {role}

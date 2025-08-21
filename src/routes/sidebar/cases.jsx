@@ -20,6 +20,7 @@ const getStatusColor = (status) => {
 const Cases = () => {
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
+    const [error, setError] = useState(null);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
@@ -38,7 +39,7 @@ const Cases = () => {
                 setTableData(data);
             } catch (error) {
                 console.error("Error fetching cases:", error);
-                alert("Failed to load cases. Please try again later.");
+                setError(error.message + ". You might want to check your server connection.");
             }
         };
         fetchCases();
@@ -136,6 +137,8 @@ const Cases = () => {
 
     return (
         <div className="mx-auto">
+            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
+
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
