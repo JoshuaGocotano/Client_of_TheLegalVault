@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Pencil, SquareX, CircleX, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
@@ -231,7 +231,7 @@ const Cases = () => {
                                                 className="p-1.5 text-red-600 hover:text-red-800"
                                                 onClick={() => alert(`Deleting the case of ${cases.client_fullname}`)}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <SquareX className="h-4 w-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -312,6 +312,7 @@ const Cases = () => {
             {/* View Case Modal */}
             <ViewModal
                 selectedCase={selectedCase}
+                tableData={tableData}
                 setSelectedCase={setSelectedCase}
             />
         </div>

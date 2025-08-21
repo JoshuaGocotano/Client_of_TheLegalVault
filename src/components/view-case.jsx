@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { X } from "lucide-react";
+import { X, MapPin } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
 const getStatusColor = (status) => {
@@ -15,7 +15,7 @@ const getStatusColor = (status) => {
     }
 };
 
-const ViewModal = ({ selectedCase, setSelectedCase }) => {
+const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -29,6 +29,28 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
     };
 
     if (!selectedCase) return null;
+
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = tableData.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                  .replace(/\s+/g, " ")
+                  .trim()
+            : "Unassigned";
+    };
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -50,8 +72,13 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <span>Drawer #: {selectedCase.case_drawer}</span>
                         </div>
                     </div>
-                    <div className="flex items-center gap-1 text-sm text-slate-400 dark:text-white">
-                        <span>Dumanjug</span>
+                    <div className="mr-7 flex items-center gap-1 text-sm text-slate-400 dark:text-white">
+                        <MapPin
+                            size={20}
+                            strokeWidth={2}
+                            className="text-red-800"
+                        />
+                        <span classname>{selectedCase.branch_name}</span>
                     </div>
                 </div>
 
@@ -62,7 +89,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <input
                                 type="text"
                                 readOnly
-                                value={selectedCase.name}
+                                value={selectedCase.ct_name}
                                 className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                             />
                         </div>
@@ -71,7 +98,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <input
                                 type="text"
                                 readOnly
-                                value={selectedCase.category}
+                                value={selectedCase.cc_name}
                                 className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                             />
                         </div>
@@ -80,7 +107,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <input
                                 type="text"
                                 readOnly
-                                value={selectedCase.client}
+                                value={selectedCase.client_fullname}
                                 className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                             />
                         </div>
@@ -89,15 +116,15 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <input
                                 type="text"
                                 readOnly
-                                value={`Atty. ${selectedCase.lawyer}`}
+                                value={`Atty. ${getLawyerFullName(selectedCase.user_id)}`}
                                 className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                             />
                         </div>
                         <div className="col-span-2">
-                            <label className="text-sm font-semibold">Description</label>
+                            <label className="text-sm font-semibold">Description / Remarks</label>
                             <textarea
-                                value={selectedCase.description || ""}
-                                onChange={(e) => setSelectedCase((prev) => ({ ...prev, description: e.target.value }))}
+                                value={selectedCase.case_remarks || ""}
+                                readOnly
                                 className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                 rows={3}
                             />
@@ -109,7 +136,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <div className="space-y-1 text-sm">
                                 <div className="flex justify-between">
                                     <span>Total Fee</span>
-                                    <span className="font-semibold">{selectedCase.fee}</span>
+                                    <span className="font-semibold">{selectedCase.case_fee}</span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Total Paid</span>
@@ -118,7 +145,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                                 <hr className="my-1 border-gray-300 dark:border-gray-600" />
                                 <div className="flex justify-between font-semibold">
                                     <span>Remaining</span>
-                                    <span>{selectedCase.balance}</span>
+                                    <span>{selectedCase.case_balance}</span>
                                 </div>
                             </div>
                             <button className="mt-3 w-full rounded-lg bg-green-600 py-2 text-sm text-white hover:bg-green-700">
@@ -127,10 +154,19 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                         </div>
                         <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
                             <p>
-                                <strong>Date Filed:</strong> April 25, 2025
+                                <strong>Date Filed:</strong>
+                                <span className="ml-2 text-gray-500">{formatDateTime(selectedCase.case_date_created)}</span>
                             </p>
+
+                            {selectedCase.case_last_updated && (
+                                <p>
+                                    <strong>Last Updated:</strong>
+                                    <span className="ml-2 text-gray-500">{formatDateTime(selectedCase.case_last_updated)}</span>
+                                </p>
+                            )}
+
                             <p>
-                                <strong>Status:</strong> <span className={getStatusColor(selectedCase.status)}>{selectedCase.status}</span>
+                                <strong>Status:</strong> <span className={getStatusColor(selectedCase.case_status)}>{selectedCase.case_status}</span>
                             </p>
                         </div>
                     </div>
