@@ -383,7 +383,7 @@ const Client = () => {
                                         <span
                                             className={`rounded-full px-3 py-0.5 text-xs text-white ${
                                                 viewClient.client_status === "Active"
-                                                    ? "bg-green-500"
+                                                    ? "bg-green-600"
                                                     : viewClient.client_status === "Inactive"
                                                       ? "bg-gray-500"
                                                       : "bg-red-500"
