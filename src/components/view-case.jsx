@@ -2,19 +2,6 @@ import { useRef } from "react";
 import { X, MapPin } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
-const getStatusColor = (status) => {
-    switch (status) {
-        case "Pending":
-            return "text-red-600 font-semibold";
-        case "Processing":
-            return "text-yellow-500 font-semibold";
-        case "Completed":
-            return "text-green-600 font-semibold";
-        default:
-            return "text-gray-500 font-semibold";
-    }
-};
-
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -72,13 +59,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             <span>Drawer #: {selectedCase.case_drawer}</span>
                         </div>
                     </div>
-                    <div className="mr-7 flex items-center gap-1 text-sm text-slate-400 dark:text-white">
+                    <div className="mr-7 flex items-center gap-1 text-sm text-slate-500">
                         <MapPin
                             size={20}
                             strokeWidth={2}
-                            className="text-red-800"
+                            className="text-red-400 dark:text-red-700"
                         />
-                        <span classname>{selectedCase.branch_name}</span>
+                        <span>{selectedCase.branch_name}</span>
                     </div>
                 </div>
 
@@ -136,16 +123,36 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             <div className="space-y-1 text-sm">
                                 <div className="flex justify-between">
                                     <span>Total Fee</span>
-                                    <span className="font-semibold">{selectedCase.case_fee}</span>
+                                    <span className="font-semibold">
+                                        {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
+                                            ? new Intl.NumberFormat("en-PH", {
+                                                  style: "currency",
+                                                  currency: "PHP",
+                                              }).format(Number(selectedCase.case_fee))
+                                            : "₱0.00"}
+                                    </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span>Total Paid</span>
-                                    <span>- 10,000.00</span>
+                                    <span>
+                                        -{" "}
+                                        {new Intl.NumberFormat("en-PH", {
+                                            style: "currency",
+                                            currency: "PHP",
+                                        }).format(Number(selectedCase.case_fee - selectedCase.case_balance))}
+                                    </span>
                                 </div>
                                 <hr className="my-1 border-gray-300 dark:border-gray-600" />
                                 <div className="flex justify-between font-semibold">
                                     <span>Remaining</span>
-                                    <span>{selectedCase.case_balance}</span>
+                                    <span>
+                                        {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
+                                            ? new Intl.NumberFormat("en-PH", {
+                                                  style: "currency",
+                                                  currency: "PHP",
+                                              }).format(Number(selectedCase.case_balance))
+                                            : "₱0.00"}
+                                    </span>
                                 </div>
                             </div>
                             <button className="mt-3 w-full rounded-lg bg-green-600 py-2 text-sm text-white hover:bg-green-700">
@@ -155,18 +162,31 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
                             <p>
                                 <strong>Date Filed:</strong>
-                                <span className="ml-2 text-gray-500">{formatDateTime(selectedCase.case_date_created)}</span>
+                                <span className="ml-2 text-slate-500">{formatDateTime(selectedCase.case_date_created)}</span>
                             </p>
 
                             {selectedCase.case_last_updated && (
                                 <p>
                                     <strong>Last Updated:</strong>
-                                    <span className="ml-2 text-gray-500">{formatDateTime(selectedCase.case_last_updated)}</span>
+                                    <span className="ml-2 text-slate-500">{formatDateTime(selectedCase.case_last_updated)}</span>
                                 </p>
                             )}
 
                             <p>
-                                <strong>Status:</strong> <span className={getStatusColor(selectedCase.case_status)}>{selectedCase.case_status}</span>
+                                <strong>Status:</strong>{" "}
+                                <span
+                                    className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                        selectedCase.case_status === "Pending"
+                                            ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                            : selectedCase.case_status === "Processing"
+                                              ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                              : selectedCase.case_status === "Completed"
+                                                ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                    }`}
+                                >
+                                    {selectedCase.case_status}
+                                </span>
                             </p>
                         </div>
                     </div>

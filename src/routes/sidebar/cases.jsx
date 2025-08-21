@@ -3,21 +3,11 @@ import { Pencil, SquareX, CircleX, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
-
-const getStatusColor = (status) => {
-    switch (status) {
-        case "Pending":
-            return "text-red-600 font-semibold";
-        case "Processing":
-            return "text-yellow-500 font-semibold";
-        case "Completed":
-            return "text-green-600 font-semibold";
-        default:
-            return "text-gray-500 font-semibold";
-    }
-};
+import { useAuth } from "@/context/auth-context";
 
 const Cases = () => {
+    const { user } = useAuth();
+
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
@@ -31,7 +21,9 @@ const Cases = () => {
     useEffect(() => {
         const fetchCases = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/cases");
+                const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
+
+                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch cases");
                 }
@@ -52,9 +44,6 @@ const Cases = () => {
             month: "long",
             day: "numeric",
             year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
         });
     };
 
@@ -203,7 +192,17 @@ const Cases = () => {
                                     <td className="px-4 py-3">{cases.client_fullname}</td>
                                     <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(cases.case_status)}`}>
+                                        <span
+                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                                cases.case_status === "Pending"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : cases.case_status === "Processing"
+                                                      ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                      : cases.case_status === "Completed"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                            }`}
+                                        >
                                             {cases.case_status}
                                         </span>
                                     </td>

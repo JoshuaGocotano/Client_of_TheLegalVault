@@ -385,7 +385,7 @@ const Client = () => {
                                                 viewClient.client_status === "Active"
                                                     ? "bg-green-500"
                                                     : viewClient.client_status === "Inactive"
-                                                      ? "bg-gray-400"
+                                                      ? "bg-gray-500"
                                                       : "bg-red-500"
                                             }`}
                                         >
