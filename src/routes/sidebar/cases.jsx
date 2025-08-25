@@ -184,7 +184,7 @@ const Cases = () => {
                         {filteredCases.length > 0 ? (
                             filteredCases.map((cases) => (
                                 <tr
-                                    key={cases.id}
+                                    key={cases.case_id}
                                     className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
                                     <td className="px-4 py-3">{cases.case_id}</td>
