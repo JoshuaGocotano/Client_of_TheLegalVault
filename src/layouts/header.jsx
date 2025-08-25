@@ -34,6 +34,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 id: toastId,
                 duration: 4000,
             });
+        } else {
+            toast.dismiss(toastId, { duration: 4000 });
         }
     };
 
