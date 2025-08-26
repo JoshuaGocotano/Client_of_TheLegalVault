@@ -61,7 +61,7 @@ export const Payments = () => {
     const [viewPayment, setViewPayment] = useState(null);
     const [addPayment, setAddPayment] = useState(null);
 
-    const rowsPerPage = 10;
+    const rowsPerPage = 2;
 
     const filteredPayments = paymentsData.filter((p) => {
         const matchesSearch =
@@ -186,7 +186,9 @@ export const Payments = () => {
                                         <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.payment_amount)}</td>
                                         <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
                                         <td className="px-4 py-3">{p.payment_type}</td>
-                                        <td className="px-4 py-3">{p.user_fname}</td>
+                                        <td className="px-4 py-3">
+                                            {p.user_fname} {p.user_mname ? p.user_mname[0] + "." : ""} {p.user_lname}
+                                        </td>
                                         <td className="it px-4 py-3">
                                             <button
                                                 className="p-1.5 text-blue-600 hover:text-blue-800"
@@ -222,11 +224,11 @@ export const Payments = () => {
 
             {/* Pagination */}
             {totalPages > 1 && (
-                <div className="mt-2 flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-white">
-                    <div>
+                <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+                    {/* <div>
                         Showing {(currentPage - 1) * rowsPerPage + 1} to {Math.min(currentPage * rowsPerPage, filteredPayments.length)} of{" "}
                         {filteredPayments.length} entries
-                    </div>
+                    </div> */}
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
