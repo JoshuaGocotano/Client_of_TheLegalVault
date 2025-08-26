@@ -200,7 +200,7 @@ export const Payments = () => {
                     <option value="Cash">Cash</option>
                 </select>
                 <button
-                    onClick={() => setAddPayment({ case_id: "", user_id: user.user_id, paid_amount: "", payment_type: "" })}
+                    onClick={() => setAddPayment({ case_id: "", user_id: user.user_id, payment_amount: "", payment_type: "" })}
                     className="flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
                 >
                     Add Payment
@@ -338,18 +338,18 @@ export const Payments = () => {
                                 <label className="font-semibold dark:text-blue-700">Amount</label>
                                 <input
                                     type="text"
-                                    value={addPayment.paid_amount}
+                                    value={addPayment.payment_amount}
                                     onChange={(e) =>
                                         setAddPayment({
                                             ...addPayment,
-                                            paid_amount: e.target.value,
+                                            payment_amount: e.target.value,
                                         })
                                     }
                                     onBlur={() => {
-                                        if (addPayment.paid_amount !== "") {
+                                        if (addPayment.payment_amount !== "") {
                                             setAddPayment({
                                                 ...addPayment,
-                                                paid_amount: parseFloat(addPayment.paid_amount).toFixed(2),
+                                                payment_amount: parseFloat(addPayment.payment_amount).toFixed(2),
                                             });
                                         }
                                     }}
