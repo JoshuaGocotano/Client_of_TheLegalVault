@@ -7,6 +7,7 @@ export const Payments = () => {
     const { user } = useAuth();
     const [error, setError] = useState("");
     const [paymentsData, setPaymentsData] = useState([]);
+    const [cases, setCases] = useState([]);
 
     // Helpers
     const formatCurrency = (amount) =>
@@ -28,11 +29,40 @@ export const Payments = () => {
         });
     };
 
+    // fetching here the cases for the add payment modal
+    useEffect(() => {
+        const fetchCases = async () => {
+            try {
+                const cases_endpoint = user.user_role === "Admin" ? "cases" : "cases/user/" + user.user_id;
+                const res = await fetch("http://localhost:3000/api/" + cases_endpoint, {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                const data = await res.json();
+                if (res.ok) {
+                    setCases(data);
+                } else {
+                    console.error("Failed to fetch cases:", data.error);
+                }
+            } catch (err) {
+                console.error("Error fetching cases:", err);
+            }
+        };
+
+        fetchCases();
+    }, []);
+
     // fetching here the payments
     useEffect(() => {
         const fetchPayments = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/payments", {
+                const payment_endpoint = user.user_role === "Admin" ? "payments" : "payments/lawyer/" + user.user_id;
+
+                const response = await fetch(`http://localhost:3000/api/${payment_endpoint}`, {
                     method: "GET",
                     credentials: "include",
                     headers: {
@@ -58,10 +88,9 @@ export const Payments = () => {
     const [searchTerm, setSearchTerm] = useState("");
     const [paymentTypeFilter, setPaymentTypeFilter] = useState("All");
     const [currentPage, setCurrentPage] = useState(1);
-    const [viewPayment, setViewPayment] = useState(null);
     const [addPayment, setAddPayment] = useState(null);
 
-    const rowsPerPage = 2;
+    const rowsPerPage = 10;
 
     const filteredPayments = paymentsData.filter((p) => {
         const matchesSearch =
@@ -79,6 +108,32 @@ export const Payments = () => {
     // Pagination
     const totalPages = Math.ceil(filteredPayments.length / rowsPerPage);
     const paginatedPayments = filteredPayments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+    // Add Payment
+    const handleAddPayment = async () => {
+        const toastId = toast.loading("Adding payment...", { duration: 4000 });
+        try {
+            const res = await fetch("http://localhost:3000/api/payments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(addPayment),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setPaymentsData((prev) => [...prev, data]);
+
+                toast.success("Payment added successfully!", { id: toastId, duration: 4000 });
+                setAddPayment(null);
+            } else {
+                toast.error(data.error || "Failed to add payment");
+            }
+        } catch (err) {
+            console.error("Error adding payment:", err);
+            toast.error("Error adding payment");
+        }
+    };
 
     const handleDeletePayment = (payment) => {
         const toastId = toast.loading("Deleting payment...", { duration: 4000 });
@@ -145,7 +200,7 @@ export const Payments = () => {
                     <option value="Cash">Cash</option>
                 </select>
                 <button
-                    onClick={() => setAddPayment(true)}
+                    onClick={() => setAddPayment({ case_id: "", user_id: user.user_id, paid_amount: "", payment_type: "" })}
                     className="flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
                 >
                     Add Payment
@@ -160,12 +215,12 @@ export const Payments = () => {
                             <tr>
                                 <th className="px-4 py-3">Payment ID</th>
                                 <th className="px-4 py-3">Client</th>
-                                <th className="px-4 py-3">Case</th>
+                                <th className="px-4 py-3">Case ID</th>
                                 <th className="px-4 py-3">Amount</th>
                                 <th className="px-4 py-3">Date</th>
                                 <th className="px-4 py-3">Payment Type</th>
                                 <th className="px-4 py-3">Added By</th>
-                                <th className="px-4 py-3">Actions</th>
+                                <th className="px-4 py-3">Action</th>
                             </tr>
                         </thead>
                         <tbody className="text-gray-700 dark:text-white">
@@ -175,13 +230,13 @@ export const Payments = () => {
                                         key={p.payment_id}
                                         className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                                     >
-                                        <td className="px-4 py-3 font-medium">{p.payment_id}</td>
-                                        <td className="px-4 py-3 font-medium">{p.client_fullname}</td>
+                                        <td className="px-4 py-3">{p.payment_id}</td>
+                                        <td className="px-4 py-3">{p.client_fullname}</td>
                                         <td
-                                            className="max-w-xs truncate px-4 py-3"
-                                            title={p.ct_name}
+                                            className="max-w-xs truncate px-4 py-3 text-center font-medium"
+                                            title={p.case_id}
                                         >
-                                            {p.ct_name}
+                                            {p.case_id}
                                         </td>
                                         <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.payment_amount)}</td>
                                         <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
@@ -189,14 +244,7 @@ export const Payments = () => {
                                         <td className="px-4 py-3">
                                             {p.user_fname} {p.user_mname ? p.user_mname[0] + "." : ""} {p.user_lname}
                                         </td>
-                                        <td className="it px-4 py-3">
-                                            <button
-                                                className="p-1.5 text-blue-600 hover:text-blue-800"
-                                                onClick={() => setViewPayment(p)}
-                                                title="View Details"
-                                            >
-                                                <Eye className="h-4 w-4" />
-                                            </button>
+                                        <td className="px-4 py-3 text-center">
                                             <button
                                                 className="p-1.5 text-red-600 hover:text-red-800"
                                                 onClick={() => handleDeletePayment(p)}
@@ -225,10 +273,6 @@ export const Payments = () => {
             {/* Pagination */}
             {totalPages > 1 && (
                 <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
-                    {/* <div>
-                        Showing {(currentPage - 1) * rowsPerPage + 1} to {Math.min(currentPage * rowsPerPage, filteredPayments.length)} of{" "}
-                        {filteredPayments.length} entries
-                    </div> */}
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -251,119 +295,83 @@ export const Payments = () => {
                 </div>
             )}
 
-            {/* View Modal */}
-            {viewPayment && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
-                        <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Payment Details</h3>
-                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Payment ID</p>
-                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.payment_id}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Client</p>
-                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.client_fullname}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Case</p>
-                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.ct_name}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Amount</p>
-                                <p className="text-lg font-bold text-green-600 dark:text-green-400">{formatCurrency(viewPayment.payment_amount)}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Date</p>
-                                <p className="text-gray-600 dark:text-slate-200">{formatDateTime(viewPayment.payment_date)}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Payment Type</p>
-                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.payment_type}</p>
-                            </div>
-                        </div>
-                        <div className="mt-6 flex justify-end">
-                            <button
-                                onClick={() => setViewPayment(null)}
-                                className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
-                            >
-                                Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Add Payment Modal */}
             {addPayment && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Add Payment</h3>
-                        <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
-                                <label className="font-semibold">Client</label>
-                                <input
-                                    type="text"
-                                    value={addPayment.client}
-                                    onChange={(e) => setAddPayment({ ...addPayment, client: e.target.value })}
+                                <label className="font-semibold dark:text-blue-700">Case</label>
+                                <select
+                                    value={addPayment.case_id}
+                                    onChange={(e) => setAddPayment({ ...addPayment, case_id: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
-                                />
+                                >
+                                    <option
+                                        value=""
+                                        disabled
+                                    >
+                                        Select Case
+                                    </option>
+                                    {cases.map((c) => (
+                                        <option
+                                            key={c.case_id}
+                                            value={c.case_id}
+                                        >
+                                            {c.case_id} – {c.client_fullname} ({c.ct_name})
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div>
-                                <label className="font-semibold">Case</label>
+                                <label className="font-semibold dark:text-blue-700">Lawyer</label>
                                 <input
                                     type="text"
-                                    value={addPayment.case}
-                                    onChange={(e) => setAddPayment({ ...addPayment, case: e.target.value })}
+                                    value={addPayment.user_id}
+                                    readOnly
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 />
+                                <p className="mt-1 text-xs text-gray-500">(Your User ID)</p>
                             </div>
                             <div>
-                                <label className="font-semibold">Amount</label>
+                                <label className="font-semibold dark:text-blue-700">Amount</label>
                                 <input
-                                    type="number"
-                                    step="0.01"
+                                    type="text"
                                     value={addPayment.paid_amount}
                                     onChange={(e) =>
                                         setAddPayment({
                                             ...addPayment,
-                                            paid_amount: parseFloat(e.target.value),
+                                            paid_amount: e.target.value,
                                         })
                                     }
+                                    onBlur={() => {
+                                        if (addPayment.paid_amount !== "") {
+                                            setAddPayment({
+                                                ...addPayment,
+                                                paid_amount: parseFloat(addPayment.paid_amount).toFixed(2),
+                                            });
+                                        }
+                                    }}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+                                    placeholder="0.00"
                                 />
                             </div>
                             <div>
-                                <label className="font-semibold">Date</label>
-                                <input
-                                    type="date"
-                                    value={addPayment.date}
-                                    onChange={(e) => setAddPayment({ ...addPayment, date: e.target.value })}
-                                    className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
-                                />
-                            </div>
-                            <div>
-                                <label className="font-semibold">Payment Type</label>
+                                <label className="font-semibold dark:text-blue-700">Payment Type</label>
                                 <select
                                     value={addPayment.payment_type}
                                     onChange={(e) => setAddPayment({ ...addPayment, payment_type: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
-                                    <option value="Bank Transfer">Bank Transfer</option>
-                                    <option value="Credit Card">Credit Card</option>
-                                    <option value="Check">Check</option>
+                                    <option
+                                        value=""
+                                        disabled
+                                    >
+                                        Select Payment Type
+                                    </option>
+                                    <option value="Cheque">Cheque</option>
                                     <option value="Cash">Cash</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="font-semibold">Status</label>
-                                <select
-                                    value={addPayment.status}
-                                    onChange={(e) => setAddPayment({ ...addPayment, status: e.target.value })}
-                                    className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
-                                >
-                                    <option value="Completed">Completed</option>
-                                    <option value="Pending">Pending</option>
                                 </select>
                             </div>
                         </div>
@@ -375,11 +383,7 @@ export const Payments = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={() => {
-                                    setPaymentsData((prev) => prev.map((p) => (p.payment_id === addPayment.payment_id ? addPayment : p)));
-                                    setAddPayment(null);
-                                    toast.success("Payment added successfully!");
-                                }}
+                                onClick={handleAddPayment}
                                 className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
                             >
                                 Add Payment
