@@ -121,7 +121,7 @@ const Client = () => {
 
         if (confirmRestore) {
             const toastId = toast.loading(`Restoring client: ${client.client_fullname}`, {
-                duration: Infinity,
+                duration: 4000,
             });
 
             try {

@@ -1,5 +1,5 @@
 import { useState, useEffect, use } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Trash2, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 
@@ -7,6 +7,26 @@ export const Payments = () => {
     const { user } = useAuth();
     const [error, setError] = useState("");
     const [paymentsData, setPaymentsData] = useState([]);
+
+    // Helpers
+    const formatCurrency = (amount) =>
+        new Intl.NumberFormat("en-PH", {
+            style: "currency",
+            currency: "PHP",
+        }).format(amount);
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
 
     // fetching here the payments
     useEffect(() => {
@@ -39,17 +59,17 @@ export const Payments = () => {
     const [paymentTypeFilter, setPaymentTypeFilter] = useState("All");
     const [currentPage, setCurrentPage] = useState(1);
     const [viewPayment, setViewPayment] = useState(null);
-    const [editPayment, setEditPayment] = useState(null);
+    const [addPayment, setAddPayment] = useState(null);
 
     const rowsPerPage = 10;
 
-    // Filter + Search
     const filteredPayments = paymentsData.filter((p) => {
         const matchesSearch =
-            p.payment_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.payment_id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.client_fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.ct_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.reference_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.payment_type.toLowerCase().includes(searchTerm.toLowerCase());
+            p.payment_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            formatDateTime(p.payment_date).toLowerCase().includes(searchTerm.toLowerCase());
 
         const matchesPaymentType = paymentTypeFilter === "All" || p.payment_type === paymentTypeFilter;
 
@@ -60,32 +80,32 @@ export const Payments = () => {
     const totalPages = Math.ceil(filteredPayments.length / rowsPerPage);
     const paginatedPayments = filteredPayments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
-    // Helpers
-    const formatCurrency = (amount) =>
-        new Intl.NumberFormat("en-PH", {
-            style: "currency",
-            currency: "PHP",
-        }).format(amount);
+    const handleDeletePayment = (payment) => {
+        const toastId = toast.loading("Deleting payment...", { duration: 4000 });
 
-    const getStatusBadge = (status) => {
-        const styles = {
-            Completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-            Pending: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-        };
-        return styles[status] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    };
+        if (window.confirm(`Are you sure you want to delete payment ID ${payment.payment_id}? This action cannot be undone.`)) {
+            try {
+                fetch(`http://localhost:3000/api/payments/${payment.payment_id}`, {
+                    method: "DELETE",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                }).then((res) => {
+                    if (!res.ok) {
+                        throw new Error("Failed to delete payment");
+                    }
+                });
 
-    const formatDateTime = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        return date.toLocaleString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        });
+                setPaymentsData((prev) => prev.filter((p) => p.payment_id !== payment.payment_id));
+                toast.success("Payment deleted successfully!", { id: toastId, duration: 4000 });
+            } catch (err) {
+                console.error(err);
+                setError("Failed to delete payment. Please try again later.");
+                toast.error("Failed to delete payment.", { id: toastId, duration: 4000 });
+                return;
+            }
+        }
     };
 
     return (
@@ -100,14 +120,20 @@ export const Payments = () => {
             </div>
 
             {/* Search + Filters */}
-            <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
-                <input
-                    type="text"
-                    placeholder="Search by client, case, or reference..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
-                />
+            <div className="card mb-6 flex flex-col items-center gap-3 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search
+                        size={18}
+                        className="text-gray-600 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search payments by client, case or date..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                    />
+                </div>
 
                 <select
                     value={paymentTypeFilter}
@@ -115,9 +141,15 @@ export const Payments = () => {
                     className="rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:focus:border-blue-600"
                 >
                     <option value="All">All Types</option>
-                    <option value="Check">Check</option>
+                    <option value="Check">Cheque</option>
                     <option value="Cash">Cash</option>
                 </select>
+                <button
+                    onClick={() => setAddPayment(true)}
+                    className="flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
+                >
+                    Add Payment
+                </button>
             </div>
 
             {/* Payments Table */}
@@ -132,6 +164,7 @@ export const Payments = () => {
                                 <th className="px-4 py-3">Amount</th>
                                 <th className="px-4 py-3">Date</th>
                                 <th className="px-4 py-3">Payment Type</th>
+                                <th className="px-4 py-3">Added By</th>
                                 <th className="px-4 py-3">Actions</th>
                             </tr>
                         </thead>
@@ -153,7 +186,8 @@ export const Payments = () => {
                                         <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.payment_amount)}</td>
                                         <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
                                         <td className="px-4 py-3">{p.payment_type}</td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3">{p.user_fname}</td>
+                                        <td className="it px-4 py-3">
                                             <button
                                                 className="p-1.5 text-blue-600 hover:text-blue-800"
                                                 onClick={() => setViewPayment(p)}
@@ -161,13 +195,20 @@ export const Payments = () => {
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
+                                            <button
+                                                className="p-1.5 text-red-600 hover:text-red-800"
+                                                onClick={() => handleDeletePayment(p)}
+                                                title="Delete Payment"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
+                                            </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan="6"
+                                        colSpan="8"
                                         className="px-4 py-6 text-center text-slate-500 dark:text-slate-400"
                                     >
                                         No payments found.
@@ -213,40 +254,30 @@ export const Payments = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Payment Details</h3>
-                        <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Reference Number</p>
-                                <p className="dark:text-slate-200">{viewPayment.reference_number}</p>
+                                <p className="font-semibold dark:text-blue-700">Payment ID</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.payment_id}</p>
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Status</p>
-                                <span className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStatusBadge(viewPayment.status)}`}>
-                                    {viewPayment.status}
-                                </span>
+                                <p className="font-semibold dark:text-blue-700">Client</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.client_fullname}</p>
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Client</p>
-                                <p className="dark:text-slate-200">{viewPayment.client}</p>
+                                <p className="font-semibold dark:text-blue-700">Case</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.ct_name}</p>
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Case</p>
-                                <p className="dark:text-slate-200">{viewPayment.case}</p>
+                                <p className="font-semibold dark:text-blue-700">Amount</p>
+                                <p className="text-lg font-bold text-green-600 dark:text-green-400">{formatCurrency(viewPayment.payment_amount)}</p>
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Amount</p>
-                                <p className="text-lg font-bold text-green-600 dark:text-green-400">{formatCurrency(viewPayment.paid_amount)}</p>
+                                <p className="font-semibold dark:text-blue-700">Date</p>
+                                <p className="text-gray-600 dark:text-slate-200">{formatDateTime(viewPayment.payment_date)}</p>
                             </div>
                             <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Date</p>
-                                <p className="dark:text-slate-200">{new Date(viewPayment.date).toLocaleDateString()}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Payment Type</p>
-                                <p className="dark:text-slate-200">{viewPayment.payment_type}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold text-gray-600 dark:text-blue-700">Payment Method</p>
-                                <p className="dark:text-slate-200">{viewPayment.payment_type}</p>
+                                <p className="font-semibold dark:text-blue-700">Payment Type</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewPayment.payment_type}</p>
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end">
@@ -261,18 +292,18 @@ export const Payments = () => {
                 </div>
             )}
 
-            {/* Edit Modal */}
-            {editPayment && (
+            {/* Add Payment Modal */}
+            {addPayment && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
-                        <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Edit Payment</h3>
+                        <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Add Payment</h3>
                         <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
                             <div>
                                 <label className="font-semibold">Client</label>
                                 <input
                                     type="text"
-                                    value={editPayment.client}
-                                    onChange={(e) => setEditPayment({ ...editPayment, client: e.target.value })}
+                                    value={addPayment.client}
+                                    onChange={(e) => setAddPayment({ ...addPayment, client: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 />
                             </div>
@@ -280,8 +311,8 @@ export const Payments = () => {
                                 <label className="font-semibold">Case</label>
                                 <input
                                     type="text"
-                                    value={editPayment.case}
-                                    onChange={(e) => setEditPayment({ ...editPayment, case: e.target.value })}
+                                    value={addPayment.case}
+                                    onChange={(e) => setAddPayment({ ...addPayment, case: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 />
                             </div>
@@ -290,10 +321,10 @@ export const Payments = () => {
                                 <input
                                     type="number"
                                     step="0.01"
-                                    value={editPayment.paid_amount}
+                                    value={addPayment.paid_amount}
                                     onChange={(e) =>
-                                        setEditPayment({
-                                            ...editPayment,
+                                        setAddPayment({
+                                            ...addPayment,
                                             paid_amount: parseFloat(e.target.value),
                                         })
                                     }
@@ -304,16 +335,16 @@ export const Payments = () => {
                                 <label className="font-semibold">Date</label>
                                 <input
                                     type="date"
-                                    value={editPayment.date}
-                                    onChange={(e) => setEditPayment({ ...editPayment, date: e.target.value })}
+                                    value={addPayment.date}
+                                    onChange={(e) => setAddPayment({ ...addPayment, date: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 />
                             </div>
                             <div>
                                 <label className="font-semibold">Payment Type</label>
                                 <select
-                                    value={editPayment.payment_type}
-                                    onChange={(e) => setEditPayment({ ...editPayment, payment_type: e.target.value })}
+                                    value={addPayment.payment_type}
+                                    onChange={(e) => setAddPayment({ ...addPayment, payment_type: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
                                     <option value="Bank Transfer">Bank Transfer</option>
@@ -325,8 +356,8 @@ export const Payments = () => {
                             <div>
                                 <label className="font-semibold">Status</label>
                                 <select
-                                    value={editPayment.status}
-                                    onChange={(e) => setEditPayment({ ...editPayment, status: e.target.value })}
+                                    value={addPayment.status}
+                                    onChange={(e) => setAddPayment({ ...addPayment, status: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
                                     <option value="Completed">Completed</option>
@@ -336,20 +367,20 @@ export const Payments = () => {
                         </div>
                         <div className="mt-6 flex justify-end gap-2">
                             <button
-                                onClick={() => setEditPayment(null)}
+                                onClick={() => setAddPayment(null)}
                                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={() => {
-                                    setPaymentsData((prev) => prev.map((p) => (p.payment_id === editPayment.payment_id ? editPayment : p)));
-                                    setEditPayment(null);
-                                    toast.success("Payment updated successfully!");
+                                    setPaymentsData((prev) => prev.map((p) => (p.payment_id === addPayment.payment_id ? addPayment : p)));
+                                    setAddPayment(null);
+                                    toast.success("Payment added successfully!");
                                 }}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                                className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
                             >
-                                Save Changes
+                                Add Payment
                             </button>
                         </div>
                     </div>
