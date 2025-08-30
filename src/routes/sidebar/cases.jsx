@@ -106,18 +106,6 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = tableData.filter((cases) => {
-        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
-        const searchLower = search.toLowerCase();
-        const matchesSearch =
-            cases.case_id.toString().includes(search) ||
-            (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
-            (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
-            (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
-            (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
-        return matchesStatus && matchesSearch;
-    });
-
     // get the full name of the (assigned) lawyer
     const getLawyerFullName = (lawyerId) => {
         const lawyer = tableData.find((u) => u.user_id === lawyerId);
@@ -127,6 +115,19 @@ const Cases = () => {
                   .trim()
             : "Unassigned";
     };
+
+    const filteredCases = tableData.filter((cases) => {
+        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
+        const searchLower = search.toLowerCase();
+        const matchesSearch =
+            cases.case_id.toString().includes(search) ||
+            (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
+            (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
+            (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
+            (getLawyerFullName(cases.user_id) && getLawyerFullName(cases.user_id).toLowerCase().includes(searchLower)) ||
+            (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
+        return matchesStatus && matchesSearch;
+    });
 
     return (
         <div className="mx-auto">
