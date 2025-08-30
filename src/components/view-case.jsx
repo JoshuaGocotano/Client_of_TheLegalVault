@@ -144,7 +144,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     <input
                                         type="text"
                                         readOnly
-                                        value={`Atty. ${getLawyerFullName(selectedCase.user_id)}`}
+                                        value={selectedCase.user_id ? `Atty. ${getLawyerFullName(selectedCase.user_id)}` : "Unassigned"}
                                         className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                     />
                                 </div>
@@ -281,8 +281,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
                                             <td className="px-4 py-2">{doc.uploader}</td>
                                             <td className="space-x-2 px-4 py-2">
-                                                <button className="text-blue-600 hover:underline">Edit</button>
-                                                <button className="text-red-600 hover:underline">Remove</button>
+                                                {/* <button className="text-blue-600 hover:underline">Edit</button> */}
+                                                <button className="text-red-600 hover:underline">Reject</button>
                                             </td>
                                         </tr>
                                     ))}

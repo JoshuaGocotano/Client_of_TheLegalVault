@@ -237,7 +237,13 @@ const Cases = () => {
                                             {cases.case_status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
+
+                                    {cases.user_id ? (
+                                        <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
+                                    ) : (
+                                        <td className="px-4 py-3 italic text-gray-500">Unassigned</td>
+                                    )}
+
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
