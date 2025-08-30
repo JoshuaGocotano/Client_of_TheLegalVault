@@ -11,6 +11,7 @@ const Cases = () => {
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
+    const [statusFilter, setStatusFilter] = useState("");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
@@ -105,14 +106,17 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = tableData.filter(
-        (cases) =>
+    const filteredCases = tableData.filter((cases) => {
+        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
+        const searchLower = search.toLowerCase();
+        const matchesSearch =
             cases.case_id.toString().includes(search) ||
-            cases.ct_name.toLowerCase().includes(search.toLowerCase()) ||
-            cases.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
-            cases.case_status.toLowerCase().includes(search.toLowerCase()) ||
-            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
-    );
+            (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
+            (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
+            (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
+            (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
+        return matchesStatus && matchesSearch;
+    });
 
     // get the full name of the (assigned) lawyer
     const getLawyerFullName = (lawyerId) => {
@@ -131,6 +135,32 @@ const Cases = () => {
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="mb-4 flex gap-2">
+                {["All", "Pending", "Processing", "Completed", "Dismissed"].map((tab) => {
+                    // assign base colors
+                    const baseColors = {
+                        All: "bg-blue-500 text-white font-semibold",
+                        Pending: "bg-yellow-500 text-white font-semibold",
+                        Processing: "bg-blue-500 text-white font-semibold",
+                        Completed: "bg-green-500 text-white font-semibold",
+                        Dismissed: "bg-red-500 text-white font-semibold",
+                    };
+
+                    const active = statusFilter === tab || (tab === "All" && statusFilter === "");
+                    return (
+                        <button
+                            key={tab}
+                            onClick={() => setStatusFilter(tab === "All" ? "" : tab)}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active ? baseColors[tab] : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"}`}
+                        >
+                            {tab}
+                        </button>
+                    );
+                    white;
+                })}
             </div>
 
             {/* Search and Buttons */}
