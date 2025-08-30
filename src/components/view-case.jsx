@@ -284,6 +284,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Add New Task, Close Case and Dismiss Case buttons here */}
+                        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+                            <button className="w-full rounded-lg bg-blue-600 py-2 text-sm text-white hover:bg-blue-700">Add New Task</button>
+                            <button className="w-full rounded-lg bg-red-600 py-2 text-sm text-white hover:bg-red-700">Close Case</button>
+                            <button className="w-full rounded-lg bg-gray-600 py-2 text-sm text-white hover:bg-gray-700">Dismiss Case</button>
+                        </div>
                     </>
                 ) : (
                     <>

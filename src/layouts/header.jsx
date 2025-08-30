@@ -100,7 +100,9 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         className="flex h-10 items-center rounded-full bg-blue-900 p-1 pr-0 transition hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-[#173B7E]"
                         onClick={() => setOpen(!open)}
                     >
-                        <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
+                        <span className="px-3 text-sm font-medium text-white">
+                            Hi, {user.user_role === "Admin" ? "Super Lawyer" : user.user_role}
+                        </span>
                         <img
                             src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar}
                             alt="profile"

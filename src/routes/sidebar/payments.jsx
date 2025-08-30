@@ -8,6 +8,7 @@ export const Payments = () => {
     const [error, setError] = useState("");
     const [paymentsData, setPaymentsData] = useState([]);
     const [cases, setCases] = useState([]);
+    const [selectedCaseBalance, setSelectedCaseBalance] = useState(null);
 
     // Helpers
     const formatCurrency = (amount) =>
@@ -110,7 +111,12 @@ export const Payments = () => {
     const paginatedPayments = filteredPayments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     // Add Payment
-    const handleAddPayment = async () => {
+    const handleAddPayment = async (amount) => {
+        if (amount > selectedCaseBalance) {
+            toast.error("Payment amount exceeds the case balance.");
+            return;
+        }
+
         const toastId = toast.loading("Adding payment...", { duration: 4000 });
         try {
             const res = await fetch("http://localhost:3000/api/payments", {
@@ -305,7 +311,13 @@ export const Payments = () => {
                                 <label className="font-semibold dark:text-blue-700">Case</label>
                                 <select
                                     value={addPayment.case_id}
-                                    onChange={(e) => setAddPayment({ ...addPayment, case_id: e.target.value })}
+                                    onChange={(e) => {
+                                        const caseId = parseInt(e.target.value, 10);
+                                        const selected = cases.find((c) => c.case_id === caseId);
+
+                                        setAddPayment({ ...addPayment, case_id: e.target.value });
+                                        setSelectedCaseBalance(selected ? selected.case_balance : null);
+                                    }}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
                                     <option
@@ -356,6 +368,11 @@ export const Payments = () => {
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                     placeholder="0.00"
                                 />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    {selectedCaseBalance !== null
+                                        ? `Remaining Balance: ${formatCurrency(selectedCaseBalance)}`
+                                        : "Select a case to see balance"}
+                                </p>
                             </div>
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Payment Type</label>
@@ -383,7 +400,7 @@ export const Payments = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={handleAddPayment}
+                                onClick={() => handleAddPayment(parseFloat(addPayment.payment_amount))}
                                 className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
                             >
                                 Add Payment

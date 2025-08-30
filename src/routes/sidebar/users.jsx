@@ -310,7 +310,7 @@ const Users = () => {
                                     </td>
                                     <td className="px-4 py-3">{u.user_email}</td>
                                     <td className="px-4 py-3">{u.user_phonenum}</td>
-                                    <td className="px-4 py-3">{u.user_role}</td>
+                                    <td className="px-4 py-3">{u.user_role === "Admin" ? "Super Lawyer" : u.user_role}</td>
                                     <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
                                     <td className="px-4 py-3">
                                         <span
