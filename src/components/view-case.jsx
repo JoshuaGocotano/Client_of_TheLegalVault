@@ -1,8 +1,11 @@
 import { useRef, useState, useEffect } from "react";
-import { X, MapPin, ArrowLeft } from "lucide-react";
+import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { useAuth } from "@/context/auth-context";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
+    const { user } = useAuth();
+
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
@@ -92,7 +95,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <h2 className="text-2xl font-semibold">
                                     Case {selectedCase.case_id}{" "}
                                     {selectedCase.case_verdict && (
-                                        <span className="rounded-full bg-green-600 px-2 text-sm font-medium">{selectedCase.case_verdict}</span>
+                                        <span className="rounded-full bg-green-600 px-2 text-sm font-medium text-white">
+                                            {selectedCase.case_verdict}
+                                        </span>
                                     )}
                                 </h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
@@ -239,21 +244,29 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         <div className="mt-6 overflow-x-auto rounded-lg border">
                             <div className="flex items-center justify-between p-4">
                                 <h3 className="text-sm font-semibold">Documents</h3>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
-                                    <button
-                                        onClick={() => fileInputRef.current.click()}
-                                        className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
-                                    >
-                                        Upload
-                                    </button>
-                                    <button className="rounded bg-blue-500 px-4 py-1.5 text-sm text-white">Clear</button>
-                                </div>
+
+                                {selectedCase.case_status !== "Completed" &&
+                                    selectedCase.case_status !== "Dismissed" &&
+                                    selectedCase.case_status !== "Pending" && (
+                                        <div className="flex gap-2">
+                                            <button className="rounded border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white">
+                                                Add Task Document
+                                            </button>
+                                            <input
+                                                type="file"
+                                                ref={fileInputRef}
+                                                onChange={handleFileUpload}
+                                                className="hidden"
+                                            />
+                                            <button
+                                                onClick={() => fileInputRef.current.click()}
+                                                className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
+                                            >
+                                                Add Document
+                                            </button>
+                                            <button className="rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700">Clear</button>
+                                        </div>
+                                    )}
                             </div>
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
@@ -266,10 +279,18 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <th className="px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
+
                                 <tbody className="text-gray-700 dark:text-white">
                                     {[
                                         { id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
-                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Batcotoy" },
+                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Glow" },
+                                        {
+                                            id: "D125",
+                                            name: "Special Proceedings",
+                                            status: "Approved",
+                                            file: "proceedings.pdf",
+                                            uploader: "Joseph Grow",
+                                        },
                                     ].map((doc) => (
                                         <tr
                                             key={doc.id}
@@ -281,8 +302,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
                                             <td className="px-4 py-2">{doc.uploader}</td>
                                             <td className="space-x-2 px-4 py-2">
-                                                {/* <button className="text-blue-600 hover:underline">Edit</button> */}
+                                                <button className="text-blue-600 hover:underline">Edit</button>
                                                 <button className="text-red-600 hover:underline">Reject</button>
+                                                <button className="text-red-600 hover:underline">
+                                                    <Trash2 size={16}/>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -290,12 +314,25 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             </table>
                         </div>
 
-                        {/* Add New Task, Close Case and Dismiss Case buttons here */}
-                        <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
-                            <button className="w-full rounded-lg bg-blue-600 py-2 text-sm text-white hover:bg-blue-700">Add New Task</button>
-                            <button className="w-full rounded-lg bg-red-600 py-2 text-sm text-white hover:bg-red-700">Close Case</button>
-                            <button className="w-full rounded-lg bg-gray-600 py-2 text-sm text-white hover:bg-gray-700">Dismiss Case</button>
-                        </div>
+                        {/* close case and dismiss case button when the case is not yet completed */}
+                        {selectedCase.case_status !== "Completed" && (
+                            <div className="mt-6 flex items-center justify-end gap-4">
+                                <button
+                                    title="Closing or Finishing the Case"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+                                >
+                                    <CheckCircle size={20} />
+                                    Close Case
+                                </button>
+                                <button
+                                    title="Dismissing Case"
+                                    className="inline-flex gap-2 rounded-lg bg-gray-600 px-3 py-2 text-sm text-white hover:bg-gray-700"
+                                >
+                                    <XCircle size={20} />
+                                    Dismiss Case
+                                </button>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <>

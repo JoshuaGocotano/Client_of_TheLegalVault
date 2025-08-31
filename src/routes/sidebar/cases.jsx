@@ -38,6 +38,15 @@ const Cases = () => {
         fetchCases();
     }, []);
 
+    // Set default statusFilter to 'Pending' if there are pending cases, else '' (All)
+    useEffect(() => {
+        if (tableData.some((c) => c.case_status === "Pending")) {
+            setStatusFilter("Pending");
+        } else {
+            setStatusFilter("");
+        }
+    }, [tableData]);
+
     const formatDateTime = (dateString) => {
         if (!dateString) return "";
         const date = new Date(dateString);
