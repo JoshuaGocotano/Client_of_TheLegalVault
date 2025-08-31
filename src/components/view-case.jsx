@@ -93,12 +93,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <h2 className="text-2xl font-semibold">
-                                    Case {selectedCase.case_id}{" "}
-                                    {selectedCase.case_verdict && (
+                                    Case {selectedCase.case_id}
+                                    {/* {" "}
+                                    {selectedCase.case_verdict && selectedCase.case_status === "Completed" && (
                                         <span className="rounded-full bg-green-600 px-2 text-sm font-medium text-white">
                                             {selectedCase.case_verdict}
                                         </span>
-                                    )}
+                                    )} */}
                                 </h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
@@ -236,6 +237,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         >
                                             {selectedCase.case_status}
                                         </span>
+                                        {/* Case Verdict */}
+                                        {selectedCase.case_verdict && selectedCase.case_status === "Completed" && (
+                                            <>
+                                                <span> -</span>
+                                                <span className="ml-2 font-semibold underline">{selectedCase.case_verdict}</span>
+                                            </>
+                                        )}
                                     </p>
                                 </div>
                             </div>
@@ -305,7 +313,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                                 <button className="text-blue-600 hover:underline">Edit</button>
                                                 <button className="text-red-600 hover:underline">Reject</button>
                                                 <button className="text-red-600 hover:underline">
-                                                    <Trash2 size={16}/>
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </td>
                                         </tr>
@@ -315,7 +323,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         </div>
 
                         {/* close case and dismiss case button when the case is not yet completed */}
-                        {selectedCase.case_status !== "Completed" && (
+                        {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Pending" && (
                             <div className="mt-6 flex items-center justify-end gap-4">
                                 <button
                                     title="Closing or Finishing the Case"
