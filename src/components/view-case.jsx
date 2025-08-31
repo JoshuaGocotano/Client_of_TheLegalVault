@@ -253,28 +253,26 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             <div className="flex items-center justify-between p-4">
                                 <h3 className="text-sm font-semibold">Documents</h3>
 
-                                {selectedCase.case_status !== "Completed" &&
-                                    selectedCase.case_status !== "Dismissed" &&
-                                    selectedCase.case_status !== "Pending" && (
-                                        <div className="flex gap-2">
-                                            <button className="rounded border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white">
-                                                Add Task Document
-                                            </button>
-                                            <input
-                                                type="file"
-                                                ref={fileInputRef}
-                                                onChange={handleFileUpload}
-                                                className="hidden"
-                                            />
-                                            <button
-                                                onClick={() => fileInputRef.current.click()}
-                                                className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
-                                            >
-                                                Add Document
-                                            </button>
-                                            <button className="rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700">Clear</button>
-                                        </div>
-                                    )}
+                                {selectedCase.case_status === "Processing" && (
+                                    <div className="flex gap-2">
+                                        <button className="rounded border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white">
+                                            Add Task Document
+                                        </button>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                        />
+                                        <button
+                                            onClick={() => fileInputRef.current.click()}
+                                            className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
+                                        >
+                                            Add Document
+                                        </button>
+                                        <button className="rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700">Clear</button>
+                                    </div>
+                                )}
                             </div>
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
@@ -323,7 +321,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         </div>
 
                         {/* close case and dismiss case button when the case is not yet completed */}
-                        {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Pending" && (
+                        {selectedCase.case_status === "Processing" && (
                             <div className="mt-6 flex items-center justify-end gap-4">
                                 <button
                                     title="Closing or Finishing the Case"
