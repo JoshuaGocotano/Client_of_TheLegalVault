@@ -50,17 +50,15 @@ const Cases = () => {
     };
 
     const [newCase, setNewCase] = useState({
-        id: "",
-        name: "",
-        category: "",
-        client: "",
-        branch: "",
-        filedDate: "",
-        description: "",
-        fee: "",
-        status: "Pending",
-        lawyer: "Unassigned",
-        balance: "P 0.00",
+        client_id: "",
+        cc_id: "",
+        ct_id: "",
+        user_id: user.user_role === "Lawyer" ? user.user_id : "",
+        case_cabinet: "",
+        case_drawer: "",
+        case_fee: "",
+        case_remarks: "",
+        case_status: user.user_role === "Lawyer" ? "Processing" : "Pending",
     });
 
     useClickOutside([addCaseModalRef], () => setIsModalOpen(false));
@@ -90,17 +88,15 @@ const Cases = () => {
         ]);
 
         setNewCase({
-            id: "",
-            name: "",
-            category: "",
-            client: "",
-            branch: "",
-            filedDate: "",
-            description: "",
-            fee: "",
-            status: "Pending",
-            lawyer: "Unassigned",
-            balance: "P 0.00",
+            client_id: "",
+            cc_id: "",
+            ct_id: "",
+            user_id: user.user_role === "Lawyer" ? user.user_id : "",
+            case_cabinet: "",
+            case_drawer: "",
+            case_fee: "",
+            case_remarks: "",
+            case_status: user.user_role === "Lawyer" ? "Processing" : "Pending",
         });
 
         setIsModalOpen(false);
@@ -275,12 +271,6 @@ const Cases = () => {
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
-                                            <button
-                                                className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Dismissing the case of ${cases.client_fullname}`)}
-                                            >
-                                                <SquareX className="h-4 w-4" />
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -307,11 +297,13 @@ const Cases = () => {
             />
             {/* Add New Case Modal */}
             <AddNewCase
+                user={user}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
                 handleAddCase={handleAddCase}
                 newCase={newCase}
                 setNewCase={setNewCase}
+                addCaseModalRef={addCaseModalRef}
             />
         </div>
     );

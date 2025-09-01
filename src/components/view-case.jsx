@@ -90,7 +90,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                 {!showPayments ? (
                     <>
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-4 flex items-center justify-between">
                             <div>
                                 <h2 className="text-2xl font-semibold">
                                     Case {selectedCase.case_id}
@@ -103,7 +103,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
-                                    <span>Drawer #: {selectedCase.case_drawer}</span>
+                                    {selectedCase.case_drawer && <span>Drawer #: {selectedCase.case_drawer}</span>}
                                 </div>
                             </div>
                             <div className="mr-7 flex items-center gap-1 text-sm text-slate-500">
@@ -249,7 +249,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             </div>
                         </div>
 
-                        <div className="mt-6 overflow-x-auto rounded-lg border">
+                        <div className="mt-2 overflow-x-auto rounded-lg border">
                             <div className="flex items-center justify-between p-4">
                                 <h3 className="text-sm font-semibold">Documents</h3>
 
