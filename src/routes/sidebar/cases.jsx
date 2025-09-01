@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 import { useAuth } from "@/context/auth-context";
+import AddNewCase from "../../components/add-case";
 
 const Cases = () => {
     const { user } = useAuth();
@@ -37,15 +38,6 @@ const Cases = () => {
         };
         fetchCases();
     }, []);
-
-    // Set default statusFilter to 'Pending' if there are pending cases, else '' (All)
-    useEffect(() => {
-        if (tableData.some((c) => c.case_status === "Pending")) {
-            setStatusFilter("Pending");
-        } else {
-            setStatusFilter("");
-        }
-    }, [tableData]);
 
     const formatDateTime = (dateString) => {
         if (!dateString) return "";
@@ -115,15 +107,14 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    // get the full name of the (assigned) lawyer
-    const getLawyerFullName = (lawyerId) => {
-        const lawyer = tableData.find((u) => u.user_id === lawyerId);
-        return lawyer
-            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
-                  .replace(/\s+/g, " ")
-                  .trim()
-            : "Unassigned";
-    };
+    // Set default statusFilter to 'Pending' if there are pending cases, else '' (All)
+    useEffect(() => {
+        if (tableData.some((c) => c.case_status === "Pending")) {
+            setStatusFilter("Pending");
+        } else {
+            setStatusFilter("");
+        }
+    }, [tableData]);
 
     const filteredCases = tableData.filter((cases) => {
         const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
@@ -133,10 +124,19 @@ const Cases = () => {
             (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
             (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
             (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
-            (getLawyerFullName(cases.user_id) && getLawyerFullName(cases.user_id).toLowerCase().includes(searchLower)) ||
             (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
         return matchesStatus && matchesSearch;
     });
+
+    // get the full name of the (assigned) lawyer
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = tableData.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                  .replace(/\s+/g, " ")
+                  .trim()
+            : "Unassigned";
+    };
 
     return (
         <div className="mx-auto">
@@ -299,69 +299,19 @@ const Cases = () => {
                 </table>
             </div>
 
-            {/* Add Case Modal */}
-            {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                    <div
-                        ref={addCaseModalRef}
-                        className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800"
-                    >
-                        <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Case</h3>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            {[
-                                ["Cabinet Number", "id"],
-                                ["Case Name", "name"],
-                                ["Category", "category"],
-                                ["Client", "client"],
-                                ["Branch", "branch"],
-                                ["Filed Date", "filedDate", "date"],
-                                ["Fee", "fee"],
-                            ].map(([label, name, type = "text"]) => (
-                                <div key={name}>
-                                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
-                                    <input
-                                        type={type}
-                                        name={name}
-                                        value={newCase[name]}
-                                        onChange={(e) => setNewCase({ ...newCase, [name]: e.target.value })}
-                                        className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
-                                    />
-                                </div>
-                            ))}
-                            <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                                <textarea
-                                    name="description"
-                                    value={newCase.description}
-                                    onChange={(e) => setNewCase({ ...newCase, description: e.target.value })}
-                                    className="w-full resize-none rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
-                                    rows={4}
-                                ></textarea>
-                            </div>
-                        </div>
-                        <div className="mt-6 flex justify-end gap-3">
-                            <button
-                                onClick={() => setIsModalOpen(false)}
-                                className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleAddCase}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                            >
-                                Add Case
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* View Case Modal */}
             <ViewModal
                 selectedCase={selectedCase}
                 tableData={tableData}
                 setSelectedCase={setSelectedCase}
+            />
+            {/* Add New Case Modal */}
+            <AddNewCase
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen}
+                handleAddCase={handleAddCase}
+                newCase={newCase}
+                setNewCase={setNewCase}
             />
         </div>
     );

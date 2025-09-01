@@ -255,7 +255,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                                 {selectedCase.case_status === "Processing" && (
                                     <div className="flex gap-2">
-                                        <button className="rounded border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white">
+                                        <button className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white">
                                             Add Task Document
                                         </button>
                                         <input

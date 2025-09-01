@@ -356,7 +356,9 @@ const Client = () => {
             {viewClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-screen-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
-                        <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">Client Information</h3>
+                        <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">
+                            Client Information <span className="text-slate-500 text-lg font-semibold">(Client ID: {viewClient.client_id})</span>{" "}
+                        </h3>
                         <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Name / Company</p>
