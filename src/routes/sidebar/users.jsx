@@ -262,7 +262,7 @@ const Users = () => {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`rounded-full px-4 py-2 text-sm ${
+                        className={`rounded-full px-4 py-2 text-sm font-medium ${
                             selectedRole === role
                                 ? "border-none bg-blue-600 text-white"
                                 : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
