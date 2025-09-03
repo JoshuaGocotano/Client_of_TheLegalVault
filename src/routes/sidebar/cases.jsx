@@ -136,6 +136,9 @@ const Cases = () => {
         }
     }, [tableData]);
 
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10;
+
     const filteredCases = tableData.filter((cases) => {
         const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
         const searchLower = search.toLowerCase();
@@ -147,6 +150,10 @@ const Cases = () => {
             (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
         return matchesStatus && matchesSearch;
     });
+
+    // Pagination
+    const totalPages = Math.ceil(filteredCases.length / rowsPerPage);
+    const paginatedCases = filteredCases.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     // get the full name of the (assigned) lawyer
     const getLawyerFullName = (lawyerId) => {
@@ -164,7 +171,7 @@ const Cases = () => {
 
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
-                <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
+                <p className="text-sm text-gray-500">Manage all case details here.</p>
             </div>
 
             {/* Tabs */}
@@ -241,8 +248,8 @@ const Cases = () => {
                         </tr>
                     </thead>
                     <tbody className="text-slate-950 dark:text-white">
-                        {filteredCases.length > 0 ? (
-                            filteredCases.map((cases) => (
+                        {paginatedCases.length > 0 ? (
+                            paginatedCases.map((cases) => (
                                 <tr
                                     key={cases.case_id}
                                     className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
@@ -312,6 +319,31 @@ const Cases = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &lt;
+                        </button>
+                        <span>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* View Case Modal */}
             <ViewModal

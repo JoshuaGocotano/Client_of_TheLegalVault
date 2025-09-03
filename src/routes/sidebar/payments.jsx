@@ -92,8 +92,6 @@ export const Payments = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [addPayment, setAddPayment] = useState(null);
 
-    const rowsPerPage = 10;
-
     const filteredPayments = paymentsData.filter((p) => {
         const matchesSearch =
             p.payment_id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -108,6 +106,7 @@ export const Payments = () => {
     });
 
     // Pagination
+    const rowsPerPage = 10;
     const totalPages = Math.ceil(filteredPayments.length / rowsPerPage);
     const paginatedPayments = filteredPayments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
