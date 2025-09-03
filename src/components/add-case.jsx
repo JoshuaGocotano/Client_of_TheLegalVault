@@ -197,7 +197,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                                         </option>
                                     ))
                             ) : (
-                                <option value={user.user_id}>
+                                <option value={newCase.user_id}>
                                     {user.user_fname} {user.user_mname} {user.user_lname}
                                 </option>
                             )}
@@ -209,12 +209,27 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Fee</label>
                         <input
                             type="number"
-                            step="0.01"
                             value={newCase.case_fee}
                             onChange={(e) => setNewCase({ ...newCase, case_fee: e.target.value })}
+                            onBlur={() => {
+                                // On blur, if fee is empty or less than 0, set to 0.00
+                                if (!newCase.case_fee || parseFloat(newCase.case_fee) < 0) {
+                                    setNewCase((prev) => ({ ...prev, case_fee: "0.00" }));
+                                } else {
+                                    // Format to two decimal places
+                                    const formattedFee = parseFloat(newCase.case_fee).toFixed(2);
+                                    setNewCase((prev) => ({ ...prev, case_fee: formattedFee }));
+                                }
+                            }}
                             className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             placeholder="0.00"
                         />
+                        {newCase.ct_id && (
+                            <p className="mt-1 text-xs text-gray-500">
+                                Fee range:{" "}
+                                {caseCategoryTypes.find((type) => type.ct_id === parseInt(newCase.ct_id))?.ct_fee || "No range fee info available"}
+                            </p>
+                        )}
                     </div>
 
                     {/* Case Status */}
@@ -235,7 +250,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                             value={newCase.case_remarks}
                             onChange={(e) => setNewCase({ ...newCase, case_remarks: e.target.value })}
                             className="w-full resize-none rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
-                            rows={4}
+                            rows={3}
                         ></textarea>
                     </div>
 

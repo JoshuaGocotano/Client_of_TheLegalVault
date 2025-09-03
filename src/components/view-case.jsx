@@ -11,6 +11,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
+    const [users, setUsers] = useState([]);
 
     // Fetching payments
     useEffect(() => {
@@ -32,6 +33,33 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
             fetchPayments();
         }
     }, [showPayments, selectedCase]);
+
+    // Fetching users for knowing who assigned the lawyer
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users", { method: "GET", credentials: "include" });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to fetch users.");
+                } else {
+                    setUsers(data);
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    // Function to get the name of the user who assigned the lawyer
+    const getAssignerName = (assignedById) => {
+        const assigner = users.find((u) => u.user_id === assignedById);
+        return assigner
+            ? `Atty. ${assigner.user_fname} ${assigner.user_mname ? assigner.user_mname[0] + "." : ""} ${assigner.user_lname}`
+            : "Unknown";
+    };
 
     useClickOutside([modalRef], () => {
         setSelectedCase(null);
@@ -153,6 +181,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         value={selectedCase.user_id ? `Atty. ${getLawyerFullName(selectedCase.user_id)}` : "Unassigned"}
                                         className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                     />
+                                    {selectedCase.assigned_by && (
+                                        <p className="mt-1 text-xs text-gray-500">Assigned by: {getAssignerName(selectedCase.assigned_by)}</p>
+                                    )}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="text-sm font-semibold">Description / Remarks</label>

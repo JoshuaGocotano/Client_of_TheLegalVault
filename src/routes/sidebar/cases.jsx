@@ -5,6 +5,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 import { useAuth } from "@/context/auth-context";
 import AddNewCase from "../../components/add-case";
+import toast from "react-hot-toast";
 
 const Cases = () => {
     const { user } = useAuth();
@@ -53,12 +54,13 @@ const Cases = () => {
         client_id: "",
         cc_id: "",
         ct_id: "",
-        user_id: user.user_role === "Lawyer" ? user.user_id : "",
+        user_id: user.user_role === "Admin" ? "" : user.user_id,
+        assigned_by: user.user_role === "Admin" ? user.user_id : null,
         case_cabinet: "",
         case_drawer: "",
         case_fee: "",
         case_remarks: "",
-        case_status: user.user_role === "Lawyer" ? "Processing" : "Pending",
+        case_status: "",
     });
 
     useClickOutside([addCaseModalRef], () => setIsModalOpen(false));
@@ -74,33 +76,55 @@ const Cases = () => {
         return () => document.removeEventListener("keydown", handleKeyDown);
     }, []);
 
-    const handleAddCase = () => {
-        const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
-        const formattedId = parseInt(newCase.id);
-
-        setData((prev) => [
-            ...prev,
-            {
-                ...newCase,
-                id: formattedId,
-                fee: formattedFee,
-            },
-        ]);
-
-        setNewCase({
-            client_id: "",
-            cc_id: "",
-            ct_id: "",
-            user_id: user.user_role === "Lawyer" ? user.user_id : "",
-            case_cabinet: "",
-            case_drawer: "",
-            case_fee: "",
-            case_remarks: "",
-            case_status: user.user_role === "Lawyer" ? "Processing" : "Pending",
+    const handleAddCase = async () => {
+        const toastId = toast.loading("Adding new case...", {
+            duration: 4000,
         });
 
-        setIsModalOpen(false);
-        alert("New case has been added successfully!");
+        try {
+            const payload = {
+                ...newCase,
+                client_id: parseInt(newCase.client_id, 10) || null,
+                cc_id: parseInt(newCase.cc_id, 10) || null,
+                ct_id: parseInt(newCase.ct_id, 10) || null,
+                assigned_by: newCase.assigned_by ? parseInt(newCase.assigned_by, 10) : null,
+                user_id: newCase.user_id ? parseInt(newCase.user_id, 10) : null,
+                case_fee: newCase.case_fee ? parseFloat(newCase.case_fee) : null,
+            };
+
+            const res = await fetch("http://localhost:3000/api/cases", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to add case");
+            }
+
+            const addedCase = res.json();
+            setTableData((prevData) => [addedCase, ...prevData]);
+            setIsModalOpen(false);
+            setNewCase({
+                client_id: "",
+                cc_id: "",
+                ct_id: "",
+                user_id: user.user_role === "Admin" ? "" : user.user_id,
+                assigned_by: user.user_role === "Admin" ? user.user_id : null,
+                case_cabinet: "",
+                case_drawer: "",
+                case_fee: "",
+                case_remarks: "",
+                case_status: "",
+            });
+
+            toast.success("New case added successfully!", { id: toastId, duration: 4000 });
+        } catch (error) {
+            console.error("Error adding case:", error);
+            setError("Failed to add case. Please try again.");
+            toast.error("Failed to add case. Please try again.", { id: toastId, duration: 4000 });
+            return;
+        }
     };
 
     // Set default statusFilter to 'Pending' if there are pending cases, else '' (All)
@@ -116,7 +140,7 @@ const Cases = () => {
         const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
         const searchLower = search.toLowerCase();
         const matchesSearch =
-            cases.case_id.toString().includes(search) ||
+            (cases.case_id && cases.case_id.toString().includes(search)) ||
             (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
             (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
             (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
