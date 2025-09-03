@@ -45,7 +45,8 @@ export const Payments = () => {
 
                 const data = await res.json();
                 if (res.ok) {
-                    setCases(data);
+                    // setCases(data);
+                    setCases(data.filter((c) => c.case_balance > 0));
                 } else {
                     console.error("Failed to fetch cases:", data.error);
                 }
