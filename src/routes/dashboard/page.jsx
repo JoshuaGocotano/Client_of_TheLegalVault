@@ -118,19 +118,6 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Total Archived Documents
-                    <div className="card">
-                        <div className="card-header">
-                            <p className="card-title">Archived Documents</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
-                                <FileCheck size={26} />
-                            </div>
-                        </div>
-                        <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">723</p>
-                        </div>
-                    </div> */}
-
                     {/* Total Pending Approvals */}
                     <div className="card">
                         <div className="card-header">
@@ -245,7 +232,7 @@ const DashboardPage = () => {
                                                 className="ml-2 size-10 flex-shrink-0 rounded-full object-cover"
                                             />
                                             <div className="flex flex-col gap-y-1">
-                                                <p className="font-medium text-slate-900 dark:text-slate-50">
+                                                <p className="text-sm font-medium text-slate-900 dark:text-slate-50">
                                                     {`${log.user_fullname}` || "Unknown User"}
                                                 </p>
                                                 <p className="text-sm text-slate-500 dark:text-slate-400">{log.user_log_action}</p>

@@ -75,6 +75,20 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
         }
     }, [newCase.user_id]);
 
+    // Validation for required fields
+    const isFormValid = () => {
+        return (
+            newCase.client_id &&
+            newCase.cc_id &&
+            newCase.ct_id &&
+            newCase.case_fee &&
+            newCase.case_status &&
+            newCase.case_remarks &&
+            newCase.case_cabinet
+        );
+    };
+    const [errorMsg, setErrorMsg] = useState("");
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div
@@ -250,6 +264,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                             value={newCase.case_remarks}
                             onChange={(e) => setNewCase({ ...newCase, case_remarks: e.target.value })}
                             className="w-full resize-none rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                            placeholder="Enter remarks or description..."
                             rows={3}
                         ></textarea>
                     </div>
@@ -285,12 +300,21 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                         Cancel
                     </button>
                     <button
-                        onClick={handleAddCase}
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        onClick={() => {
+                            if (!isFormValid()) {
+                                setErrorMsg("Please fill out all required fields before adding the case.");
+                                return;
+                            }
+                            setErrorMsg("");
+                            handleAddCase();
+                        }}
+                        className={`rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 ${!isFormValid() ? "cursor-not-allowed opacity-50" : ""}`}
+                        disabled={!isFormValid()}
                     >
                         Add Case
                     </button>
                 </div>
+                {errorMsg && <div className="mt-2 text-center text-sm text-red-600">{errorMsg}</div>}
             </div>
         </div>
     );

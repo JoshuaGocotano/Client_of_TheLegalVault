@@ -182,7 +182,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                     />
                                     {selectedCase.assigned_by && (
-                                        <p className="mt-1 text-xs text-gray-500">Assigned by: {getAssignerName(selectedCase.assigned_by)}</p>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            {selectedCase.user_id
+                                                ? `Assigned by: ${getAssignerName(selectedCase.assigned_by)}`
+                                                : `Created by: ${getAssignerName(selectedCase.assigned_by)}`}
+                                        </p>
                                     )}
                                 </div>
                                 <div className="col-span-2">

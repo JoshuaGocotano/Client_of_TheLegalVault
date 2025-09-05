@@ -58,12 +58,14 @@ const Userlogs = () => {
         if (/login/i.test(action)) return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
         if (/logout/i.test(action)) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
         if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
-        return "bg-green-100 text-green-700";
+        return "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300";
     };
 
     const getLogTag = (action) => {
         if (/login/i.test(action)) return "Login";
         if (/logout/i.test(action)) return "Logout";
+        // Test data for "action" is this => "New Criminal Case: Crime Against Property of Princy Gocotano"
+        if (/new/i.test(action)) return "New Case";
         if (/fail|error/i.test(action)) return "Error";
         return "Action";
     };
@@ -159,6 +161,7 @@ const Userlogs = () => {
                                     <div className="text-dark-700 mb-1 flex items-center gap-2 text-sm">
                                         {icon}
                                         {log.user_log_type || "Unknown Type"}
+                                        <span className="text-slate-400">{log.user_log_action}</span>
                                     </div>
                                 </div>
 
