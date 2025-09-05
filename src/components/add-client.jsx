@@ -63,7 +63,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                     credentials: "include",
                     body: JSON.stringify({
                         ...contact,
-                        client_id: newClient.client_id, 
+                        client_id: newClient.client_id,
                     }),
                 });
 
@@ -99,7 +99,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                 >
                     <div>
                         <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Client Information</h3>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                             <input
                                 type="text"
                                 placeholder="Full Name"
@@ -114,6 +114,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                                 value={clientData.client_email}
                                 onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                required
                             />
                             <input
                                 type="tel"
@@ -122,14 +123,14 @@ const AddClient = ({ AddClients, setAddClients }) => {
                                 onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
-                            <input
+                            {/* <input
                                 type="password"
                                 placeholder="Password"
                                 value={clientData.client_password}
                                 onChange={(e) => setClientData({ ...clientData, client_password: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                                 required
-                            />
+                            /> */}
                         </div>
                     </div>
 
