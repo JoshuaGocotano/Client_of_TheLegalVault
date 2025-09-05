@@ -142,9 +142,9 @@ export const Payments = () => {
     };
 
     const handleDeletePayment = (payment) => {
-        const toastId = toast.loading("Deleting payment...", { duration: 4000 });
-
         if (window.confirm(`Are you sure you want to delete payment ID ${payment.payment_id}? This action cannot be undone.`)) {
+            const toastId = toast.loading("Deleting payment...", { duration: 4000 });
+
             try {
                 fetch(`http://localhost:3000/api/payments/${payment.payment_id}`, {
                     method: "DELETE",
