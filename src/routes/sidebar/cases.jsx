@@ -146,7 +146,7 @@ const Cases = () => {
         }
     };
 
-    // Editting Case
+    // Editing Case
     const handleCaseUpdate = async (updatedCase) => {
         const toastId = toast.loading("Updating case...");
         try {

@@ -63,7 +63,7 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 client_id: caseData.client_id || "",
                 cc_id: caseData.cc_id || "",
                 ct_id: caseData.ct_id || "",
-                user_id: caseData.user_id || "",
+                user_id: caseData.user_id || null,
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
