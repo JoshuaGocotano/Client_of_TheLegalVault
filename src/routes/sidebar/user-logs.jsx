@@ -64,8 +64,8 @@ const Userlogs = () => {
     const getLogTag = (action) => {
         if (/login/i.test(action)) return "Login";
         if (/logout/i.test(action)) return "Logout";
-        // Test data for "action" is this => "New Criminal Case: Crime Against Property of Princy Gocotano"
-        if (/new/i.test(action)) return "New Case";
+        if (/new/i.test(action)) return "New Case Added";
+        if (/update/i.test(action)) return "Case Update";
         if (/fail|error/i.test(action)) return "Error";
         return "Action";
     };
