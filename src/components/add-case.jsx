@@ -95,6 +95,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                 ref={addCaseModalRef}
                 className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-6 shadow-lg dark:bg-slate-800"
             >
+                {errorMsg && <div className="mt-2 text-center text-sm text-red-600">{errorMsg}</div>}
                 <h3 className="mb-6 text-xl font-bold text-slate-900 dark:text-slate-50">Add New Case</h3>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -273,7 +274,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                     <div>
                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Cabinet</label>
                         <input
-                            type="text"
+                            type="number"
                             value={newCase.case_cabinet}
                             onChange={(e) => setNewCase({ ...newCase, case_cabinet: e.target.value })}
                             className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
@@ -314,7 +315,6 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                         Add Case
                     </button>
                 </div>
-                {errorMsg && <div className="mt-2 text-center text-sm text-red-600">{errorMsg}</div>}
             </div>
         </div>
     );
