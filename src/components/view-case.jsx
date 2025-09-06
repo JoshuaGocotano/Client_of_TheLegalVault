@@ -120,15 +120,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                     <>
                         <div className="mb-4 flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-semibold">
-                                    Case {selectedCase.case_id}
-                                    {/* {" "}
-                                    {selectedCase.case_verdict && selectedCase.case_status === "Completed" && (
-                                        <span className="rounded-full bg-green-600 px-2 text-sm font-medium text-white">
-                                            {selectedCase.case_verdict}
-                                        </span>
-                                    )} */}
-                                </h2>
+                                <h2 className="text-2xl font-semibold">Case {selectedCase.case_id}</h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
                                     {selectedCase.case_drawer && <span>Drawer #: {selectedCase.case_drawer}</span>}
@@ -254,6 +246,14 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <p>
                                             <strong>Last Updated:</strong>
                                             <span className="ml-2 text-slate-500">{formatDateTime(selectedCase.case_last_updated)}</span>
+                                        </p>
+                                    )}
+
+                                    {selectedCase.last_updated_by && (
+                                        <p>
+                                            <strong>Last Updated By:</strong>
+                                            {/* using getAssignerName function here to get the name of the user who last updated the case */}
+                                            <span className="ml-2 text-slate-500">{getAssignerName(selectedCase.last_updated_by)}</span>
                                         </p>
                                     )}
 

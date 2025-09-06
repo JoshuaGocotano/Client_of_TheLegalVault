@@ -146,14 +146,14 @@ const Cases = () => {
         }
     };
 
-    // code for editing case
+    // Editting Case
     const handleCaseUpdate = async (updatedCase) => {
         const toastId = toast.loading("Updating case...");
         try {
             const res = await fetch(`http://localhost:3000/api/cases/${updatedCase.case_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(updatedCase),
+                body: JSON.stringify({...updatedCase, last_updated_by: user.user_id}),
             });
 
             if (!res.ok) throw new Error("Failed to update case.");
