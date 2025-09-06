@@ -267,7 +267,7 @@ const AddUser = ({ onClose }) => {
                                     value="Admin"
                                     className="dark:bg-slate-800 dark:text-white"
                                 >
-                                    Admin
+                                    Super Lawyer
                                 </option>
                             </select>
                         </div>
