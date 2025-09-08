@@ -165,8 +165,11 @@ const Userlogs = () => {
                                     </div>
                                 </div>
 
-                                {/* Timestamp */}
-                                <div className="ml-auto whitespace-nowrap text-sm">{formattedTime}</div>
+                                {/* Timestamp and IP Address*/}
+                                <div className="ml-4 text-right text-xs text-slate-500">
+                                    <div>{formattedTime}</div>
+                                    {user.user_role === "Admin" && log.user_ip_address && <div>IP: {log.user_ip_address}</div>}
+                                </div>
                             </div>
                         );
                     })}
