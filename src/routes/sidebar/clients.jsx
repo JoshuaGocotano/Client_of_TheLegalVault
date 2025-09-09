@@ -20,7 +20,7 @@ const Client = () => {
     const fetchAll = useCallback(async () => {
         try {
             const clients_endpoint =
-                user?.user_role === "Admin"
+                user?.user_role === "Admin" || user?.user_role === "Staff"
                     ? showAllClients
                         ? "http://localhost:3000/api/all-clients"
                         : "http://localhost:3000/api/clients"

@@ -69,7 +69,10 @@ const Cases = () => {
             try {
                 const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
 
-                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`);
+                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`, {
+                    credentials: "include",
+                });
+
                 if (!response.ok) {
                     throw new Error("Failed to fetch cases");
                 }
@@ -318,19 +321,22 @@ const Cases = () => {
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
-                                            <button
-                                                className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => {
-                                                    setCaseToEdit({
-                                                        ...cases,
-                                                        lawyer_fullname: getLawyerFullName(cases.user_id),
-                                                        assigned_by_name: getLawyerFullName(cases.assigned_by),
-                                                    });
-                                                    setEditModalOpen(true);
-                                                }}
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </button>
+
+                                            {cases.case_status !== "Completed" && cases.case_status !== "Dismissed" && (
+                                                <button
+                                                    className="p-1.5 text-yellow-500 hover:text-yellow-700"
+                                                    onClick={() => {
+                                                        setCaseToEdit({
+                                                            ...cases,
+                                                            lawyer_fullname: getLawyerFullName(cases.user_id),
+                                                            assigned_by_name: getLawyerFullName(cases.assigned_by),
+                                                        });
+                                                        setEditModalOpen(true);
+                                                    }}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

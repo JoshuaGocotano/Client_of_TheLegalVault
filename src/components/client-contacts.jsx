@@ -26,12 +26,14 @@ const ClientContact = () => {
         const fetchData = async () => {
             try {
                 const client_contacts_endpoint =
-                    user?.user_role === "Admin"
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
                         ? "http://localhost:3000/api/client-contacts"
                         : `http://localhost:3000/api/a-lawyer-client-contacts/${user.user_id}`;
 
                 const clients_endpoint =
-                    user?.user_role === "Admin" ? "http://localhost:3000/api/clients" : `http://localhost:3000/api/clients/${user.user_id}`;
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/clients"
+                        : `http://localhost:3000/api/clients/${user.user_id}`;
 
                 // Fetch both contacts and clients in parallel
                 const [contactsRes, clientsRes] = await Promise.all([
