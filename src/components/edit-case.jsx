@@ -64,7 +64,7 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 cc_id: caseData.cc_id || "",
                 ct_id: caseData.ct_id || "",
                 // user_id: caseData.user_id || null,
-                user_id: user.user_role === "Lawyer" ? user.user_id : (caseData.user_id || null),
+                user_id: user.user_role === "Lawyer" ? user.user_id : caseData.user_id || null,
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
@@ -306,7 +306,7 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                         className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                         onClick={handleSubmit}
                     >
-                        Update Case
+                        Update Case {user.user_role === "Lawyer" && " & Start Processing"}
                     </button>
                 </div>
             </div>

@@ -324,6 +324,7 @@ const Cases = () => {
 
                                             {cases.case_status !== "Completed" && cases.case_status !== "Dismissed" && (
                                                 <button
+                                                    title={user.user_role === "Admin" ? "Edit case" : "Update and take case"}
                                                     className="p-1.5 text-yellow-500 hover:text-yellow-700"
                                                     onClick={() => {
                                                         setCaseToEdit({
