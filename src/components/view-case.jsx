@@ -108,6 +108,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
             currency: "PHP",
         }).format(amount);
 
+    // handles closing and dismissing case
     const handleCaseAction = async (type, updatedCase) => {
         if (!selectedCase) return;
         try {

@@ -11,7 +11,7 @@ const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
     const btnColor = isClose ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700";
     const actionText = isClose ? "close" : "dismiss";
 
-    const [verdict, setVerdict] = React.useState(caseData.verdict || "");
+    const [verdict, setVerdict] = React.useState(caseData.case_verdict || "");
 
     const handleVerdictChange = (e) => {
         setVerdict(e.target.value);

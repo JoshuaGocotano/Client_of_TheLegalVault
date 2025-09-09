@@ -63,7 +63,8 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 client_id: caseData.client_id || "",
                 cc_id: caseData.cc_id || "",
                 ct_id: caseData.ct_id || "",
-                user_id: caseData.user_id || null,
+                // user_id: caseData.user_id || null,
+                user_id: user.user_role === "Lawyer" ? user.user_id : (caseData.user_id || null),
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
@@ -100,9 +101,19 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
     const handleSubmit = () => {
         if (!validate()) return;
 
-        if (onUpdate) {
-            onUpdate({ ...caseData, ...formData });
+        let updatedCase = {
+            ...caseData,
+            ...formData,
+        };
+
+        if (updatedCase.user_id) {
+            updatedCase.case_status = "Processing";
         }
+
+        if (onUpdate) {
+            onUpdate(updatedCase);
+        }
+
         onClose();
     };
 
@@ -224,6 +235,7 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                                       ? "Select Category first"
                                       : "Select Lawyer"}
                             </option>
+
                             {user.user_role === "Admin" ? (
                                 lawyers
                                     .filter((lawyer) => lawyer.cc_id === parseInt(formData.cc_id))
