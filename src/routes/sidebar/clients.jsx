@@ -14,7 +14,7 @@ const Client = () => {
     useEffect(() => {
         if (!user) return; // wait until auth state is known
         if (user.user_role === "Paralegal") {
-            navigate("/unauthorized", { replace: true });
+            navigate("/unauthorized");
         }
     }, [user, navigate]);
 
@@ -90,7 +90,7 @@ const Client = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...editClient, last_updated_by: user.user_id }),
+                body: JSON.stringify({ ...editClient, client_last_updated_by: user.user_id }),
             });
 
             if (!res.ok) {
