@@ -10,6 +10,15 @@ import EditCaseModal from "../../components/edit-case";
 
 const Cases = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // redirect non-admins
+    useEffect(() => {
+        if (!user) return; // wait until auth state is known
+        if (user.user_role !== "Admin" && user.user_role !== "Lawyer") {
+            navigate("/unauthorized");
+        }
+    }, [user, navigate]);
 
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
@@ -21,7 +30,6 @@ const Cases = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
     const addCaseModalRef = useRef();
-    const navigate = useNavigate();
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [caseToEdit, setCaseToEdit] = useState(null);
 

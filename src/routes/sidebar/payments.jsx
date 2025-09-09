@@ -2,9 +2,20 @@ import { useState, useEffect, use } from "react";
 import { Eye, Trash2, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const Payments = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // redirect non-admins and non-lawyers
+    useEffect(() => {
+        if (!user) return; // wait until auth state is known
+        if (user.user_role !== "Admin" && user.user_role !== "Lawyer") {
+            navigate("/unauthorized", { replace: true });
+        }
+    }, [user, navigate]);
+
     const [error, setError] = useState("");
     const [paymentsData, setPaymentsData] = useState([]);
     const [cases, setCases] = useState([]);

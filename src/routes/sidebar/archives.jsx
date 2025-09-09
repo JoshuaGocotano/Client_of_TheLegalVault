@@ -2,6 +2,9 @@ import { useState, useRef } from "react";
 import { Filter, X } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
+import { useAuth } from "@/context/auth-context";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const initialCases = [
     {
@@ -59,6 +62,18 @@ const getStatusColor = (status) => {
 };
 
 const Archives = () => {
+    const { user } = useAuth();
+
+    const navigate = useNavigate();
+
+    // redirect non-admins
+    useEffect(() => {
+        if (!user) return; // wait until auth state is known
+        if (user.user_role !== "Admin" && user.user_role !== "Lawyer") {
+            navigate("/unauthorized", { replace: true });
+        }
+    }, [user, navigate]);
+
     const [search, setSearch] = useState("");
     const [cases, setCases] = useState(initialCases);
     const [selectedCase, setSelectedCase] = useState(null);
