@@ -63,8 +63,10 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 client_id: caseData.client_id || "",
                 cc_id: caseData.cc_id || "",
                 ct_id: caseData.ct_id || "",
-                // user_id: caseData.user_id || null,
-                user_id: user.user_role === "Lawyer" ? user.user_id : caseData.user_id || null,
+                user_id:
+                    user.user_role === "Lawyer"
+                        ? user.user_id // lawyer always auto-assigned
+                        : "", // admin starts with "Select Lawyer"
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
@@ -237,16 +239,27 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                             </option>
 
                             {user.user_role === "Admin" ? (
-                                lawyers
-                                    .filter((lawyer) => lawyer.cc_id === parseInt(formData.cc_id))
-                                    .map((lawyer) => (
-                                        <option
-                                            key={lawyer.user_id}
-                                            value={lawyer.user_id}
-                                        >
-                                            {lawyer.user_fname} {lawyer.user_mname} {lawyer.user_lname}
+                                (() => {
+                                    const filteredLawyers = lawyers.filter((lawyer) => lawyer.cc_id === parseInt(formData.cc_id));
+
+                                    if (filteredLawyers.length > 0) {
+                                        return filteredLawyers.map((lawyer) => (
+                                            <option
+                                                key={lawyer.user_id}
+                                                value={lawyer.user_id}
+                                            >
+                                                {lawyer.user_fname} {lawyer.user_mname} {lawyer.user_lname}
+                                            </option>
+                                        ));
+                                    }
+
+                                    // fallback: no lawyers → assign to the admin (or super lawyer)
+                                    return (
+                                        <option value={user.user_id}>
+                                            {user.user_fname} {user.user_mname} {user.user_lname} (You)
                                         </option>
-                                    ))
+                                    );
+                                })()
                             ) : (
                                 <option value={formData.user_id}>
                                     {user.user_fname} {user.user_mname} {user.user_lname}
