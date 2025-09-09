@@ -36,6 +36,16 @@ const Cases = () => {
         });
     };
 
+    // get the full name of the (assigned) lawyer
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = tableData.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                  .replace(/\s+/g, " ")
+                  .trim()
+            : "Unassigned";
+    };
+
     const filteredCases = tableData.filter((cases) => {
         const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
         const searchLower = search.toLowerCase();
@@ -44,6 +54,7 @@ const Cases = () => {
             (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
             (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
             (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
+            (getLawyerFullName(cases.user_id) && getLawyerFullName(cases.user_id).toLowerCase().includes(searchLower)) ||
             (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
         return matchesStatus && matchesSearch;
     });
@@ -153,7 +164,7 @@ const Cases = () => {
             const res = await fetch(`http://localhost:3000/api/cases/${updatedCase.case_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({...updatedCase, last_updated_by: user.user_id}),
+                body: JSON.stringify({ ...updatedCase, last_updated_by: user.user_id }),
             });
 
             if (!res.ok) throw new Error("Failed to update case.");
@@ -177,16 +188,6 @@ const Cases = () => {
             setStatusFilter("");
         }
     }, [tableData]);
-
-    // get the full name of the (assigned) lawyer
-    const getLawyerFullName = (lawyerId) => {
-        const lawyer = tableData.find((u) => u.user_id === lawyerId);
-        return lawyer
-            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
-                  .replace(/\s+/g, " ")
-                  .trim()
-            : "Unassigned";
-    };
 
     return (
         <div className="mx-auto">
