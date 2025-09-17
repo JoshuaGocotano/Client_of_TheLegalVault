@@ -4,6 +4,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 import CaseActionModal from "./case-action-modal";
 import toast from "react-hot-toast";
+import AddTask from "./add-task";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const { user } = useAuth();
@@ -11,6 +12,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
     const [users, setUsers] = useState([]);
@@ -353,7 +355,10 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                                 {selectedCase.case_status === "Processing" && (
                                     <div className="flex gap-2">
-                                        <button className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white">
+                                        <button
+                                            onClick={() => setIsAddTaskOpen(true)}
+                                            className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white"
+                                        >
                                             Add Task Document
                                         </button>
                                         <input
@@ -368,18 +373,18 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         >
                                             Add Document
                                         </button>
-                                        <button className="rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700">Clear</button>
                                     </div>
                                 )}
                             </div>
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
-                                    <tr>
+                                    <tr className="text-xs">
                                         <th className="px-4 py-2">ID</th>
+                                        <th className="px-4 py-2">Type</th>
                                         <th className="px-4 py-2">Name</th>
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">File</th>
-                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Uploaded by"}</th>
+                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
                                         <th className="px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
@@ -391,14 +396,28 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             className="border-t border-gray-200 dark:border-gray-700"
                                         >
                                             <td className="px-4 py-2">{doc.doc_id}</td>
+                                            <td className="px-4 py-2">{doc.doc_type} Document</td>
                                             <td className="px-4 py-2">{doc.doc_name}</td>
                                             <td className="px-4 py-2">{doc.doc_status}</td>
-                                            <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.doc_file}</td>
-                                            <td className="px-4 py-2">{doc.doc_}</td>
+                                            <td
+                                                className="cursor-pointer px-4 py-2 text-blue-600 underline"
+                                                onClick={() =>
+                                                    window.open(
+                                                        `http://localhost:3000/uploads/${doc.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`,
+                                                        "_blank",
+                                                    )
+                                                }
+                                            >
+                                                {doc.doc_file}
+                                            </td>
+                                            <td className="px-4 py-2">{doc.doc_submitted_by}</td>
                                             <td className="space-x-2 px-4 py-2">
                                                 <button className="text-blue-600 hover:underline">Edit</button>
                                                 <button className="text-red-600 hover:underline">Reject</button>
-                                                <button className="text-red-600 hover:underline">
+                                                <button
+                                                    className="text-red-600"
+                                                    title="Delete Document"
+                                                >
                                                     <Trash2 size={16} />
                                                 </button>
                                             </td>
@@ -407,6 +426,28 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Add Task Modal */}
+                        {isAddTaskOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                <div className="relative w-full max-w-3xl rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+                                    <button
+                                        className="absolute right-4 top-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                                        onClick={() => setIsAddTaskOpen(false)}
+                                    >
+                                        <X className="h-6 w-6" />
+                                    </button>
+                                    <AddTask
+                                        caseId={selectedCase.case_id}
+                                        onClose={() => setIsAddTaskOpen(false)}
+                                        onAdded={() => {
+                                            setIsAddTaskOpen(false);
+                                            // Optionally refresh documents
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* close case and dismiss case button when the case is not yet completed */}
                         {selectedCase.case_status === "Processing" && (
