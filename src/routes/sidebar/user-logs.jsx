@@ -67,6 +67,7 @@ const Userlogs = () => {
         if (/login/i.test(action)) return "Login";
         if (/logout/i.test(action)) return "Logout";
         if (/new client/i.test(action)) return "New Client Added";
+        if (/new contact/i.test(action)) return "New Client Contact Added";
         if (/updated client/i.test(action)) return "Client Update";
         if (/new case/i.test(action)) return "New Case Added";
         if (/updated case/i.test(action)) return "Case Update";
