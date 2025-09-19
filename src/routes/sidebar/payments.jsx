@@ -148,7 +148,7 @@ export const Payments = () => {
             }
         } catch (err) {
             console.error("Error adding payment:", err);
-            toast.error("Error adding payment");
+            toast.error("Error adding payment", { id: toastId, duration: 4000 });
         }
     };
 
@@ -360,14 +360,31 @@ export const Payments = () => {
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Amount</label>
                                 <input
-                                    type="text"
+                                    type="number"
                                     value={addPayment.payment_amount}
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        // Allow empty string for editing
+                                        if (value === "") {
+                                            setAddPayment({
+                                                ...addPayment,
+                                                payment_amount: "",
+                                            });
+                                            return;
+                                        }
+
+                                        // Prevent negative values
+                                        if (parseFloat(value) < 0) {
+                                            alert("Amount cannot be negative!");
+                                            return;
+                                        }
+
                                         setAddPayment({
                                             ...addPayment,
-                                            payment_amount: e.target.value,
-                                        })
-                                    }
+                                            payment_amount: value,
+                                        });
+                                    }}
                                     onBlur={() => {
                                         if (addPayment.payment_amount !== "") {
                                             setAddPayment({
