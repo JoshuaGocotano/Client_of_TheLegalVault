@@ -344,6 +344,8 @@ export default ClientContact;
 
 // EditContactModal Component
 const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
+    const { user } = useAuth();
+    
     const [formData, setFormData] = useState(contact || {});
 
     // Sync when contact prop changes
@@ -368,7 +370,7 @@ const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(formData),
+                body: JSON.stringify({ ...formData, contact_updated_by: user.user_id }),
             });
 
             if (!res.ok) {
