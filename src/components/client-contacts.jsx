@@ -125,8 +125,12 @@ const ClientContact = () => {
 
         try {
             const res = await fetch(`http://localhost:3000/api/client-contacts/${contact.contact_id}`, {
-                method: "DELETE",
+                method: "PUT",
                 credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ ...contact, contact_status: "Removed", contact_updated_by: user.user_id }),
             });
 
             if (!res.ok) {
