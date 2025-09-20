@@ -345,7 +345,7 @@ export default ClientContact;
 // EditContactModal Component
 const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
     const { user } = useAuth();
-    
+
     const [formData, setFormData] = useState(contact || {});
 
     // Sync when contact prop changes
