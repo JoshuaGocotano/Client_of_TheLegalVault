@@ -66,7 +66,9 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 user_id:
                     user.user_role === "Lawyer"
                         ? user.user_id // lawyer always auto-assigned
-                        : "", // admin starts with "Select Lawyer"
+                        : caseData.case_status === "Processing"
+                          ? caseData.user_id || "" // if processing, keep assigned lawyer
+                          : "", // if not processing, allow unassigned
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
