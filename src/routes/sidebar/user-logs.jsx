@@ -71,6 +71,7 @@ const Userlogs = () => {
         if (/new contact/i.test(action)) return "New Client Contact Added";
         if (/updated client/i.test(action)) return "Client Update";
         if (/updated contact/i.test(action)) return "Client Contact Update";
+        if (/removed contact/i.test(action)) return "Client Contact Removed";
         if (/new case/i.test(action)) return "New Case Added";
         if (/updated case/i.test(action)) return "Case Update";
         if (/fail|error/i.test(action)) return "Error";
