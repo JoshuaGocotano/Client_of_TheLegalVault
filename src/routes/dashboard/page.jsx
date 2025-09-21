@@ -11,6 +11,54 @@ const DashboardPage = () => {
     const { theme } = useTheme();
     const { user } = useAuth();
     const [userLogs, setUserLogs] = useState([]);
+    const [userCount, setUserCount] = useState(0);
+    const [processingCasesCount, setProcessingCasesCount] = useState(0);
+
+    // fetching user count
+    useEffect(() => {
+        const fetchUserCount = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users/count", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch user count");
+                const data = await res.json();
+                setUserCount(data.count);
+            } catch (error) {
+                console.error("Failed to fetch user count:", error);
+            }
+        };
+
+        if (user?.user_role === "Admin") {
+            fetchUserCount();
+        }
+    }, [user]);
+
+    // fetching processing cases count with role-based access
+    useEffect(() => {
+        const fetchProcessingCasesCount = async () => {
+            try {
+                const endpoint =
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/cases/count/processing"
+                        : `http://localhost:3000/api/cases/count/processing/user/${user.user_id}`;
+                const res = await fetch(endpoint, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch processing cases count");
+                const data = await res.json();
+                setProcessingCasesCount(data.count);
+            } catch (error) {
+                console.error("Failed to fetch processing cases count:", error);
+            }
+        };
+
+        if (user) {
+            fetchProcessingCasesCount();
+        }
+    }, [user]);
 
     // fetching user logs
     useEffect(() => {
@@ -56,7 +104,7 @@ const DashboardPage = () => {
                                 </div>
                             </div>
                             <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                                <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">32</p>
+                                <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">{userCount}</p>
                             </div>
                         </div>
                     )}
@@ -83,7 +131,7 @@ const DashboardPage = () => {
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">5</p>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">{processingCasesCount}</p>
                         </div>
                     </div>
 
