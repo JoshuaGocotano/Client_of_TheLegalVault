@@ -1,3 +1,5 @@
+// Add Task Document modal component
+
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/auth-context.jsx";
 
@@ -331,7 +333,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
             {/* Existing Documents */}
             <div className="mt-4 overflow-x-auto">
-                <h3 className="mb-2 font-medium text-gray-900 dark:text-gray-100">Existing Documents for this Case</h3>
+                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Existing Documents for this Case:</h3>
                 {loadingDocs ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                 ) : docs.length === 0 ? (
@@ -365,7 +367,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                                         {d.doc_file ? (
                                             <a
                                                 className="text-blue-600 hover:underline"
-                                                href={`http://localhost:3000${d.doc_file}`}
+                                                href={`http://localhost:3000/uploads/${d.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${d.doc_file}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
