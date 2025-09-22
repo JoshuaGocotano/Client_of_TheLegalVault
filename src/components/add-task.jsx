@@ -1,7 +1,7 @@
 // Add Task Document modal component
-
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/auth-context.jsx";
+import toast from "react-hot-toast";
 
 export default function AddTask({ caseId, onClose, onAdded }) {
     const { user } = useAuth() || {};
@@ -11,10 +11,9 @@ export default function AddTask({ caseId, onClose, onAdded }) {
     const [loadingDocs, setLoadingDocs] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
-    const [files, setFiles] = useState([]);
+    const [refDocs, setRefDocs] = useState([]);
 
-    // Form state
+    // Form state (exclude doc_references here, we handle via refDocs state)
     const [form, setForm] = useState({
         doc_name: "",
         doc_description: "",
@@ -24,9 +23,13 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         doc_tag: "",
         doc_password: "",
         doc_tasked_to: "",
-        doc_type: "Task",
+        doc_tasked_by: user?.user_id || "",
+        doc_type: "Task", // keep consistent with backend
+        doc_status: "to-do",
+        case_id: caseId,
     });
 
+    // Priority → days mapping
     const prioToDays = useMemo(() => ({ Low: 14, Mid: 5, High: 2 }), []);
 
     const formatDate = (d) => {
@@ -34,6 +37,16 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         const m = String(d.getMonth() + 1).padStart(2, "0");
         const day = String(d.getDate()).padStart(2, "0");
         return `${y}-${m}-${day}`;
+    };
+
+    const formatTimestamp = (d) => {
+        const pad2 = (n) => String(n).padStart(2, "0");
+        const date = formatDate(d);
+        const h = pad2(d.getHours());
+        const mi = pad2(d.getMinutes());
+        const s = pad2(d.getSeconds());
+        const micros = String(d.getMilliseconds() * 1000).padStart(6, "0");
+        return `${date} ${h}:${mi}:${s}.${micros}`;
     };
 
     const onChange = (e) => {
@@ -48,20 +61,24 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         if (days) {
             const dt = new Date();
             dt.setDate(dt.getDate() + days);
-            due = formatDate(dt);
+            dt.setHours(23, 59, 59, 999);
+            due = formatTimestamp(dt);
         }
         setForm((prev) => ({ ...prev, doc_prio_level: value, doc_due_date: due }));
     };
 
+    // Handle file uploads
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
-        setFiles((prev) => [...prev, ...selectedFiles]);
+        setRefDocs((prev) => [...prev, ...selectedFiles]);
+        e.target.value = null;
     };
 
     const removeFile = (index) => {
-        setFiles((prev) => prev.filter((_, i) => i !== index));
+        setRefDocs((prev) => prev.filter((_, i) => i !== index));
     };
 
+    // Fetch existing documents
     const fetchDocuments = async () => {
         if (!caseId) return;
         setLoadingDocs(true);
@@ -84,6 +101,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         fetchDocuments();
     }, [caseId]);
 
+    // Fetch users
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -106,21 +124,22 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         if (!caseId) return;
         setSubmitting(true);
         setError("");
-        setSuccess("");
+
+        const toastId = toast.loading("Submitting task document...", { duration: 4000 });
+
         try {
             const fd = new FormData();
             Object.entries(form).forEach(([k, v]) => {
                 if (v !== undefined && v !== null) fd.append(k, v);
             });
-            if (user?.user_id) fd.append("doc_tasked_by", user.user_id);
-            fd.append("case_id", caseId);
 
-            files.forEach((f) => fd.append("doc_files", f));
+            // append reference docs
+            refDocs.forEach((f) => fd.append("doc_reference", f));
 
             const res = await fetch("http://localhost:3000/api/documents", {
                 method: "POST",
-                body: fd,
                 credentials: "include",
+                body: fd,
             });
 
             if (!res.ok) {
@@ -128,7 +147,9 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                 throw new Error(t || "Failed to create task document");
             }
 
-            setSuccess("Task document created.");
+            toast.success("Task document created successfully!", { id: toastId, duration: 4000 });
+
+            // reset
             setForm({
                 doc_name: "",
                 doc_description: "",
@@ -138,13 +159,19 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                 doc_tag: "",
                 doc_password: "",
                 doc_tasked_to: "",
+                doc_tasked_by: user?.user_id || "",
                 doc_type: "Task",
+                doc_status: "to-do",
+                case_id: caseId,
             });
-            setFiles([]);
+            setRefDocs([]);
             fetchDocuments();
             if (onAdded) onAdded();
         } catch (e) {
             setError(e.message || "Submission failed");
+            console.error("Error submitting task document:", e);
+            setError("Submission failed. Please try again.");
+            toast.error("Failed to submit task document.", { id: toastId, duration: 4000 });
         } finally {
             setSubmitting(false);
         }
@@ -152,9 +179,14 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
     return (
         <div className="space-y-4">
+            {error && <div className="rounded bg-red-100 px-4 py-2 text-sm font-medium text-red-700">{error}</div>}
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add Task Document</h2>
 
-            <form onSubmit={onSubmit}>
+            <form
+                onSubmit={onSubmit}
+                className="space-y-4"
+            >
+                {/* Grid Inputs */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                     {/* Tasked To */}
                     <div className="flex flex-col">
@@ -227,7 +259,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                         <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
                         <input
                             name="doc_due_date"
-                            value={form.doc_due_date}
+                            value={form.doc_due_date ? form.doc_due_date.slice(0, 10) : ""}
                             type="date"
                             readOnly
                             required
@@ -262,8 +294,8 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                     </div>
                 </div>
 
-                <div className="mb-4 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {/* Description */}
+                {/* Description & Task */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="flex flex-col">
                         <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                         <textarea
@@ -276,7 +308,6 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                         />
                     </div>
 
-                    {/* Task */}
                     <div className="flex flex-col">
                         <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Task</label>
                         <textarea
@@ -290,9 +321,9 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                     </div>
                 </div>
 
-                {/* File Reference */}
-                <div className="mb-4 flex flex-col md:col-span-3">
-                    <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">File Reference (PDF)</label>
+                {/* Reference Files */}
+                <div className="flex flex-col">
+                    <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">File References (PDF)</label>
                     <input
                         type="file"
                         accept="application/pdf"
@@ -301,7 +332,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                         className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                     />
                     <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
-                        {files.map((file, index) => (
+                        {refDocs.map((file, index) => (
                             <li
                                 key={index}
                                 className="flex items-center justify-between rounded border px-2 py-1 dark:border-gray-600"
@@ -320,7 +351,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                 </div>
 
                 {/* Submit */}
-                <div className="flex justify-end gap-3 md:col-span-3">
+                <div className="flex justify-end">
                     <button
                         type="submit"
                         disabled={submitting}
@@ -332,8 +363,8 @@ export default function AddTask({ caseId, onClose, onAdded }) {
             </form>
 
             {/* Existing Documents */}
-            <div className="mt-4 overflow-x-auto">
-                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Existing Documents for this Case:</h3>
+            <div className="mt-6 overflow-x-auto">
+                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Existing Documents</h3>
                 {loadingDocs ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                 ) : docs.length === 0 ? (
@@ -367,7 +398,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                                         {d.doc_file ? (
                                             <a
                                                 className="text-blue-600 hover:underline"
-                                                href={`http://localhost:3000/uploads/${d.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${d.doc_file}`}
+                                                href={`http://localhost:3000/uploads/${d.doc_type === "Task" ? "taskDocs" : "supportingDocs"}/${d.doc_file}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >

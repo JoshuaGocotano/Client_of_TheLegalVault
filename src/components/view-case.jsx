@@ -61,25 +61,25 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
         fetchUsers();
     }, []);
 
+    const fetchDocuments = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/api/case/documents/${selectedCase.case_id}`, {
+                method: "GET",
+                credentials: "include",
+            });
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to fetch documents.");
+            }
+            setDocuments(data);
+        } catch (error) {
+            console.error("Error fetching documents:", error);
+        }
+    };
+
     // Fetching documents for the selected case
     useEffect(() => {
-        const fetchDocuments = async () => {
-            try {
-                const res = await fetch(`http://localhost:3000/api/case/documents/${selectedCase.case_id}`, {
-                    method: "GET",
-                    credentials: "include",
-                });
-                const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || "Failed to fetch documents.");
-                }
-                setDocuments(data);
-            } catch (error) {
-                console.error("Error fetching documents:", error);
-            }
-        };
-
         if (selectedCase) {
             fetchDocuments();
         }
@@ -403,7 +403,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                                 className="cursor-pointer px-4 py-2 text-blue-600 underline"
                                                 onClick={() =>
                                                     window.open(
-                                                        `http://localhost:3000/uploads/${doc.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`,
+                                                        `http://localhost:3000/uploads/${doc.doc_type === "Task" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`,
                                                         "_blank",
                                                     )
                                                 }
@@ -442,7 +442,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         onClose={() => setIsAddTaskOpen(false)}
                                         onAdded={() => {
                                             setIsAddTaskOpen(false);
-                                            // Optionally refresh documents
+                                            fetchDocuments();
                                         }}
                                     />
                                 </div>
