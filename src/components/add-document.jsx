@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context.jsx";
+import toast from "react-hot-toast";
+import Spinner from "./loading.jsx";
 
 export default function AddDocument({ caseId, onClose, onAdded }) {
     const { user } = useAuth() || {};
@@ -8,7 +10,6 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     const [loadingDocs, setLoadingDocs] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
     const [file, setFile] = useState(null);
     const [fileError, setFileError] = useState("");
 
@@ -72,10 +73,11 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
 
     const onSubmit = async (e) => {
         e.preventDefault();
-        if (!caseId) return;
         setSubmitting(true);
         setError("");
-        setSuccess("");
+
+        const toastId = toast.loading("Submitting...", { duration: 10000 });
+
         try {
             const fd = new FormData();
             Object.entries(form).forEach(([k, v]) => {
@@ -98,7 +100,8 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                 throw new Error(t || "Failed to create document");
             }
 
-            setSuccess("Document created.");
+            toast.success("Document added successfully", { id: toastId, duration: 4000 });
+
             setForm({
                 doc_name: "",
                 doc_description: "",
@@ -112,6 +115,9 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
             if (onAdded) onAdded();
         } catch (e) {
             setError(e.message || "Submission failed");
+            toast.error("Submission failed", { id: toastId, duration: 4000 });
+            console.error("Add document error:", e);
+            setSubmitting(false);
         } finally {
             setSubmitting(false);
         }
@@ -134,7 +140,6 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                 {/* Body */}
                 <div className="space-y-4 p-4">
                     {error && <p className="text-red-600">{error}</p>}
-                    {success && <p className="text-green-600">{success}</p>}
 
                     <form
                         onSubmit={onSubmit}
@@ -226,7 +231,13 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                                 disabled={submitting}
                                 className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
                             >
-                                {submitting ? "Submitting..." : "Add Document"}
+                                {submitting ? (
+                                    <>
+                                        Submitting... <Spinner />
+                                    </>
+                                ) : (
+                                    <>Add Document</>
+                                )}
                             </button>
                         </div>
                     </form>
