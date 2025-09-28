@@ -5,6 +5,7 @@ import { useAuth } from "@/context/auth-context";
 import CaseActionModal from "./case-action-modal";
 import toast from "react-hot-toast";
 import AddTask from "./add-task";
+import AddDocument from "./add-document";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const { user } = useAuth();
@@ -13,6 +14,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const fileInputRef = useRef(null);
 
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+    const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
     const [users, setUsers] = useState([]);
@@ -442,6 +445,28 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         onClose={() => setIsAddTaskOpen(false)}
                                         onAdded={() => {
                                             setIsAddTaskOpen(false);
+                                            fetchDocuments();
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Add Document Modal */}
+                        {isAddDocumentOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                <div className="relative w-full max-w-3xl rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+                                    <button
+                                        className="absolute right-4 top-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                                        onClick={() => setIsAddDocumentOpen(false)}
+                                    >
+                                        <X className="h-6 w-6" />
+                                    </button>
+                                    <AddDocument
+                                        caseId={selectedCase.case_id}
+                                        onClose={() => setIsAddDocumentOpen(false)}
+                                        onAdded={() => {
+                                            setIsAddDocumentOpen(false);
                                             fetchDocuments();
                                         }}
                                     />
