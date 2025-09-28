@@ -139,7 +139,7 @@ const Documents = () => {
                                         <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
                                         <td className="px-4 py-3">
                                             <a
-                                                href={`http://localhost:3000/uploads/${doc.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`}
+                                                href={`http://localhost:3000${doc.doc_file}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="flex text-red-600 hover:text-red-800"
@@ -151,14 +151,6 @@ const Documents = () => {
                                         <td className="px-4 py-3">{doc.doc_type}</td>
                                         <td className="px-4 py-3">{doc.doc_submitted_by}</td>
                                         <td className="flex justify-center gap-4 px-4 py-3">
-                                            <a
-                                                href={`http://localhost:3000${doc.doc_file}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="text-blue-600 hover:text-blue-800"
-                                            >
-                                                <Download size={16} />
-                                            </a>
                                             <button
                                                 className="text-red-500 hover:text-red-700"
                                                 onClick={() => confirmDelete(doc)}

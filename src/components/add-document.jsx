@@ -10,6 +10,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const [file, setFile] = useState(null);
+    const [fileError, setFileError] = useState("");
 
     // Form state
     const [form, setForm] = useState({
@@ -27,11 +28,24 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     };
 
     const handleFileChange = (e) => {
-        setFile(e.target.files[0] || null);
+        const selected = e.target.files[0];
+        if (!selected) return;
+
+        // File size limiting
+        if (selected.size > 10 * 1024 * 1024) {
+            setFileError("File size must be 10MB or less.");
+            setFile(null);
+            e.target.value = null;
+            return;
+        }
+
+        setFile(selected);
+        setFileError("");
     };
 
     const removeFile = () => {
         setFile(null);
+        setFileError("");
     };
 
     const fetchDocuments = async () => {
@@ -107,7 +121,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
             <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white shadow-lg dark:bg-slate-900">
                 {/* Header */}
-                <div className="flex items-center justify-between border-b p-4 dark:border-gray-700">
+                <div className="flex items-center justify-between p-4">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add Document (Support Document)</h2>
                     <button
                         onClick={onClose}
@@ -190,6 +204,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                                 onChange={handleFileChange}
                                 className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                             />
+                            {fileError && <p className="mt-1 text-sm text-red-600">{fileError}</p>}
                             {file && (
                                 <div className="mt-2 flex items-center justify-between rounded border px-2 py-1 text-sm dark:border-gray-600">
                                     <span>📄 {file.name}</span>

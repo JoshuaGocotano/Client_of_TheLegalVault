@@ -96,6 +96,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
             : "Unknown";
     };
 
+    const getSubmitterName = (submittedById) => {
+        const submitter = users.find((u) => u.user_id === submittedById);
+        return submitter ? `${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}` : "-";
+    };
+
     useClickOutside([modalRef], () => {
         setSelectedCase(null);
         setShowPayments(false);
@@ -371,7 +376,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             className="hidden"
                                         />
                                         <button
-                                            onClick={() => fileInputRef.current.click()}
+                                            onClick={() => setIsAddDocumentOpen(true)}
                                             className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
                                         >
                                             Add Document
@@ -383,8 +388,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
                                     <tr className="text-xs">
                                         <th className="px-4 py-2">ID</th>
-                                        <th className="px-4 py-2">Type</th>
                                         <th className="px-4 py-2">Name</th>
+                                        <th className="px-4 py-2">Type</th>
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">File</th>
                                         <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
@@ -399,21 +404,16 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             className="border-t border-gray-200 dark:border-gray-700"
                                         >
                                             <td className="px-4 py-2">{doc.doc_id}</td>
-                                            <td className="px-4 py-2">{doc.doc_type} Document</td>
                                             <td className="px-4 py-2">{doc.doc_name}</td>
+                                            <td className="px-4 py-2">{doc.doc_type} Document</td>
                                             <td className="px-4 py-2">{doc.doc_status}</td>
                                             <td
                                                 className="cursor-pointer px-4 py-2 text-blue-600 underline"
-                                                onClick={() =>
-                                                    window.open(
-                                                        `http://localhost:3000/uploads/${doc.doc_type === "Task" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`,
-                                                        "_blank",
-                                                    )
-                                                }
+                                                onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
                                             >
-                                                {doc.doc_file}
+                                                {"View File"}
                                             </td>
-                                            <td className="px-4 py-2">{doc.doc_submitted_by}</td>
+                                            <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
                                             <td className="space-x-2 px-4 py-2">
                                                 <button className="text-blue-600 hover:underline">Edit</button>
                                                 <button className="text-red-600 hover:underline">Reject</button>
