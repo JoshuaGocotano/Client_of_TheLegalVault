@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAuth } from "@/context/auth-context";
-import AddDocument from "../../components/add-document";
+import AddDocument from "@/components/add-document";
 import { X } from "lucide-react";
 
 export default function Tasks() {
@@ -37,7 +37,7 @@ export default function Tasks() {
                             <X className="h-6 w-6" />
                         </button>
                         <AddDocument
-                            caseId={selectedCase.case_id}
+                            caseId={null}
                             onClose={() => setIsAddDocumentOpen(false)}
                             onAdded={() => {
                                 setIsAddDocumentOpen(false);
@@ -47,7 +47,6 @@ export default function Tasks() {
                     </div>
                 </div>
             )}
-
         </div>
     );
 }

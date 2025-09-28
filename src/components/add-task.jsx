@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/auth-context.jsx";
 import toast from "react-hot-toast";
+import Spinner from "./loading.jsx";
 
 export default function AddTask({ caseId, onClose, onAdded }) {
     const { user } = useAuth() || {};
@@ -12,6 +13,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [refDocs, setRefDocs] = useState([]);
+    const [fileError, setFileError] = useState("");
 
     // Form state (exclude doc_references here, we handle via refDocs state)
     const [form, setForm] = useState({
@@ -70,8 +72,18 @@ export default function AddTask({ caseId, onClose, onAdded }) {
     // Handle file uploads
     const handleFileChange = (e) => {
         const selectedFiles = Array.from(e.target.files);
+
+        const oversized = selectedFiles.filter((f) => f.size > 10 * 1024 * 1024);
+
+        if (oversized.length > 0) {
+            setFileError("Each file must be 10MB or less.");
+            e.target.value = null; 
+            return;
+        }
+
         setRefDocs((prev) => [...prev, ...selectedFiles]);
-        e.target.value = null;
+        setFileError("");
+        e.target.value = null; // allow same file to be picked again
     };
 
     const removeFile = (index) => {
@@ -331,6 +343,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                         onChange={handleFileChange}
                         className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                     />
+                    {fileError && <p className="mt-1 text-sm text-red-600">{fileError}</p>}
                     <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
                         {refDocs.map((file, index) => (
                             <li
@@ -357,7 +370,13 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                         disabled={submitting}
                         className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
                     >
-                        {submitting ? "Submitting..." : "Create Task Document"}
+                        {submitting ? (
+                            <>
+                                Adding Task... <Spinner />
+                            </>
+                        ) : (
+                            "Add Task Document"
+                        )}
                     </button>
                 </div>
             </form>

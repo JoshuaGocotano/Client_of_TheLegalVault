@@ -233,10 +233,10 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                             >
                                 {submitting ? (
                                     <>
-                                        Submitting... <Spinner />
+                                        Adding Document... <Spinner />
                                     </>
                                 ) : (
-                                    <>Add Document</>
+                                    "Add Document"
                                 )}
                             </button>
                         </div>
