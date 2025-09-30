@@ -74,7 +74,7 @@ const Documents = () => {
             <div className="flex flex-col items-start justify-between md:flex-row md:items-center">
                 <div>
                     <h1 className="title">Documents</h1>
-                    <p className="text-sm dark:text-slate-300">Manage and organize case-related documents</p>
+                    <p className="text-sm text-gray-500">Manage and organize case-related documents</p>
                 </div>
                 <div className="mt-4 flex gap-2 md:mt-0">
                     <button
@@ -138,14 +138,17 @@ const Documents = () => {
                                         <td className="px-4 py-3">{doc.doc_id}</td>
                                         <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
                                         <td className="px-4 py-3">
-                                            <a
-                                                href={`http://localhost:3000${doc.doc_file}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="flex text-red-600 hover:text-red-800"
-                                            >
-                                                <FileText size={16} /> {doc.doc_file}
-                                            </a>
+                                            <div className="flex items-center gap-3">
+                                                <a
+                                                    href={`http://localhost:3000${doc.doc_file}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="inline-flex items-center gap-1 rounded-md border border-blue-600 px-2 py-1 text-xs font-medium text-blue-600 hover:bg-blue-50 dark:hover:bg-slate-800"
+                                                >
+                                                    <FileText size={14} />
+                                                    View
+                                                </a>
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3">{doc.case_id}</td>
                                         <td className="px-4 py-3">{doc.doc_type}</td>
@@ -190,6 +193,7 @@ const Documents = () => {
                     </div>
                 </div>
             )}
+
 
             {/* Filter Modal */}
             {showFilterModal && (
