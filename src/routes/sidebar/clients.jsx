@@ -146,7 +146,7 @@ const Client = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ ...client, client_status: "Active" }),
+                    body: JSON.stringify({ ...client, client_status: "Active", client_last_updated_by: user.user_id }),
                 });
 
                 if (!res.ok) {
@@ -185,7 +185,7 @@ const Client = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...client, client_status: "Removed" }),
+                body: JSON.stringify({ ...client, client_status: "Removed", client_last_updated_by: user.user_id }),
             });
 
             if (!res.ok) {
@@ -458,6 +458,7 @@ const Client = () => {
                                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
                                             <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Address</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-600 dark:text-slate-200">
@@ -470,12 +471,13 @@ const Client = () => {
                                                         <td className="whitespace-nowrap px-4 py-2">{contact.contact_email}</td>
                                                         <td className="whitespace-nowrap px-4 py-2">{contact.contact_phone}</td>
                                                         <td className="whitespace-nowrap px-4 py-2">{contact.contact_role}</td>
+                                                        <td className="whitespace-nowrap px-4 py-2">{contact.contact_address || "-"}</td>
                                                     </tr>
                                                 ))
                                         ) : (
                                             <tr>
                                                 <td
-                                                    colSpan="4"
+                                                    colSpan="5"
                                                     className="py-3 text-center text-gray-500"
                                                 >
                                                     No contacts available for this client.
@@ -543,6 +545,14 @@ const Client = () => {
                                     <option value="Inactive">Inactive</option>
                                     {showAllClients && <option value="Removed">Removed</option>}
                                 </select>
+                            </div>
+                            <div className="col-span-2">
+                                <p className="font-semibold dark:text-blue-700">Address</p>
+                                <input
+                                    value={editClient.client_address}
+                                    onChange={(e) => setEditClient({ ...editClient, client_address: e.target.value })}
+                                    className="w-full rounded-md border px-3 py-2 text-slate-900 dark:bg-slate-700 dark:text-slate-50"
+                                />
                             </div>
                         </div>
 
