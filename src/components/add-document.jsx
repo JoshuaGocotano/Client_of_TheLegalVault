@@ -1,3 +1,5 @@
+// Modal for adding a supporting document to a case
+
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context.jsx";
 import toast from "react-hot-toast";

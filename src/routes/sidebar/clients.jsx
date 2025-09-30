@@ -386,6 +386,16 @@ const Client = () => {
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_phonenum || "-"}</p>
                             </div>
 
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Address</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_address || "-"}</p>
+                            </div>
+
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Created by</p>
+                                <p className="text-gray-600 dark:text-slate-200">{getUserFullName(viewClient.created_by)}</p>
+                            </div>
+
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <p className="font-semibold dark:text-blue-700">Date Added</p>
@@ -409,11 +419,6 @@ const Client = () => {
                                         </span>
                                     </p>
                                 </div>
-                            </div>
-
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Created by</p>
-                                <p className="text-gray-600 dark:text-slate-200">{getUserFullName(viewClient.created_by)}</p>
                             </div>
 
                             <div>
