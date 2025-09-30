@@ -123,6 +123,11 @@ const Client = () => {
             getUserFullName(client.created_by).toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
+    // Legend counts (based on all clients, not just filtered)
+    const activeCount = tableData.filter((c) => c.client_status.toLowerCase() === "active").length;
+    const inactiveCount = tableData.filter((c) => c.client_status.toLowerCase() === "inactive").length;
+    const removedCount = tableData.filter((c) => c.client_status.toLowerCase() === "removed").length;
+
     const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
     const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -329,8 +334,24 @@ const Client = () => {
                 </table>
             </div>
 
-            {totalPages > 1 && (
-                <div className="mt-2 flex items-center justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+            <div className="mt-2 flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-white">
+                {/* Legend */}
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-green-500" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Active ({activeCount})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-gray-400" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Inactive ({inactiveCount})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Removed ({removedCount})</span>
+                    </div>
+                </div>
+
+                {totalPages > 1 && (
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -352,8 +373,8 @@ const Client = () => {
                             &gt;
                         </button>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Client Contacts link */}
             <div className="mt-4">

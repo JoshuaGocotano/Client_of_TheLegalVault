@@ -234,6 +234,10 @@ const Users = () => {
         return matchesSearch && matchesRole;
     });
 
+    // Legend counts (based on all users, not just filtered)
+    const activeCount = users.filter((u) => u.user_status.toLowerCase() === "active").length;
+    const suspendedCount = users.filter((u) => u.user_status.toLowerCase() === "suspended").length;
+
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -411,8 +415,20 @@ const Users = () => {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+            <div className="mt-2 flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-white">
+                {/* Legend */}
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-green-500" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Active ({activeCount})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-red-400" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Suspended ({suspendedCount})</span>
+                    </div>
+                </div>
+
+                {totalPages > 1 && (
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -432,8 +448,8 @@ const Users = () => {
                             &gt;
                         </button>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Add User Modal */}
             {isModalOpen && (
