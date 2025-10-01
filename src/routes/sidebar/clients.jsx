@@ -26,6 +26,10 @@ const Client = () => {
 
     const [showAllClients, setShowAllClients] = useState(false);
 
+    const handleClientAdded = (newClient) => {
+        setTableData((prev) => [newClient, ...prev]); // put new client on top
+    };
+
     // Fetching clients, users, and contacts data for their relations
     const fetchAll = useCallback(async () => {
         try {
@@ -608,6 +612,7 @@ const Client = () => {
                 <AddClient
                     AddClients={AddClients}
                     setAddClients={setAddClients}
+                    onClientAdded={handleClientAdded}
                 />
             )}
         </div>
