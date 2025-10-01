@@ -153,7 +153,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                     onClick={() => setAddClients(null)}
                     className="absolute right-4 top-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
                 >
-                    <X className="h-6 w-6" />
+                    <X className="btn-ghost" size={40}/>
                 </button>
 
                 <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Client</h2>
