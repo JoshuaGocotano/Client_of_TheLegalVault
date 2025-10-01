@@ -200,7 +200,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                         placeholder="First Name"
                                         value={personName.first}
                                         onChange={(e) => setPersonName({ ...personName, first: e.target.value })}
-                                        className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                        className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                                         required
                                     />
                                     <input
@@ -208,14 +208,14 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                         placeholder="Middle Name"
                                         value={personName.middle}
                                         onChange={(e) => setPersonName({ ...personName, middle: e.target.value })}
-                                        className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                        className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                                     />
                                     <input
                                         type="text"
                                         placeholder="Last Name"
                                         value={personName.last}
                                         onChange={(e) => setPersonName({ ...personName, last: e.target.value })}
-                                        className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                        className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                                         required
                                     />
                                 </>
@@ -230,7 +230,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                             client_fullname: e.target.value,
                                         })
                                     }
-                                    className="col-span-3 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                    className="col-span-3 rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                                     required
                                 />
                             )}
@@ -242,7 +242,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                 placeholder="Email"
                                 value={clientData.client_email}
                                 onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
-                                className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                                 required
                             />
                             <input
@@ -255,7 +255,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                         client_phonenum: e.target.value,
                                     })
                                 }
-                                className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             />
                         </div>
 
@@ -270,7 +270,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                         client_address: e.target.value,
                                     })
                                 }
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             />
                         </div>
                     </div>
