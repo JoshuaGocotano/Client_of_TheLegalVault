@@ -30,20 +30,44 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
         last: "",
     });
 
-    // Contact state
+    // For contacts (split name parts)
+    const [contactName, setContactName] = useState({
+        first: "",
+        middle: "",
+        last: "",
+    });
+
+    // Contact state (other info)
     const [contact, setContact] = useState({
-        contact_fullname: "",
         contact_email: "",
         contact_phone: "",
         contact_role: "",
+        contact_address: "",
     });
+
     const [contacts, setContacts] = useState([]);
 
     const handleAddContact = () => {
-        const { contact_fullname, contact_email, contact_phone, contact_role } = contact;
-        if (!contact_fullname || !contact_email || !contact_phone || !contact_role) return;
-        setContacts([...contacts, contact]);
-        setContact({ contact_fullname: "", contact_email: "", contact_phone: "", contact_role: "" });
+        // Build full name from parts
+        const fullName = `${contactName.first} ${contactName.middle ? contactName.middle + " " : ""}${contactName.last}`.trim();
+
+        if (!fullName || !contact.contact_email || !contact.contact_phone || !contact.contact_role) return;
+
+        const newContact = {
+            contact_fullname: fullName,
+            ...contact,
+        };
+
+        setContacts([...contacts, newContact]);
+
+        // Reset states
+        setContactName({ first: "", middle: "", last: "" });
+        setContact({
+            contact_email: "",
+            contact_phone: "",
+            contact_role: "",
+            contact_address: "",
+        });
     };
 
     const handleRemoveContact = (index) => {
@@ -52,7 +76,9 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const toastId = toast.loading("Adding client and contacts...", { duration: 4000 });
+        const toastId = toast.loading("Adding client and contacts...", {
+            duration: 4000,
+        });
 
         try {
             // Build fullname depending on type
@@ -77,19 +103,23 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
             if (!resClient.ok) throw new Error("Failed to add client");
             const newClient = await resClient.json();
 
+            // Notify parent
             onClientAdded(newClient);
             setAddClients(null);
 
-            toast.success("Client added successfully!", { id: toastId, duration: 4000 });
+            toast.success("Client added successfully!", {
+                id: toastId,
+                duration: 4000,
+            });
 
             // 2. Create contacts
-            for (const contact of contacts) {
+            for (const c of contacts) {
                 const resContact = await fetch("http://localhost:3000/api/client-contacts", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
                     body: JSON.stringify({
-                        ...contact,
+                        ...c,
                         client_id: newClient.client_id,
                     }),
                 });
@@ -97,13 +127,19 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
             }
 
             if (contacts.length > 0) {
-                toast.success("All contacts added successfully!", { id: toastId, duration: 4000 });
+                toast.success("Client and contact/s added successfully!", {
+                    id: toastId,
+                    duration: 4000,
+                });
             }
 
             setAddClients(null);
         } catch (err) {
             console.error(err);
-            toast.error("Error adding client and contacts.", { id: toastId, duration: 4000 });
+            toast.error("Error adding client and contacts.", {
+                id: toastId,
+                duration: 4000,
+            });
         }
     };
 
@@ -126,6 +162,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                     onSubmit={handleSubmit}
                     className="space-y-6"
                 >
+                    {/* --- CLIENT INFO --- */}
                     <div>
                         <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Client Information</h3>
 
@@ -187,12 +224,18 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                     type="text"
                                     placeholder="Company Name"
                                     value={clientData.client_fullname}
-                                    onChange={(e) => setClientData({ ...clientData, client_fullname: e.target.value })}
+                                    onChange={(e) =>
+                                        setClientData({
+                                            ...clientData,
+                                            client_fullname: e.target.value,
+                                        })
+                                    }
                                     className="col-span-3 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                                     required
                                 />
                             )}
                         </div>
+
                         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                             <input
                                 type="email"
@@ -206,96 +249,140 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                 type="tel"
                                 placeholder="Phone Number"
                                 value={clientData.client_phonenum}
-                                onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
+                                onChange={(e) =>
+                                    setClientData({
+                                        ...clientData,
+                                        client_phonenum: e.target.value,
+                                    })
+                                }
                                 className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
-                            {/* <input
-                                type="password"
-                                placeholder="Password"
-                                value={clientData.client_password}
-                                onChange={(e) => setClientData({ ...clientData, client_password: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                required
-                            /> */}
                         </div>
-                        <div className="mt-2 mt-4 text-gray-500 dark:text-gray-400">
+
+                        <div className="mt-4">
                             <input
                                 type="text"
                                 placeholder="Address (Optional)"
                                 value={clientData.client_address}
-                                onChange={(e) => setClientData({ ...clientData, client_address: e.target.value })}
+                                onChange={(e) =>
+                                    setClientData({
+                                        ...clientData,
+                                        client_address: e.target.value,
+                                    })
+                                }
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                         </div>
                     </div>
 
+                    {/* --- CONTACT PERSON --- */}
                     <div>
-                        <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Contact Person</h3>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
-                            <input
-                                type="text"
-                                placeholder="Full Name"
-                                value={contact.contact_fullname}
-                                onChange={(e) => setContact({ ...contact, contact_fullname: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                            />
-                            <input
-                                type="email"
-                                placeholder="Email"
-                                value={contact.contact_email}
-                                onChange={(e) => setContact({ ...contact, contact_email: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                            />
-                            <input
-                                type="tel"
-                                placeholder="Phone"
-                                value={contact.contact_phone}
-                                onChange={(e) => setContact({ ...contact, contact_phone: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Relation / Role"
-                                value={contact.contact_role}
-                                onChange={(e) => setContact({ ...contact, contact_role: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleAddContact}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                            >
-                                +
-                            </button>
+                        <h3 className="mb-3 text-lg font-semibold text-blue-700 dark:text-blue-300">Contact Person</h3>
+
+                        <div className="space-y-4">
+                            {/* Row 1: Name fields */}
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <input
+                                    type="text"
+                                    placeholder="First Name"
+                                    value={contactName.first}
+                                    onChange={(e) => setContactName({ ...contactName, first: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Middle Name"
+                                    value={contactName.middle}
+                                    onChange={(e) => setContactName({ ...contactName, middle: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Last Name"
+                                    value={contactName.last}
+                                    onChange={(e) => setContactName({ ...contactName, last: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+
+                            {/* Row 2: Contact info */}
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <input
+                                    type="email"
+                                    placeholder="Email"
+                                    value={contact.contact_email}
+                                    onChange={(e) => setContact({ ...contact, contact_email: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                                <input
+                                    type="tel"
+                                    placeholder="Phone"
+                                    value={contact.contact_phone}
+                                    onChange={(e) => setContact({ ...contact, contact_phone: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+
+                            {/* Row 3: Role & Address */}
+                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <input
+                                    type="text"
+                                    placeholder="Relation / Role"
+                                    value={contact.contact_role}
+                                    onChange={(e) => setContact({ ...contact, contact_role: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                                <input
+                                    type="text"
+                                    placeholder="Address"
+                                    value={contact.contact_address}
+                                    onChange={(e) => setContact({ ...contact, contact_address: e.target.value })}
+                                    className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
+                                />
+                            </div>
+
+                            {/* Add button */}
+                            <div className="flex justify-end">
+                                <button
+                                    type="button"
+                                    onClick={handleAddContact}
+                                    className="rounded-lg border border-blue-400 px-6 py-2 text-blue-500 shadow hover:bg-blue-600 hover:text-white dark:border-blue-900 dark:text-blue-400 dark:hover:bg-blue-900 dark:hover:text-white"
+                                >
+                                    + Add Contact
+                                </button>
+                            </div>
                         </div>
 
+                        {/* Contact list */}
                         {contacts.length > 0 && (
-                            <div className="mt-4 overflow-x-auto">
-                                <table className="w-full table-auto text-sm dark:text-slate-100">
-                                    <thead className="dark:text-slate-500">
-                                        <tr className="text-left uppercase">
-                                            <th className="px-2 py-1">Name</th>
-                                            <th className="px-2 py-1">Email</th>
-                                            <th className="px-2 py-1">Phone</th>
-                                            <th className="px-2 py-1">Role</th>
-                                            <th className="px-2 py-1">Remove</th>
+                            <div className="mt-6 overflow-x-auto">
+                                <table className="w-full table-auto text-sm">
+                                    <thead>
+                                        <tr className="bg-gray-100 text-left text-xs font-semibold uppercase text-gray-600 dark:bg-slate-700 dark:text-gray-300">
+                                            <th className="px-3 py-2">Full Name</th>
+                                            <th className="px-3 py-2">Email</th>
+                                            <th className="px-3 py-2">Phone</th>
+                                            <th className="px-3 py-2">Role</th>
+                                            <th className="px-3 py-2">Address</th>
+                                            <th className="px-3 py-2">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-slate-600">
                                         {contacts.map((c, idx) => (
                                             <tr
                                                 key={idx}
-                                                className="border-t"
+                                                className="hover:bg-gray-50 dark:hover:bg-slate-800"
                                             >
-                                                <td className="px-2 py-1">{c.contact_fullname}</td>
-                                                <td className="px-2 py-1">{c.contact_email}</td>
-                                                <td className="px-2 py-1">{c.contact_phone}</td>
-                                                <td className="px-2 py-1">{c.contact_role}</td>
-                                                <td className="px-2 py-1">
+                                                <td className="px-3 py-2">{c.contact_fullname}</td>
+                                                <td className="px-3 py-2">{c.contact_email}</td>
+                                                <td className="px-3 py-2">{c.contact_phone}</td>
+                                                <td className="px-3 py-2">{c.contact_role}</td>
+                                                <td className="px-3 py-2">{c.contact_address || "-"}</td>
+                                                <td className="px-3 py-2">
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveContact(idx)}
-                                                        className="text-red-500 hover:text-red-700"
+                                                        className="rounded p-1 text-red-500 hover:bg-red-100 dark:hover:bg-red-900"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </button>
