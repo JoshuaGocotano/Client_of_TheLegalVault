@@ -103,7 +103,7 @@ const Userlogs = () => {
             )}
 
             <div className="mb-6 flex flex-col gap-y-1">
-                <h2 className="title">Logs</h2>
+                <h2 className="title">Activity Logs</h2>
                 <p className="text-sm dark:text-slate-300">Track and monitor user activities across the platform.</p>
             </div>
 

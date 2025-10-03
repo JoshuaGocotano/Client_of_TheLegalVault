@@ -72,25 +72,26 @@ const Cases = () => {
     const currentCases = filteredCases.slice(startIndex, startIndex + rowsPerPage);
 
     // Fetch cases data from API
-    useEffect(() => {
-        const fetchCases = async () => {
-            try {
-                const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
+    const fetchCases = async () => {
+        try {
+            const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
 
-                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`, {
-                    credentials: "include",
-                });
+            const response = await fetch(`http://localhost:3000/api${cases_endpoint}`, {
+                credentials: "include",
+            });
 
-                if (!response.ok) {
-                    throw new Error("Failed to fetch cases");
-                }
-                const data = await response.json();
-                setTableData(data);
-            } catch (error) {
-                console.error("Error fetching cases:", error);
-                setError(error.message + ". You might want to check your server connection.");
+            if (!response.ok) {
+                throw new Error("Failed to fetch cases");
             }
-        };
+            const data = await response.json();
+            setTableData(data);
+        } catch (error) {
+            console.error("Error fetching cases:", error);
+            setError(error.message + ". You might want to check your server connection.");
+        }
+    };
+
+    useEffect(() => {
         fetchCases();
     }, [user]);
 
@@ -402,6 +403,7 @@ const Cases = () => {
                 selectedCase={selectedCase}
                 tableData={tableData}
                 setSelectedCase={setSelectedCase}
+                onCaseUpdated={fetchCases}
             />
 
             {/* Edit Case Modal */}

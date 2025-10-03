@@ -329,6 +329,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                             rows={3}
                             placeholder="Detailed task instructions"
                             className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                            required
                         />
                     </div>
                 </div>

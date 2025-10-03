@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle, Eye, Pen, Undo } from "lucide-react";
+import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle, Eye, Pen, ArchiveRestore, Undo } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 import CaseActionModal from "./case-action-modal";
@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import AddTask from "./add-task";
 import AddDocument from "./add-document";
 
-const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
+const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) => {
     const { user } = useAuth();
 
     const modalRef = useRef(null);
@@ -151,7 +151,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const handleCaseAction = async (type, updatedCase) => {
         if (!selectedCase) return;
         try {
-            const toastId = toast.loading(type === "close" ? "Closing case..." : "Dismissing case...", {
+            const toastId = toast.loading(type === "close" ? "Closing case..." : type === "dismiss" ? "Dismissing case..." : "Archiving case...", {
                 duration: 4000,
             });
 
@@ -161,7 +161,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...updatedCase,
-                    case_status: type === "close" ? "Completed" : "Dismissed",
+                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Archived",
                     last_updated_by: user.user_id,
                 }),
             });
@@ -171,9 +171,14 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                 throw new Error(data.error || "Failed to update case status.");
             }
 
-            toast.success(`Case ${type === "close" ? "closed" : "dismissed"} successfully!`, { id: toastId, duration: 4000 });
-            setSelectedCase({ ...updatedCase, case_status: type === "close" ? "Completed" : "Dismissed" });
+            toast.success(`Case ${type === "close" ? "closed" : type === "dismiss" ? "dismissed" : "archived"} successfully!`, {
+                id: toastId,
+                duration: 4000,
+            });
+
+            setSelectedCase({ ...updatedCase, case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Archived" });
             setIsActionModalOpen(false);
+            if (onCaseUpdated) onCaseUpdated();
         } catch (error) {
             console.error("Error updating case status:", error);
             toast.error("Failed to update case status. Please try again.");
@@ -397,7 +402,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">Due</th>
                                         <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                        <th className="px-4 py-2">Actions</th>
+                                        {selectedCase.case_status !== "Completed" && <th className="px-4 py-2">Actions</th>}
                                     </tr>
                                 </thead>
 
@@ -413,38 +418,40 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             <td className="px-4 py-2">{doc.doc_status}</td>
                                             <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
                                             <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
-                                            <td className="flex gap-2 space-x-2 px-4 py-2">
-                                                {doc.doc_file && (
-                                                    <button
-                                                        className="text-blue-600 hover:text-blue-800"
-                                                        onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
-                                                        title="View File"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                )}
+                                            {selectedCase.case_status !== "Completed" && (
+                                                <td className="flex gap-2 space-x-2 px-4 py-2">
+                                                    {doc.doc_file && (
+                                                        <button
+                                                            className="text-blue-600 hover:text-blue-800"
+                                                            onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
+                                                            title="View File"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    )}
 
-                                                <button
-                                                    className="text-yellow-600 hover:text-yellow-800"
-                                                    title="Edit Document"
-                                                >
-                                                    <Pen size={16} />
-                                                </button>
-                                                {doc.doc_type !== "Support" && (
+                                                    <button
+                                                        className="text-yellow-600 hover:text-yellow-800"
+                                                        title="Edit Document"
+                                                    >
+                                                        <Pen size={16} />
+                                                    </button>
+                                                    {doc.doc_type !== "Support" && (
+                                                        <button
+                                                            className="text-red-600 hover:text-red-800"
+                                                            title="Reject Document"
+                                                        >
+                                                            <Undo size={16} />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         className="text-red-600 hover:text-red-800"
-                                                        title="Reject Document"
+                                                        title="Delete Document"
                                                     >
-                                                        <Undo size={16} />
+                                                        <Trash2 size={16} />
                                                     </button>
-                                                )}
-                                                <button
-                                                    className="text-red-600 hover:text-red-800"
-                                                    title="Delete Document"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </td>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -519,6 +526,22 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 >
                                     <XCircle size={20} />
                                     Dismiss Case
+                                </button>
+                            </div>
+                        )}
+
+                        {selectedCase.case_status === "Completed" && (
+                            <div className="mt-6 flex items-center justify-end gap-4">
+                                <button
+                                    title="Archive"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-blue-950 px-3 py-2 text-sm text-white hover:bg-blue-800"
+                                    onClick={() => {
+                                        setActionType("archive");
+                                        setIsActionModalOpen(true);
+                                    }}
+                                >
+                                    <ArchiveRestore size={20} />
+                                    Archive
                                 </button>
                             </div>
                         )}

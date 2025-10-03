@@ -8,7 +8,7 @@ const allNavbarLinks = [
     { label: "Tasks", icon: ListTodo, path: "/tasks" },
     { label: "Users", icon: ShieldUser, path: "/users" },
     { label: "Reports", icon: ChartColumn, path: "/reports" },
-    { label: "Logs", icon: Logs, path: "/user-logs" },
+    { label: "Activity Logs", icon: Logs, path: "/user-logs" },
     { label: "Case Archive", icon: Archive, path: "/case-archive" },
     { label: "Payments", icon: Wallet, path: "/payments" },
 ];
@@ -24,11 +24,11 @@ export const getNavbarLinks = (role) => {
     }
 
     if (role === "Staff") {
-        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Logs"].includes(link.label));
+        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Activity Logs"].includes(link.label));
     }
 
     if (role === "Paralegal") {
-        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Logs"].includes(link.label));
+        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Activity Logs"].includes(link.label));
     }
 
     return [];

@@ -1,4 +1,4 @@
-// This modal is used for both closing and dismissing a case
+// This modal is used for closing, dismissing, or archiving a case
 
 import React from "react";
 import { X } from "lucide-react";
@@ -6,10 +6,16 @@ import { X } from "lucide-react";
 const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
     if (!caseData) return null;
 
+    // Determine modal behavior by type
     const isClose = type === "close";
-    const title = isClose ? "Close Case" : "Dismiss Case";
-    const btnColor = isClose ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700";
-    const actionText = isClose ? "close" : "dismiss";
+    const isDismiss = type === "dismiss";
+    const isArchive = type === "archive";
+
+    const title = isClose ? "Close Case" : isDismiss ? "Dismiss Case" : "Archive Case";
+
+    const btnColor = isClose ? "bg-green-600 hover:bg-green-700" : isDismiss ? "bg-red-600 hover:bg-red-700" : "bg-blue-600 hover:bg-blue-700";
+
+    const actionText = isClose ? "close" : isDismiss ? "dismiss" : "archive";
 
     const [verdict, setVerdict] = React.useState(caseData.case_verdict || "");
 
@@ -18,7 +24,9 @@ const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
     };
 
     const handleConfirm = () => {
-        onConfirm({ ...caseData, case_verdict: verdict });
+        // For "close" include verdict, for others just forward data
+        const payload = isClose ? { ...caseData, case_verdict: verdict } : caseData;
+        onConfirm(payload);
     };
 
     return (
@@ -42,8 +50,8 @@ const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
                     Are you sure you want to <strong>{actionText}</strong> Case {caseData.case_id}? This action cannot be undone.
                 </p>
 
-                {/* Input verdict of case before closing */}
-                {type === "close" && (
+                {/* Input verdict only if closing case */}
+                {isClose && (
                     <div className="mb-6">
                         <label
                             className="mb-2 block text-sm"

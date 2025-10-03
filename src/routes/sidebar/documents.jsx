@@ -110,7 +110,6 @@ const Documents = () => {
                         <tr>
                             <th className="px-4 py-3">Document ID</th>
                             <th className="px-4 py-3">Name</th>
-                            <th className="px-4 py-3">File</th>
                             <th className="px-4 py-3">Case ID</th>
                             <th className="px-4 py-3">Type</th>
                             <th className="px-4 py-3">Submitted By</th>
@@ -137,7 +136,10 @@ const Documents = () => {
                                     >
                                         <td className="px-4 py-3">{doc.doc_id}</td>
                                         <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
-                                        <td className="px-4 py-3">
+                                        <td className="px-4 py-3">{doc.case_id}</td>
+                                        <td className="px-4 py-3">{doc.doc_type}</td>
+                                        <td className="px-4 py-3">{doc.doc_submitted_by}</td>
+                                        <td className="flex justify-center gap-4 px-4 py-3">
                                             <div className="flex items-center gap-3">
                                                 <a
                                                     href={`http://localhost:3000${doc.doc_file}`}
@@ -149,11 +151,6 @@ const Documents = () => {
                                                     View
                                                 </a>
                                             </div>
-                                        </td>
-                                        <td className="px-4 py-3">{doc.case_id}</td>
-                                        <td className="px-4 py-3">{doc.doc_type}</td>
-                                        <td className="px-4 py-3">{doc.doc_submitted_by}</td>
-                                        <td className="flex justify-center gap-4 px-4 py-3">
                                             <button
                                                 className="text-red-500 hover:text-red-700"
                                                 onClick={() => confirmDelete(doc)}
@@ -193,7 +190,6 @@ const Documents = () => {
                     </div>
                 </div>
             )}
-
 
             {/* Filter Modal */}
             {showFilterModal && (
