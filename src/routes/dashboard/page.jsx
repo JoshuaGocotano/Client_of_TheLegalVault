@@ -13,6 +13,7 @@ const DashboardPage = () => {
     const [userLogs, setUserLogs] = useState([]);
     const [userCount, setUserCount] = useState(0);
     const [processingCasesCount, setProcessingCasesCount] = useState(0);
+    const [archivedCasesCount, setArchivedCasesCount] = useState(0);
 
     // fetching user count
     useEffect(() => {
@@ -43,6 +44,7 @@ const DashboardPage = () => {
                     user?.user_role === "Admin" || user?.user_role === "Staff"
                         ? "http://localhost:3000/api/cases/count/processing"
                         : `http://localhost:3000/api/cases/count/processing/user/${user.user_id}`;
+
                 const res = await fetch(endpoint, {
                     method: "GET",
                     credentials: "include",
@@ -57,6 +59,32 @@ const DashboardPage = () => {
 
         if (user) {
             fetchProcessingCasesCount();
+        }
+    }, [user]);
+
+    // fetching archived cases count
+    useEffect(() => {
+        const fetchArchivedCasesCount = async () => {
+            try {
+                const endpoint =
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/cases/count/archived"
+                        : `http://localhost:3000/api/cases/count/archived/user/${user.user_id}`;
+
+                const res = await fetch(endpoint, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch archived cases count");
+                const data = await res.json();
+                setArchivedCasesCount(data.count);
+            } catch (error) {
+                console.error("Failed to fetch archived cases count:", error);
+            }
+        };
+
+        if (user) {
+            fetchArchivedCasesCount();
         }
     }, [user]);
 
@@ -118,7 +146,7 @@ const DashboardPage = () => {
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">407</p>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">{archivedCasesCount}</p>
                         </div>
                     </div>
 

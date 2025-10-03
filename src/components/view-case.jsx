@@ -161,7 +161,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...updatedCase,
-                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Completed and Archived",
+                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Archived",
                     last_updated_by: user.user_id,
                 }),
             });
