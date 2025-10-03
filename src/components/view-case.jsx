@@ -402,7 +402,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">Due</th>
                                         <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                        {selectedCase.case_status !== "Completed" && <th className="px-4 py-2">Actions</th>}
+                                        {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Archived" && (
+                                            <th className="px-4 py-2">Actions</th>
+                                        )}
                                     </tr>
                                 </thead>
 
@@ -418,7 +420,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                             <td className="px-4 py-2">{doc.doc_status}</td>
                                             <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
                                             <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
-                                            {selectedCase.case_status !== "Completed" && (
+                                            {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Archived" && (
                                                 <td className="flex gap-2 space-x-2 px-4 py-2">
                                                     {doc.doc_file && (
                                                         <button

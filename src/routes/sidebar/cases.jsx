@@ -285,72 +285,74 @@ const Cases = () => {
                     </thead>
                     <tbody className="text-slate-950 dark:text-white">
                         {currentCases.length > 0 ? (
-                            currentCases.map((cases) => (
-                                <tr
-                                    key={cases.case_id}
-                                    className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
-                                >
-                                    <td className="px-4 py-3">{cases.case_id}</td>
-                                    <td className="px-4 py-3">{cases.ct_name}</td>
-                                    <td className="px-4 py-3">{cases.client_fullname}</td>
-                                    <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                                                cases.case_status === "Pending"
-                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                    : cases.case_status === "Processing"
-                                                      ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                      : cases.case_status === "Completed"
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
-                                            }`}
-                                        >
-                                            {cases.case_status}
-                                        </span>
-                                    </td>
-                                    {cases.user_id ? (
-                                        <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
-                                    ) : (
-                                        <td className="px-4 py-3 italic text-gray-500">Unassigned</td>
-                                    )}
-                                    <td className="px-4 py-3">
-                                        {cases?.case_balance !== null && cases?.case_balance !== undefined
-                                            ? new Intl.NumberFormat("en-PH", {
-                                                  style: "currency",
-                                                  currency: "PHP",
-                                              }).format(Number(cases.case_balance))
-                                            : "₱0.00"}
-                                    </td>
-                                    <td className="px-4 py-3">
-                                        <div className="flex flex-wrap items-center gap-1">
-                                            <button
-                                                className="p-1.5 text-blue-600 hover:text-blue-800"
-                                                onClick={() => setSelectedCase(cases)}
+                            currentCases
+                                .filter((c) => c.case_status !== "Archived")
+                                .map((cases) => (
+                                    <tr
+                                        key={cases.case_id}
+                                        className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
+                                    >
+                                        <td className="px-4 py-3">{cases.case_id}</td>
+                                        <td className="px-4 py-3">{cases.ct_name}</td>
+                                        <td className="px-4 py-3">{cases.client_fullname}</td>
+                                        <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
+                                        <td className="px-4 py-3">
+                                            <span
+                                                className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                                    cases.case_status === "Pending"
+                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                        : cases.case_status === "Processing"
+                                                          ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                          : cases.case_status === "Completed"
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                }`}
                                             >
-                                                <Eye className="h-4 w-4" />
-                                            </button>
-
-                                            {cases.case_status !== "Completed" && cases.case_status !== "Dismissed" && (
+                                                {cases.case_status}
+                                            </span>
+                                        </td>
+                                        {cases.user_id ? (
+                                            <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
+                                        ) : (
+                                            <td className="px-4 py-3 italic text-gray-500">Unassigned</td>
+                                        )}
+                                        <td className="px-4 py-3">
+                                            {cases?.case_balance !== null && cases?.case_balance !== undefined
+                                                ? new Intl.NumberFormat("en-PH", {
+                                                      style: "currency",
+                                                      currency: "PHP",
+                                                  }).format(Number(cases.case_balance))
+                                                : "₱0.00"}
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="flex flex-wrap items-center gap-1">
                                                 <button
-                                                    title={user.user_role === "Admin" ? "Edit case" : "Update and take case"}
-                                                    className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                    onClick={() => {
-                                                        setCaseToEdit({
-                                                            ...cases,
-                                                            lawyer_fullname: getLawyerFullName(cases.user_id),
-                                                            assigned_by_name: getLawyerFullName(cases.assigned_by),
-                                                        });
-                                                        setEditModalOpen(true);
-                                                    }}
+                                                    className="p-1.5 text-blue-600 hover:text-blue-800"
+                                                    onClick={() => setSelectedCase(cases)}
                                                 >
-                                                    <Pencil className="h-4 w-4" />
+                                                    <Eye className="h-4 w-4" />
                                                 </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
+
+                                                {cases.case_status !== "Completed" && cases.case_status !== "Dismissed" && (
+                                                    <button
+                                                        title={user.user_role === "Admin" ? "Edit case" : "Update and take case"}
+                                                        className="p-1.5 text-yellow-500 hover:text-yellow-700"
+                                                        onClick={() => {
+                                                            setCaseToEdit({
+                                                                ...cases,
+                                                                lawyer_fullname: getLawyerFullName(cases.user_id),
+                                                                assigned_by_name: getLawyerFullName(cases.assigned_by),
+                                                            });
+                                                            setEditModalOpen(true);
+                                                        }}
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
                         ) : (
                             <tr>
                                 <td
