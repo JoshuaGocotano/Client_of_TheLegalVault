@@ -60,6 +60,7 @@ const Cases = () => {
         const matchesSearch =
             (cases.case_id && cases.case_id.toString().includes(search)) ||
             (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
+            (cases.cc_name && cases.cc_name.toLowerCase().includes(searchLower)) ||
             (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
             (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
             (getLawyerFullName(cases.user_id) && getLawyerFullName(cases.user_id).toLowerCase().includes(searchLower)) ||
