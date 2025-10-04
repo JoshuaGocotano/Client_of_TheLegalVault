@@ -3,21 +3,26 @@ import boslogo from "@/assets/light_logo.png";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "@/components/loading";
+import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 const Login = () => {
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
-    
+
     const [loading, setLoading] = useState(false);
 
     const handleLogin = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError("");
+
+        const toastId = toast.loading("Authenticating...", { duration: 4000 });
 
         try {
             const res = await fetch("http://localhost:3000/api/login", {
@@ -37,15 +42,36 @@ const Login = () => {
                 return;
             }
 
-            // Temporarily store user_id and email in session/localStorage
-            localStorage.setItem("pendingUserId", data.user_id);
-            localStorage.setItem("pendingUserEmail", email);
+            // OTP required if user is not verified
+            if (data.message === "OTP sent to your email" && data.user_id) {
+                // Temporarily store user_id and email in session/localStorage
+                localStorage.setItem("pendingUserId", data.user_id);
+                localStorage.setItem("pendingUserEmail", email);
 
-            // Redirect to OTP verification
-            navigate("/verify");
+                // Redirect to OTP verification
+                navigate("/verify");
+                return;
+            }
+
+            // If user is verified
+            if (data.user) {
+                // Store user in your auth context or state
+                login(data.user);
+
+                localStorage.removeItem("pendingUserId");
+                localStorage.removeItem("pendingUserEmail");
+
+                toast.success("Login successful!", { id: toastId, duration: 4000 });
+                navigate("/");
+                return;
+            }
+
+            setError("Unexpected response from server.");
+            setLoading(false);
         } catch (err) {
             console.error("Login error:", err);
             setError("Something went wrong. Please try again.");
+            toast.error("Login failed. Please try again.", { id: toastId, duration: 4000 });
             setLoading(false);
         }
     };
