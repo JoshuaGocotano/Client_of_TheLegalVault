@@ -1,21 +1,10 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { Eye, Trash2, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
 
 export const Payments = () => {
     const { user } = useAuth();
-    const navigate = useNavigate();
-
-    // redirect non-admins and non-lawyers
-    useEffect(() => {
-        if (!user) return; // wait until auth state is known
-        if (user.user_role !== "Admin" && user.user_role !== "Lawyer") {
-            navigate("/unauthorized", { replace: true });
-        }
-    }, [user, navigate]);
-
     const [error, setError] = useState("");
     const [paymentsData, setPaymentsData] = useState([]);
     const [cases, setCases] = useState([]);
@@ -107,6 +96,7 @@ export const Payments = () => {
         const matchesSearch =
             p.payment_id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.client_fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.case_id.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.ct_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.payment_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
             formatDateTime(p.payment_date).toLowerCase().includes(searchTerm.toLowerCase());
@@ -122,9 +112,30 @@ export const Payments = () => {
     const paginatedPayments = filteredPayments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     // Add Payment
-    const handleAddPayment = async (amount) => {
-        if (amount > selectedCaseBalance) {
-            toast.error("Payment amount exceeds the case balance.");
+    const handleAddPayment = async () => {
+        if (!addPayment) return;
+
+        const bal = Number(selectedCaseBalance);
+        const amt = Number(addPayment.payment_amount);
+
+        if (!addPayment.case_id) {
+            toast.error("Please select a case.");
+            return;
+        }
+        if (!addPayment.payment_type) {
+            toast.error("Please select a payment type.");
+            return;
+        }
+        if (Number.isNaN(amt) || amt <= 0) {
+            toast.error("Enter a valid payment amount.");
+            return;
+        }
+        if (Number.isNaN(bal)) {
+            toast.error("Unable to validate case balance.");
+            return;
+        }
+        if (amt !== bal) {
+            toast.error(`Payment must be exactly ${formatCurrency(bal)}.`);
             return;
         }
 
@@ -133,7 +144,7 @@ export const Payments = () => {
             const res = await fetch("http://localhost:3000/api/payments", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(addPayment),
+                body: JSON.stringify({ ...addPayment, payment_amount: amt.toFixed(2) }),
             });
 
             const data = await res.json();
@@ -144,11 +155,11 @@ export const Payments = () => {
                 toast.success("Payment added successfully!", { id: toastId, duration: 4000 });
                 setAddPayment(null);
             } else {
-                toast.error(data.error || "Failed to add payment");
+                toast.error(data.error || "Failed to add payment", { id: toastId });
             }
         } catch (err) {
             console.error("Error adding payment:", err);
-            toast.error("Error adding payment", { id: toastId, duration: 4000 });
+            toast.error("Error adding payment", { id: toastId });
         }
     };
 
@@ -337,14 +348,16 @@ export const Payments = () => {
                                     >
                                         Select Case
                                     </option>
-                                    {cases.map((c) => (
-                                        <option
-                                            key={c.case_id}
-                                            value={c.case_id}
-                                        >
-                                            {c.case_id} – {c.client_fullname} ({c.ct_name})
-                                        </option>
-                                    ))}
+                                    {cases
+                                        .filter((c) => c.case_status === "Processing")
+                                        .map((c) => (
+                                            <option
+                                                key={c.case_id}
+                                                value={c.case_id}
+                                            >
+                                                {c.case_id} – {c.client_fullname} ({c.ct_name})
+                                            </option>
+                                        ))}
                                 </select>
                             </div>
                             <div>
@@ -357,10 +370,13 @@ export const Payments = () => {
                                 />
                                 <p className="mt-1 text-xs text-gray-500">(Your User ID)</p>
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Amount</label>
                                 <input
                                     type="number"
+                                    min="0"
+                                    step="0.01"
                                     value={addPayment.payment_amount}
                                     onChange={(e) => {
                                         const value = e.target.value;
@@ -386,10 +402,18 @@ export const Payments = () => {
                                         });
                                     }}
                                     onBlur={() => {
-                                        if (addPayment.payment_amount !== "") {
+                                        if (addPayment.payment_amount === "") return; // don't alert if user cleared it
+
+                                        if (parseFloat(addPayment.payment_amount) >= 0) {
                                             setAddPayment({
                                                 ...addPayment,
                                                 payment_amount: parseFloat(addPayment.payment_amount).toFixed(2),
+                                            });
+                                        } else {
+                                            alert("Invalid amount! Resetting to 0.00");
+                                            setAddPayment({
+                                                ...addPayment,
+                                                payment_amount: "0.00",
                                             });
                                         }
                                     }}
@@ -398,10 +422,11 @@ export const Payments = () => {
                                 />
                                 <p className="mt-1 text-xs text-gray-500">
                                     {selectedCaseBalance !== null
-                                        ? `Remaining Balance: ${formatCurrency(selectedCaseBalance)}`
-                                        : "Select a case to see balance"}
+                                        ? `Total Case Fee: ${formatCurrency(selectedCaseBalance)}`
+                                        : "Select a case to see fee / balance."}
                                 </p>
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Payment Type</label>
                                 <select
@@ -428,7 +453,7 @@ export const Payments = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={() => handleAddPayment(parseFloat(addPayment.payment_amount))}
+                                onClick={() => handleAddPayment()}
                                 className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
                             >
                                 Add Payment
