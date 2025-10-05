@@ -59,6 +59,7 @@ const Userlogs = () => {
         if (/logout/i.test(action)) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
         if (/client/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
         if (/contact/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+        if (/archived/i.test(action)) return "bg-slate-700 text-white dark:bg-white dark:text-black";
         if (/case/i.test(action)) return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
         if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
         return "bg-gray-100 text-gray-700 dark:bg-gray-700/20 dark:text-gray-300";
@@ -75,6 +76,7 @@ const Userlogs = () => {
         if (/updated contact/i.test(action)) return "Client Contact Update";
         if (/removed contact/i.test(action)) return "Client Contact Removed";
         if (/new case/i.test(action)) return "New Case Added";
+        if (/archived/i.test(action)) return "Case Archived";
         if (/updated case/i.test(action)) return "Case Update";
         if (/fail|error/i.test(action)) return "Error";
         return "Action";

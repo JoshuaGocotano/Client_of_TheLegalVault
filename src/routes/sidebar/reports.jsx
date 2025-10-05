@@ -1,37 +1,9 @@
+import { useEffect, useState } from "react";
 import { ShieldUser, FileText, Archive, FolderKanban } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useNavigate } from "react-router-dom";
-
-import user1 from "@/assets/JoshuaG..jpg";
-import user2 from "../../../../uploads/joshua.png";
-import user3 from "../../../../uploads/angelie.png";
-
-import { useTheme } from "@/hooks/use-theme";
-import { useAuth } from "@/context/auth-context";
-
-const initialUsers = [
-    {
-        user: "Sarah Wilson",
-        action: "Logged out 2 minutes ago",
-        status: "Inactive",
-        date: "April 21, 2025",
-        image: user1,
-    },
-    {
-        user: "Bryan Wilson",
-        action: "Logged in 5 minutes ago",
-        status: "Active",
-        date: "April 21, 2025",
-        image: user2,
-    },
-    {
-        user: "John Wilson",
-        action: "Logged in 10 minutes ago",
-        status: "Active",
-        date: "April 21, 2025",
-        image: user3,
-    },
-];
+import defaultAvatar from "../../assets/default-avatar.png";
+import { useAuth } from "../../context/auth-context.jsx";
 
 const data = [
     { name: "Mon", Cases: 400, analytics: 240 },
@@ -53,7 +25,7 @@ const StatCard = ({ title, value, icon }) => (
     </div>
 );
 
-const ChartPlaceholder = ({ title, dataKey, theme }) => (
+const ChartPlaceholder = ({ title, dataKey }) => (
     <div className="flex flex-col gap-3 rounded-lg bg-white p-4 shadow dark:bg-slate-900">
         <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
         <div className="h-[200px] w-full">
@@ -87,18 +59,14 @@ const ChartPlaceholder = ({ title, dataKey, theme }) => (
                     </defs>
                     <XAxis
                         dataKey="name"
-                        stroke={theme === "light" ? "#475569" : "#94a3b8"}
-                        strokeWidth={0}
+                        stroke="#94a3b8"
                     />
-                    <YAxis
-                        stroke={theme === "light" ? "#94a3b8" : "#cbd5e1"}
-                        strokeWidth={0}
+                    <YAxis stroke="#94a3b8" />
+                    <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="#e2e8f0"
                     />
-                    <Tooltip
-                        cursor={false}
-                        formatter={(value) => `${value}`}
-                        active={true}
-                    />
+                    <Tooltip />
                     <Area
                         type="monotone"
                         dataKey={dataKey}
@@ -112,23 +80,155 @@ const ChartPlaceholder = ({ title, dataKey, theme }) => (
     </div>
 );
 
-export const Reports = () => {
-    const { user } = useAuth();
-    const navigate = useNavigate();
-    const { theme } = useTheme(); // ✅ Hook is now correctly used inside component
+// format time compactly
+const formatDistanceToNow = (date) => {
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
 
-    if (user.user_role !== "Admin") {
-        navigate("unauthorized");
-    }
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    return `${weeks}w ago`;
+};
+
+export const Reports = () => {
+    const navigate = useNavigate();
+    const { user } = useAuth() || {};
+    const [logs, setLogs] = useState([]);
+    const [loading, setLoading] = useState(true);
+    // remove toggle in favor of scrollable list
+    // const [showAll, setShowAll] = useState(false);
+
+    // Stat counts
+    const [usersCount, setUsersCount] = useState(0);
+    const [archivedCasesCount, setArchivedCasesCount] = useState(0);
+    const [processingCasesCount, setProcessingCasesCount] = useState(0);
+    const [processingDocumentsCount, setProcessingDocumentsCount] = useState(0);
+
+    useEffect(() => {
+        const fetchLogs = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/user-logs", {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+                const data = await res.json();
+                setLogs(data);
+            } catch (err) {
+                console.error("Error fetching logs:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchLogs();
+    }, []);
+
+    // Users count (Admins only)
+    useEffect(() => {
+        const fetchUserCount = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users/count", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch user count");
+                const data = await res.json();
+                setUsersCount(data.count ?? 0);
+            } catch (error) {
+                console.error("Failed to fetch user count:", error);
+                setUsersCount(0);
+            }
+        };
+        if (user?.user_role === "Admin") fetchUserCount();
+    }, [user]);
+
+    // Processing cases count (role-based)
+    useEffect(() => {
+        const fetchProcessingCasesCount = async () => {
+            try {
+                const endpoint =
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/cases/count/processing"
+                        : `http://localhost:3000/api/cases/count/processing/user/${user.user_id}`;
+                const res = await fetch(endpoint, { method: "GET", credentials: "include" });
+                if (!res.ok) throw new Error("Failed to fetch processing cases count");
+                const data = await res.json();
+                setProcessingCasesCount(data.count ?? 0);
+            } catch (error) {
+                console.error("Failed to fetch processing cases count:", error);
+                setProcessingCasesCount(0);
+            }
+        };
+        if (user) fetchProcessingCasesCount();
+    }, [user]);
+
+    // Archived cases count (role-based)
+    useEffect(() => {
+        const fetchArchivedCasesCount = async () => {
+            try {
+                const endpoint =
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/cases/count/archived"
+                        : `http://localhost:3000/api/cases/count/archived/user/${user.user_id}`;
+                const res = await fetch(endpoint, { method: "GET", credentials: "include" });
+                if (!res.ok) throw new Error("Failed to fetch archived cases count");
+                const data = await res.json();
+                setArchivedCasesCount(data.count ?? 0);
+            } catch (error) {
+                console.error("Failed to fetch archived cases count:", error);
+                setArchivedCasesCount(0);
+            }
+        };
+        if (user) fetchArchivedCasesCount();
+    }, [user]);
+
+    // Processing documents count (derived from documents API)
+    useEffect(() => {
+        const fetchProcessingDocumentsCount = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/documents", { credentials: "include" });
+                if (!res.ok) throw new Error("Failed to load documents");
+                const data = await res.json();
+                const statuses = new Set(["processing", "in-progress", "to-do", "pending"]);
+                const count = (Array.isArray(data) ? data : []).filter((d) =>
+                    statuses.has(
+                        String(d.doc_status || "")
+                            .toLowerCase()
+                            .trim(),
+                    ),
+                ).length;
+                setProcessingDocumentsCount(count);
+            } catch (e) {
+                console.error("Failed to compute processing documents count:", e);
+                setProcessingDocumentsCount(0);
+            }
+        };
+        fetchProcessingDocumentsCount();
+    }, []);
+
+    // only show first 5 logs if not expanded
+    // const visibleLogs = showAll ? logs : logs.slice(0, 5);
+    // scrollable list: show all logs
+    const visibleLogs = logs;
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Reports & Analytics</h1>
+            <h2 className="title">Reports & Analytics</h2>
 
+            {/* Stat Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
                     title="Users"
-                    value="1,482"
+                    value={usersCount}
                     icon={
                         <ShieldUser
                             size={20}
@@ -138,7 +238,7 @@ export const Reports = () => {
                 />
                 <StatCard
                     title="Archived Cases"
-                    value="267"
+                    value={archivedCasesCount}
                     icon={
                         <Archive
                             size={20}
@@ -148,7 +248,7 @@ export const Reports = () => {
                 />
                 <StatCard
                     title="Processing Cases"
-                    value="24"
+                    value={processingCasesCount}
                     icon={
                         <FolderKanban
                             size={20}
@@ -158,7 +258,7 @@ export const Reports = () => {
                 />
                 <StatCard
                     title="Processing Documents"
-                    value="3,642"
+                    value={processingDocumentsCount}
                     icon={
                         <FileText
                             size={20}
@@ -168,6 +268,7 @@ export const Reports = () => {
                 />
             </div>
 
+            {/* Chart */}
             <div className="relative rounded-xl bg-white p-6 shadow-md dark:bg-gray-800">
                 <span className="absolute right-4 top-4 z-10 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">Last 7 Days</span>
 
@@ -175,13 +276,13 @@ export const Reports = () => {
                     <ChartPlaceholder
                         title="Completed Cases"
                         dataKey="Cases"
-                        theme={theme}
                     />
                 </div>
             </div>
 
-            <div className="card">
-                <div className="mb-4 flex items-center justify-between">
+            {/* User Activity Logs */}
+            <div className="card p-4">
+                <div className="mb-3 flex items-center justify-between">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-white">User Activity</h2>
                     <button
                         onClick={() => navigate("/user-logs")}
@@ -191,38 +292,66 @@ export const Reports = () => {
                     </button>
                 </div>
 
-                <table className="w-full text-sm">
-                    <thead>
-                        <tr className="text-left text-slate-600 dark:text-slate-300">
-                            <th className="p-2">USER</th>
-                            <th className="p-2">ACTION</th>
-                            <th className="p-2">STATUS</th>
-                            <th className="p-2">DATE</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {initialUsers.map((item, idx) => (
-                            <tr
-                                key={idx}
-                                className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
-                            >
-                                <td className="flex items-center gap-2 p-2">
-                                    <img
-                                        src={item.image}
-                                        alt={item.user}
-                                        className="h-8 w-8 rounded-full object-cover"
-                                    />
-                                    <span className="text-slate-900 dark:text-white">{item.user}</span>
-                                </td>
-                                <td className="p-2 text-slate-700 dark:text-slate-300">{item.action}</td>
-                                <td className={`p-2 font-medium ${item.status.toLowerCase() === "active" ? "text-green-600" : "text-red-600"}`}>
-                                    {item.status}
-                                </td>
-                                <td className="p-2 text-slate-700 dark:text-slate-300">{item.date}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                {loading ? (
+                    <p className="text-center text-gray-500">Loading logs...</p>
+                ) : (
+                    <>
+                        <div className="max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700">
+                            <table className="w-full text-sm">
+                                <thead className="sticky top-0 bg-gray-100 text-left text-gray-600 dark:bg-gray-800">
+                                    <tr>
+                                        <th className="p-2">USER</th>
+                                        <th className="p-2">ACTION</th>
+                                        <th className="p-2">DATE</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {visibleLogs.map((log) => (
+                                        <tr
+                                            key={log.user_log_id}
+                                            className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                                        >
+                                            {/* USER */}
+                                            <td className="flex items-center gap-2 p-2">
+                                                {log.user_profile ? (
+                                                    <img
+                                                        src={`http://localhost:3000${log.user_profile}`}
+                                                        alt={log.user_fullname}
+                                                        className="h-8 w-8 rounded-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 text-xs font-bold text-white">
+                                                        {log.user_fullname?.charAt(0).toUpperCase()}
+                                                    </div>
+                                                )}
+                                                <span className="text-slate-900 dark:text-white">{log.user_fullname}</span>
+                                            </td>
+
+                                            {/* ACTION */}
+                                            <td className="p-2">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-medium text-gray-600 dark:text-gray-400">{log.user_log_action}</span>
+                                                    <span className="text-xs text-gray-500">{formatDistanceToNow(new Date(log.user_log_time))}</span>
+                                                </div>
+                                            </td>
+
+                                            {/* DATE */}
+                                            <td className="p-2 text-slate-700 dark:text-slate-300">
+                                                {log.user_log_time
+                                                    ? new Date(log.user_log_time).toLocaleString("en-US", {
+                                                          year: "numeric",
+                                                          month: "long",
+                                                          day: "numeric",
+                                                      })
+                                                    : ""}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
