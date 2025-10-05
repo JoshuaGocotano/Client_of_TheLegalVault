@@ -260,7 +260,8 @@ const Client = () => {
                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
                             <th className="whitespace-nowrap px-4 py-3">Date Created</th>
-                            <th className="whitespace-nowrap px-4 py-3">Created by</th>
+                            {/* <th className="whitespace-nowrap px-4 py-3">Created by</th> */}
+                            {user?.user_role !== "Lawyer" && <th className="whitespace-nowrap px-4 py-3">Lawyer</th>}
                             <th className="whitespace-nowrap px-4 py-3">Action</th>
                         </tr>
                     </thead>
@@ -286,7 +287,10 @@ const Client = () => {
                                     <td className="whitespace-nowrap px-4 py-3">{client.client_email}</td>
                                     <td className="whitespace-nowrap px-4 py-3">{client.client_phonenum}</td>
                                     <td className="whitespace-nowrap px-4 py-3">{new Date(client.client_date_created).toLocaleDateString()}</td>
-                                    <td className="whitespace-nowrap px-4 py-3">{getUserFullName(client.created_by)}</td>
+                                    {/* <td className="whitespace-nowrap px-4 py-3">{getUserFullName(client.created_by)}</td> */}
+                                    {user?.user_role !== "Lawyer" && (
+                                        <td className="whitespace-nowrap px-4 py-3">{getUserFullName(client.user_id)}</td>
+                                    )}
                                     <td className="px-4 py-3">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <button
@@ -349,10 +353,12 @@ const Client = () => {
                         <span className="inline-block h-3 w-3 rounded-full bg-gray-400" />
                         <span className="text-xs text-slate-500 dark:text-slate-300">Inactive ({inactiveCount})</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
-                        <span className="text-xs text-slate-500 dark:text-slate-300">Removed ({removedCount})</span>
-                    </div>
+                    {user?.user_role === "Admin" && showAllClients && (
+                        <div className="flex items-center gap-2">
+                            <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+                            <span className="text-xs text-slate-500 dark:text-slate-300">Removed ({removedCount})</span>
+                        </div>
+                    )}
                 </div>
 
                 {totalPages > 1 && (
@@ -444,6 +450,11 @@ const Client = () => {
                                         </span>
                                     </p>
                                 </div>
+                            </div>
+
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Lawyer</p>
+                                <p className="text-gray-600 dark:text-slate-200">Atty. {getUserFullName(viewClient.user_id)}</p>
                             </div>
 
                             <div>
