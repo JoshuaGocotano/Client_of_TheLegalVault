@@ -127,7 +127,7 @@ const DashboardPage = () => {
                         <div className="card">
                             <div className="card-header">
                                 <p className="card-title">Users</p>
-                                <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                                <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                     <ShieldUser size={26} />
                                 </div>
                             </div>
@@ -141,7 +141,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Archived Cases</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                            <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <Archive size={26} />
                             </div>
                         </div>
@@ -154,7 +154,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Processing Cases</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                            <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <FolderOpen size={26} />
                             </div>
                         </div>
@@ -167,7 +167,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Processing Documents</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                            <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <FileMinus size={26} />
                             </div>
                         </div>
@@ -185,7 +185,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Clients</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                            <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <Users size={26} />
                             </div>
                         </div>
@@ -198,7 +198,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Pending Approvals</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                            <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <UserRoundMinus size={26} />
                             </div>
                         </div>
@@ -211,7 +211,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Pending Tasks</p>
-                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
+                            <div className="bg-blue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <ListTodo size={26} />
                             </div>
                         </div>

@@ -6,7 +6,7 @@ const allNavbarLinks = [
     { label: "Documents", icon: FileText, path: "/documents" },
     { label: "Clients", icon: Users, path: "/clients" },
     { label: "Tasks", icon: ListTodo, path: "/tasks" },
-    { label: "Tasksv2", icon: ListTodo, path: "/tasksv2" },
+    { label: "Tasks V2", icon: ListTodo, path: "/tasking" },
     { label: "Users", icon: ShieldUser, path: "/users" },
     { label: "Reports", icon: ChartColumn, path: "/reports" },
     { label: "Activity Logs", icon: Logs, path: "/user-logs" },
@@ -59,5 +59,42 @@ export const overviewData = [
     {
         name: "Special Courts",
         total: 20,
+    },
+];
+
+export const COLUMNS = [
+    { id: "TODO", title: "To Do" },
+    { id: "IN_PROGRESS", title: "In Progress" },
+    { id: "DONE", title: "Done" },
+];
+
+export const INITIAL_TASKS = [
+    {
+        id: "1",
+        title: "Research Project",
+        description: "Gather requirements and create initial documentation",
+        status: "TODO",
+        priolevel: "high",
+    },
+    {
+        id: "2",
+        title: "Design System",
+        description: "Create component library and design tokens",
+        status: "TODO",
+        priolevel: "medium",
+    },
+    {
+        id: "3",
+        title: "API Integration",
+        description: "Implement REST API endpoints",
+        status: "TODO",
+        priolevel: "low",
+    },
+    {
+        id: "4",
+        title: "Testing",
+        description: "Write unit tests for core functionality",
+        status: "TODO",
+        priolevel: "medium",
     },
 ];

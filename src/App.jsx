@@ -27,7 +27,7 @@ import { UnauthorizedAccess } from "./auth/unauthorized";
 import ClientContact from "./components/client-contacts";
 import ChangePass from "./auth/changepass";
 import { Payments } from "./routes/sidebar/payments";
-import { Tasking } from "./routes/sidebar/version2task";
+import { Tasking } from "./routes/sidebar/tasking";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -64,7 +64,7 @@ export default function App() {
                         { path: "clients", element: <Clients /> },
                         { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
-                        { path: "tasksv2", element: <Tasking /> },
+                        { path: "tasking", element: <Tasking /> },
                         { path: "users", element: <Users /> },
                         {
                             path: "register",
