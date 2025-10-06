@@ -158,16 +158,14 @@ const Archives = () => {
 
     // Refresh after case update from modal
     const handleCaseUpdated = (updatedCase) => {
-        setArchivedCases((prev) =>
-            prev.map((c) => (c.case_id === updatedCase.case_id ? updatedCase : c))
-        );
+        setArchivedCases((prev) => prev.map((c) => (c.case_id === updatedCase.case_id ? updatedCase : c)));
     };
 
     return (
         <div className="mx-auto">
             <div className="mb-6">
                 <h2 className="title">Archived Cases</h2>
-                <p className="text-sm dark:text-slate-300">Browse and search all archived cases.</p>
+                <p className="text-sm text-gray-500">Browse and search all archived cases.</p>
             </div>
 
             {/* Search and Filter */}

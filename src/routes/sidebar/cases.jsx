@@ -208,7 +208,7 @@ const Cases = () => {
 
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
-                <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
+                <p className="text-sm text-gray-500">Manage all case details here.</p>
             </div>
 
             {/* Tabs */}

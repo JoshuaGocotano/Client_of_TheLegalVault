@@ -257,7 +257,7 @@ const Users = () => {
             {/* Header */}
             <div className="mb-6">
                 <h2 className="title">Users</h2>
-                <p className="text-sm dark:text-slate-300">Manage system users and their roles</p>
+                <p className="text-sm text-gray-500">Manage system users and their roles</p>
             </div>
 
             {/* Role Filters */}
