@@ -63,9 +63,9 @@ export const overviewData = [
 ];
 
 export const COLUMNS = [
-    { id: "TODO", title: "To Do" },
-    { id: "IN_PROGRESS", title: "In Progress" },
-    { id: "DONE", title: "Done" },
+    { id: "todo", title: "To Do" },
+    { id: "in_progress", title: "In Progress" },
+    { id: "done", title: "Done" },
 ];
 
 export const INITIAL_TASKS = [
@@ -73,28 +73,28 @@ export const INITIAL_TASKS = [
         id: "1",
         title: "Research Project",
         description: "Gather requirements and create initial documentation",
-        status: "TODO",
+        status: "todo",
         priolevel: "high",
     },
     {
         id: "2",
         title: "Design System",
         description: "Create component library and design tokens",
-        status: "TODO",
+        status: "todo",
         priolevel: "medium",
     },
     {
         id: "3",
         title: "API Integration",
         description: "Implement REST API endpoints",
-        status: "TODO",
+        status: "todo",
         priolevel: "low",
     },
     {
         id: "4",
         title: "Testing",
         description: "Write unit tests for core functionality",
-        status: "TODO",
+        status: "todo",
         priolevel: "medium",
     },
 ];

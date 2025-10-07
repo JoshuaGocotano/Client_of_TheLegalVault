@@ -15,9 +15,9 @@ export function Column({ column, tasks }) {
         {column.title}
       </h2>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex flex-1 flex-col gap-3">
         {tasks.map((task) => (
-          <TaskCard key={task.id} task={task} />
+          <TaskCard key={task.doc_id} task={task} />
         ))}
 
         {tasks.length === 0 && (
