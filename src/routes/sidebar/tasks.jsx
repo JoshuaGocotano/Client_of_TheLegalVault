@@ -50,7 +50,6 @@ export default function Tasks() {
                 
             </div>
 
-            {/* Simple inline action card */}
             {user.user_role === "Staff" && (
                 <div className=" ">
                     <div className="mb-3 flex items-center justify-between">

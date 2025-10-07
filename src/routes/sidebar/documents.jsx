@@ -8,6 +8,7 @@ const Documents = () => {
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [docToDelete, setDocToDelete] = useState(null);
+    const [users, setUsers] = useState([]);
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +33,21 @@ const Documents = () => {
         fetchDocs();
     }, []);
 
+    // Fetch users for submitter names
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users", { credentials: "include" });
+                if (!res.ok) throw new Error("Failed to load users");
+                const data = await res.json();
+                setUsers(Array.isArray(data) ? data : []);
+            } catch {
+                setUsers([]);
+            }
+        };
+        fetchUsers();
+    }, []);
+
     const toggleFilterModal = () => setShowFilterModal(!showFilterModal);
 
     const confirmDelete = (doc) => {
@@ -46,6 +62,16 @@ const Documents = () => {
             setDocToDelete(null);
             setShowDeleteModal(false);
         }
+    };
+
+    // Helper to display submitter's name or fallback
+    const getSubmitterName = (submittedById) => {
+        if (!submittedById) return "-";
+        const u = users.find((x) => x.user_id === submittedById);
+        if (!u) return String(submittedById);
+        const m = u.user_mname ? `${u.user_mname[0]}.` : "";
+        if (u.user_role === "Staff") return `${u.user_fname} ${m} ${u.user_lname}`.replace(/\s+/g, " ").trim();
+        return `Atty. ${u.user_fname} ${m} ${u.user_lname}`.replace(/\s+/g, " ").trim();
     };
 
     // Filtered list (by name, type, case id, submitted/tasked by)
@@ -138,7 +164,7 @@ const Documents = () => {
                                         <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
                                         <td className="px-4 py-3">{doc.case_id}</td>
                                         <td className="px-4 py-3">{doc.doc_type}</td>
-                                        <td className="px-4 py-3">{doc.doc_submitted_by}</td>
+                                        <td className="px-4 py-3">{getSubmitterName(doc.doc_submitted_by)}</td>
                                         <td className="flex justify-center gap-4 px-4 py-3">
                                             <div className="flex items-center gap-3">
                                                 <a

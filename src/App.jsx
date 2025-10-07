@@ -28,6 +28,7 @@ import ClientContact from "./components/client-contacts";
 import ChangePass from "./auth/changepass";
 import { Payments } from "./routes/sidebar/payments";
 import { Tasking } from "./routes/sidebar/tasking";
+import Settings from "./components/settings";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -76,6 +77,7 @@ export default function App() {
                         { path: "notifications", element: <Notifications /> },
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
                         { path: "payments", element: <Payments /> },
+                        { path: "settings", element: <Settings /> },
                     ],
                 },
             ],
