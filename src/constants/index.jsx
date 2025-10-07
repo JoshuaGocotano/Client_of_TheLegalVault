@@ -25,11 +25,11 @@ export const getNavbarLinks = (role) => {
     }
 
     if (role === "Staff") {
-        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Activity Logs"].includes(link.label));
+        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Tasks V2", "Activity Logs"].includes(link.label));
     }
 
     if (role === "Paralegal") {
-        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Activity Logs"].includes(link.label));
+        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Tasks V2", "Activity Logs"].includes(link.label));
     }
 
     return [];
