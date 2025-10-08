@@ -116,7 +116,7 @@ export const Tasks = () => {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-5">
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Tasks</h1>
@@ -124,12 +124,12 @@ export const Tasks = () => {
             </div>
 
             {/* Priority Legend */}
-            <div>
-                <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">Priority Levels:</h3>
+            <div className="flex items-center gap-6">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Priority Levels:</h3>
                 <div className="flex gap-4">
                     {[
                         { color: "bg-red-500", label: "High" },
-                        { color: "bg-yellow-500", label: "Medium" },
+                        { color: "bg-yellow-500", label: "Mid" },
                         { color: "bg-blue-500", label: "Low" },
                     ].map((p) => (
                         <div
@@ -214,7 +214,7 @@ export const Tasks = () => {
                                                         className={`inline-block h-2.5 w-2.5 rounded-full ${
                                                             task.doc_prio_level === "High"
                                                                 ? "bg-red-500"
-                                                                : task.doc_prio_level === "Medium"
+                                                                : task.doc_prio_level === "Mid"
                                                                   ? "bg-yellow-500"
                                                                   : task.doc_prio_level === "Low"
                                                                     ? "bg-blue-500"
