@@ -14,6 +14,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
     const [error, setError] = useState("");
     const [refDocs, setRefDocs] = useState([]);
     const [fileError, setFileError] = useState("");
+    const [showDropdown, setShowDropdown] = useState(false);
 
     // Form state (exclude doc_references here, we handle via refDocs state)
     const [form, setForm] = useState({
@@ -199,35 +200,81 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                 className="space-y-4"
             >
                 {/* Grid Inputs */}
-                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Tasked To */}
-                    <div className="flex flex-col">
+                    <div className="relative flex flex-col">
                         <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Tasked To</label>
-                        <select
-                            name="doc_tasked_to"
-                            value={form.doc_tasked_to}
-                            onChange={onChange}
-                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
-                            required
-                        >
-                            <option
-                                value=""
-                                disabled
+                        <div className="relative">
+                            <button
+                                type="button"
+                                onClick={() => setShowDropdown((prev) => !prev)}
+                                className="flex w-full items-center justify-between rounded border px-3 py-2 text-left dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                             >
-                                Select Staff / Paralegal
-                            </option>
-                            {users
-                                .filter((u) => u.user_role === "Paralegal" || u.user_role === "Staff")
-                                .map((u) => (
-                                    <option
-                                        key={u.user_id}
-                                        value={u.user_id}
-                                    >
-                                        {u.user_fname} {u.user_mname ? u.user_mname[0] + ". " : ""}
-                                        {u.user_lname}
-                                    </option>
-                                ))}
-                        </select>
+                                {form.doc_tasked_to
+                                    ? (() => {
+                                          const selected = users.find((u) => u.user_id === form.doc_tasked_to);
+                                          return (
+                                              <span>
+                                                  {selected.user_fname} {selected.user_mname ? selected.user_mname[0] + ". " : ""}
+                                                  {selected.user_lname}{" "}
+                                                  <span
+                                                      className={`ml-2 rounded px-2 py-0.5 text-xs font-medium ${
+                                                          selected.user_role === "Paralegal"
+                                                              ? "bg-blue-100 text-blue-700"
+                                                              : "bg-green-100 text-green-700"
+                                                      }`}
+                                                  >
+                                                      {selected.user_role}
+                                                  </span>
+                                              </span>
+                                          );
+                                      })()
+                                    : "Select Staff / Paralegal"}
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="ml-2 h-4 w-4 opacity-70"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
+                            </button>
+
+                            {showDropdown && (
+                                <div className="absolute z-10 mt-1 max-h-48 w-full overflow-y-auto rounded border bg-white shadow dark:border-gray-600 dark:bg-slate-800">
+                                    {users
+                                        .filter((u) => u.user_role === "Paralegal" || u.user_role === "Staff")
+                                        .map((u) => (
+                                            <div
+                                                key={u.user_id}
+                                                onClick={() => {
+                                                    setForm((prev) => ({ ...prev, doc_tasked_to: u.user_id }));
+                                                    setShowDropdown(false);
+                                                }}
+                                                className="flex cursor-pointer items-center justify-between px-3 py-2 hover:bg-blue-50 dark:hover:bg-slate-700"
+                                            >
+                                                <span className="text-gray-800 dark:text-gray-100">
+                                                    {u.user_fname} {u.user_mname ? u.user_mname[0] + ". " : ""}
+                                                    {u.user_lname}
+                                                </span>
+                                                <span
+                                                    className={`ml-2 rounded px-2 py-0.5 text-xs font-medium ${
+                                                        u.user_role === "Paralegal" ? "bg-blue-100 text-blue-700" : "bg-green-100 text-green-700"
+                                                    }`}
+                                                >
+                                                    {u.user_role}
+                                                </span>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Document Name */}
@@ -383,14 +430,14 @@ export default function AddTask({ caseId, onClose, onAdded }) {
             </form>
 
             {/* Existing Documents */}
-            <div className="mt-6 overflow-x-auto">
-                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Existing Documents</h3>
+            <div className="mt-4 max-h-40 overflow-x-auto">
+                <h3 className="top-0 mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Existing Documents</h3>
                 {loadingDocs ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                 ) : docs.length === 0 ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400">No documents found.</p>
                 ) : (
-                    <table className="min-w-full border text-sm dark:border-gray-600">
+                    <table className="min-w-full border text-xs dark:border-gray-600">
                         <thead className="bg-gray-50 dark:bg-slate-800">
                             <tr>
                                 <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Name</th>
@@ -418,7 +465,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                                         {d.doc_file ? (
                                             <a
                                                 className="text-blue-600 hover:underline"
-                                                href={`http://localhost:3000/uploads/${d.doc_type === "Task" ? "taskDocs" : "supportingDocs"}/${d.doc_file}`}
+                                                href={`http://localhost:3000${d.doc_file}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >

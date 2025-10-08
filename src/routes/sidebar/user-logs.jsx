@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search } from "lucide-react";
+import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search, ListCheck } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
@@ -46,6 +46,7 @@ const Userlogs = () => {
         if (type === "document log") return <FileText className="h-5 w-5" />;
         if (type === "case log") return <Scale className="h-5 w-5" />;
         if (type === "archive log") return <Archive className="h-5 w-5" />;
+        if (type === "task log") return <ListCheck className="h-5 w-5" />;
 
         if (/login/.test(action)) return <LogIn className="h-5 w-5" />;
         if (/logout/.test(action)) return <LogOut className="h-5 w-5" />;
@@ -61,6 +62,7 @@ const Userlogs = () => {
         if (/contact/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
         if (/archived/i.test(action)) return "bg-slate-700 text-white dark:bg-white dark:text-black";
         if (/case/i.test(action)) return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+        if (/task/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
         if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
         return "bg-gray-100 text-gray-700 dark:bg-gray-700/20 dark:text-gray-300";
     };
@@ -78,6 +80,8 @@ const Userlogs = () => {
         if (/new case/i.test(action)) return "New Case Added";
         if (/archived/i.test(action)) return "Case Archived";
         if (/updated case/i.test(action)) return "Case Update";
+        if (/task added/i.test(action)) return "New Task Added";
+        if (/task updated/i.test(action)) return "Task Updated";
         if (/fail|error/i.test(action)) return "Error";
         return "Action";
     };
