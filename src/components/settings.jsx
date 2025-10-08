@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 // Simple reusable section card
 const SettingsCard = ({ title, actions, children }) => (
@@ -346,6 +347,9 @@ const Settings = () => {
         if (!name) return;
         setAddCatError("");
         setAddCatLoading(true);
+
+        const toastId = toast.loading("Adding category...", { duration: 3000 });
+
         try {
             const created = await fetchJson(`${API_BASE}/case-categories`, {
                 method: "POST",
@@ -356,11 +360,15 @@ const Settings = () => {
             setCategories((prev) => [created, ...prev]);
             // Optionally keep a local copy
             const next = [name, ...customCategories.filter((c) => c !== name)];
+
+            toast.success("Category added", { id: toastId, duration: 3000 });
+
             setCustomCategories(next);
             saveCaseCustomPrefs(next, undefined);
             setNewCategoryName("");
         } catch (e) {
             setAddCatError(e.message || "Failed to add category");
+            toast.error(e.message || "Failed to add category", { id: toastId, duration: 4000 });
         } finally {
             setAddCatLoading(false);
         }
@@ -378,6 +386,9 @@ const Settings = () => {
         if (!name) return;
         setAddTypeError("");
         setAddTypeLoading(true);
+
+        const toastId = toast.loading("Adding case type...", { duration: 3000 });
+
         try {
             const payload = { ct_name: name };
             const cid = newTypeCategoryId ? Number(newTypeCategoryId) : null;
@@ -389,12 +400,16 @@ const Settings = () => {
             });
             setTypes((prev) => [created, ...prev]);
             const next = [name, ...customTypes.filter((t) => t !== name)];
+
+             toast.success("Case type added successfully", { id: toastId, duration: 3000 });
+
             setCustomTypes(next);
             saveCaseCustomPrefs(undefined, next);
             setNewTypeName("");
             setNewTypeCategoryId("");
         } catch (e) {
             setAddTypeError(e.message || "Failed to add type");
+            toast.error(e.message || "Failed to add type", { id: toastId, duration: 4000 });
         } finally {
             setAddTypeLoading(false);
         }
