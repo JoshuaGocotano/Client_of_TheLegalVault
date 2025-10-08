@@ -6,7 +6,6 @@ const allNavbarLinks = [
     { label: "Documents", icon: FileText, path: "/documents" },
     { label: "Clients", icon: Users, path: "/clients" },
     { label: "Tasks", icon: ListTodo, path: "/tasks" },
-    { label: "Tasks V2", icon: ListTodo, path: "/tasking" },
     { label: "Users", icon: ShieldUser, path: "/users" },
     { label: "Reports", icon: ChartColumn, path: "/reports" },
     { label: "Activity Logs", icon: Logs, path: "/user-logs" },

@@ -16,7 +16,7 @@ import Registration from "./components/registration";
 import Cases from "./routes/sidebar/cases";
 import Documents from "./routes/sidebar/documents";
 import Clients from "./routes/sidebar/clients";
-import Tasks from "./routes/sidebar/tasks";
+import Tasks from "./routes/sidebar/task";
 import Users from "./routes/sidebar/users";
 import Reports from "./routes/sidebar/reports";
 import UserLogs from "./routes/sidebar/user-logs";
@@ -27,7 +27,6 @@ import { UnauthorizedAccess } from "./auth/unauthorized";
 import ClientContact from "./components/client-contacts";
 import ChangePass from "./auth/changepass";
 import { Payments } from "./routes/sidebar/payments";
-import { Tasking } from "./routes/sidebar/tasking";
 import Settings from "./components/settings";
 
 export default function App() {
@@ -65,7 +64,6 @@ export default function App() {
                         { path: "clients", element: <Clients /> },
                         { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
-                        { path: "tasking", element: <Tasking /> },
                         { path: "users", element: <Users /> },
                         {
                             path: "register",
