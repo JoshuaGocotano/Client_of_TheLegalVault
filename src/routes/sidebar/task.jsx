@@ -166,19 +166,17 @@ export const Tasks = () => {
                         <table className="w-full table-auto text-sm">
                             <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
                                 <tr>
-                                    <th className="w-[18%] px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Task Name
                                     </th>
-                                    <th className="w-[40%] px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Description
                                     </th>
-                                    <th className="w-[12%] px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
-                                        Status
-                                    </th>
-                                    <th className="w-[15%] px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Due Date
                                     </th>
-                                    <th className="w-[15%] px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Actions
                                     </th>
                                 </tr>
