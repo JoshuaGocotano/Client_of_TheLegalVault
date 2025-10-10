@@ -123,8 +123,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
         const lawyer = tableData.find((u) => u.user_id === lawyerId);
         return lawyer
             ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
-                .replace(/\s+/g, " ")
-                .trim()
+                  .replace(/\s+/g, " ")
+                  .trim()
             : "Unassigned";
     };
 
@@ -282,9 +282,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                             <span className="font-semibold">
                                                 {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
                                                     ? new Intl.NumberFormat("en-PH", {
-                                                        style: "currency",
-                                                        currency: "PHP",
-                                                    }).format(Number(selectedCase.case_fee))
+                                                          style: "currency",
+                                                          currency: "PHP",
+                                                      }).format(Number(selectedCase.case_fee))
                                                     : "₱0.00"}
                                             </span>
                                         </div>
@@ -304,9 +304,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                             <span>
                                                 {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
                                                     ? new Intl.NumberFormat("en-PH", {
-                                                        style: "currency",
-                                                        currency: "PHP",
-                                                    }).format(Number(selectedCase.case_balance))
+                                                          style: "currency",
+                                                          currency: "PHP",
+                                                      }).format(Number(selectedCase.case_balance))
                                                     : "₱0.00"}
                                             </span>
                                         </div>
@@ -342,14 +342,15 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     <p>
                                         <strong>Status:</strong>{" "}
                                         <span
-                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                : selectedCase.case_status === "Processing"
-                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                    : selectedCase.case_status === "Completed"
+                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                                selectedCase.case_status === "Pending"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : selectedCase.case_status === "Processing"
+                                                      ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                      : selectedCase.case_status === "Completed"
                                                         ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
                                                         : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
-                                                }`}
+                                            }`}
                                         >
                                             {selectedCase.case_status}
                                         </span>
@@ -404,7 +405,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                             <th className="px-4 py-2">Status</th>
                                             <th className="px-4 py-2">Due</th>
                                             <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                            <th className="px-4 py-2">Actions</th>
+                                            {selectedCase.case_status === "Processing" && <th className="px-4 py-2">Actions</th>}
                                         </tr>
                                     </thead>
 
@@ -417,41 +418,49 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                 <td className="px-4 py-2">{doc.doc_id}</td>
                                                 <td className="px-4 py-2">{doc.doc_name}</td>
                                                 <td className="px-4 py-2">{doc.doc_type}</td>
-                                                <td className="px-4 py-2">{doc.doc_status}</td>
+                                                <td className="px-4 py-2">
+                                                    {doc.doc_status === "todo"
+                                                        ? "to do"
+                                                        : doc.doc_status === "in_progress"
+                                                          ? "in progress"
+                                                          : doc.doc_status}
+                                                </td>
                                                 <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
                                                 <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
-                                                <td className="flex gap-2 space-x-2 px-4 py-2">
-                                                    {doc.doc_file && (
-                                                        <button
-                                                            className="text-blue-600 hover:text-blue-800"
-                                                            onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
-                                                            title="View File"
-                                                        >
-                                                            <Eye size={16} />
-                                                        </button>
-                                                    )}
+                                                {selectedCase.case_status === "Processing" && (
+                                                    <td className="flex gap-2 space-x-2 px-4 py-2">
+                                                        {doc.doc_file && (
+                                                            <button
+                                                                className="text-blue-600 hover:text-blue-800"
+                                                                onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
+                                                                title="View File"
+                                                            >
+                                                                <Eye size={16} />
+                                                            </button>
+                                                        )}
 
-                                                    <button
-                                                        className="text-yellow-600 hover:text-yellow-800"
-                                                        title="Edit Document"
-                                                    >
-                                                        <Pen size={16} />
-                                                    </button>
-                                                    {doc.doc_type !== "Support" && (
+                                                        <button
+                                                            className="text-yellow-600 hover:text-yellow-800"
+                                                            title="Edit Document"
+                                                        >
+                                                            <Pen size={16} />
+                                                        </button>
+                                                        {doc.doc_type !== "Support" && (
+                                                            <button
+                                                                className="text-red-600 hover:text-red-800"
+                                                                title="Reject Document"
+                                                            >
+                                                                <Undo size={16} />
+                                                            </button>
+                                                        )}
                                                         <button
                                                             className="text-red-600 hover:text-red-800"
-                                                            title="Reject Document"
+                                                            title="Delete Document"
                                                         >
-                                                            <Undo size={16} />
+                                                            <Trash2 size={16} />
                                                         </button>
-                                                    )}
-                                                    <button
-                                                        className="text-red-600 hover:text-red-800"
-                                                        title="Delete Document"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </td>
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>
@@ -531,7 +540,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                             </div>
                         )}
 
-                        {selectedCase.case_status === "Completed" && (
+                        {selectedCase.case_status === "Completed" && user.user_role === "Admin" && (
                             <div className="mt-6 flex items-center justify-end gap-4">
                                 <button
                                     title="Archive"

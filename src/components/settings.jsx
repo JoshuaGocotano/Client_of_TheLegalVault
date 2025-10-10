@@ -34,6 +34,9 @@ const Settings = () => {
     const [branchAddress, setBranchAddress] = useState("");
     const [branchEmail, setBranchEmail] = useState("");
     const [branchPhone, setBranchPhone] = useState("");
+    // New: edit states for branch PUT
+    const [editingBranchId, setEditingBranchId] = useState(null);
+    const [editingBranchName, setEditingBranchName] = useState("");
 
     // Case preferences (local)
     const [customCategories, setCustomCategories] = useState([]);
@@ -78,6 +81,14 @@ const Settings = () => {
     const fetchJson = async (url, opts = {}) => {
         const res = await fetch(url, { credentials: "include", ...opts });
         if (!res.ok) throw new Error((await res.text()) || "Request failed");
+        // Handle 204 No Content or empty body safely
+        if (res.status === 204) return null;
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.includes("application/json")) {
+            // Try text; return null if empty
+            const text = await res.text();
+            return text ? text : null;
+        }
         return res.json();
     };
 
@@ -123,27 +134,75 @@ const Settings = () => {
             if (raw) setBranchDrafts(JSON.parse(raw));
         } catch {}
     };
-    const addBranchDraft = (e) => {
+    // Replace local-only draft submit with server POST; keep drafts as optional fallback list
+    const addBranchDraft = async (e) => {
         e.preventDefault();
         if (!branchName.trim()) return;
-        const draft = {
-            id: Date.now(),
-            branch_name: branchName.trim(),
-            address: branchAddress.trim(),
-            email: branchEmail.trim(),
-            phone: branchPhone.trim(),
-            created_at: new Date().toISOString(),
-        };
-        const next = [draft, ...branchDrafts];
-        saveBranchDrafts(next);
-        setBranchName("");
-        setBranchAddress("");
-        setBranchEmail("");
-        setBranchPhone("");
+        const name = branchName.trim();
+        const toastId = toast.loading("Adding branch...", { duration: 3000 });
+        try {
+            const created = await fetchJson(`${API_BASE}/branches`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ branch_name: name }),
+            });
+            // Optimistically add to list
+            setBranches((prev) => [created, ...prev]);
+            toast.success("Branch added", { id: toastId, duration: 3000 });
+            setBranchName("");
+            setBranchAddress("");
+            setBranchEmail("");
+            setBranchPhone("");
+        } catch (e) {
+            toast.error(e.message || "Failed to add branch", { id: toastId, duration: 4000 });
+        }
     };
     const removeBranchDraft = (id) => {
         const next = branchDrafts.filter((d) => d.id !== id);
         saveBranchDrafts(next);
+    };
+
+    // edit branch
+    const startEditBranch = (b) => {
+        const id = b?.branch_id ?? b?.id;
+        if (!id) return;
+        setEditingBranchId(id);
+        setEditingBranchName(b?.branch_name ?? b?.name ?? "");
+    };
+    const cancelEditBranch = () => {
+        setEditingBranchId(null);
+        setEditingBranchName("");
+    };
+    const saveEditBranch = async () => {
+        const id = editingBranchId;
+        const name = editingBranchName.trim();
+        if (!id || !name) return;
+        const toastId = toast.loading("Updating branch...", { duration: 3000 });
+        try {
+            const updated = await fetchJson(`${API_BASE}/branches/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ branch_name: name }),
+            });
+            setBranches((prev) => prev.map((b) => ((b?.branch_id ?? b?.id) === id ? updated : b)));
+            toast.success("Branch updated", { id: toastId, duration: 3000 });
+            cancelEditBranch();
+        } catch (e) {
+            toast.error(e.message || "Failed to update branch", { id: toastId, duration: 4000 });
+        }
+    };
+    const deleteBranch = async (id) => {
+        if (!id) return;
+        const toastId = toast.loading("Deleting branch...", { duration: 3000 });
+        try {
+            await fetchJson(`${API_BASE}/branches/${id}`, {
+                method: "DELETE",
+            });
+            setBranches((prev) => prev.filter((b) => (b?.branch_id ?? b?.id) !== id));
+            toast.success("Branch deleted", { id: toastId, duration: 3000 });
+        } catch (e) {
+            toast.error(e.message || "Failed to delete branch", { id: toastId, duration: 4000 });
+        }
     };
 
     const loadUsers = async () => {
@@ -401,7 +460,7 @@ const Settings = () => {
             setTypes((prev) => [created, ...prev]);
             const next = [name, ...customTypes.filter((t) => t !== name)];
 
-             toast.success("Case type added successfully", { id: toastId, duration: 3000 });
+            toast.success("Case type added successfully", { id: toastId, duration: 3000 });
 
             setCustomTypes(next);
             saveCaseCustomPrefs(undefined, next);
@@ -481,21 +540,21 @@ const Settings = () => {
     return (
         <div className="flex h-full">
             {/* Sidebar */}
-            <aside className="w-72 border-r bg-white shadow-md dark:border-gray-700 dark:bg-gray-900">
-                <div className="flex items-center gap-2 border-b p-4 text-lg font-semibold dark:border-gray-700 dark:text-slate-300">
+            <aside className="sticky top-0 h-[100vh] w-72 border-r bg-gradient-to-b from-white to-slate-50/80 shadow-lg dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+                <div className="sticky top-0 z-10 flex items-center gap-3 border-b bg-white/70 p-4 text-lg font-semibold backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:border-gray-800 dark:bg-gray-900/70 dark:text-slate-200">
                     <SettingsIcon size={22} />
                     <span>Settings</span>
                 </div>
-                <nav className="flex flex-col space-y-1 p-2">
+                <nav className="flex flex-col gap-1 overflow-y-auto p-3">
                     {visibleTabs.map((tab) => (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`flex items-center gap-3 rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                            className={`group relative flex items-center gap-3 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
                                 activeTab === tab.key
-                                    ? "bg-blue-600 text-white shadow-md"
-                                    : "text-gray-700 hover:bg-blue-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                            }`}
+                                    ? "border-blue-500/60 bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                    : "border-transparent text-gray-700 hover:bg-blue-50 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-800/80"
+                            } `}
                         >
                             <tab.icon size={18} />
                             {tab.label}
@@ -509,8 +568,63 @@ const Settings = () => {
                 {/* Branch */}
                 {activeTab === "branch" && (
                     <div className="space-y-6">
+                        {/* Add Branch Section */}
+                        <SettingsCard title="Add New Branch">
+                            <form
+                                onSubmit={addBranchDraft}
+                                className="space-y-6"
+                            >
+                                <div className="space-y-2">
+                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Branch Name</label>
+                                    <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+                                        <input
+                                            type="text"
+                                            value={branchName}
+                                            onChange={(e) => setBranchName(e.target.value)}
+                                            placeholder="Enter branch name (e.g., Main Office)"
+                                            className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        />
+                                        <button
+                                            type="submit"
+                                            className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                        >
+                                            <Plus size={16} />
+                                            Add Branch
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            {/* Pending Branches List */}
+                            {branchDrafts.length > 0 && (
+                                <div className="mt-4 border-t pt-6 dark:border-gray-700">
+                                    <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">Pending Branches (Local)</h3>
+                                    <ul className="space-y-3">
+                                        {branchDrafts.map((d) => (
+                                            <li
+                                                key={d.id}
+                                                className="group flex items-center justify-between rounded-lg border border-gray-200 bg-white p-3 shadow-sm transition hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+                                            >
+                                                <div>
+                                                    <div className="font-medium text-gray-900 dark:text-gray-100">{d.branch_name}</div>
+                                                </div>
+                                                <button
+                                                    onClick={() => removeBranchDraft(d.id)}
+                                                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm text-red-600 transition hover:bg-red-50 dark:hover:bg-red-900/30"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Remove
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                        </SettingsCard>
+
+                        {/* Existing Branches Section */}
                         <SettingsCard
-                            title="Branches (Server)"
+                            title="Branches "
                             actions={
                                 <button
                                     onClick={loadBranches}
@@ -527,101 +641,74 @@ const Settings = () => {
                             ) : branches.length === 0 ? (
                                 <p className="text-sm text-gray-500">No branches found.</p>
                             ) : (
-                                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                    {branches.map((b, i) => (
-                                        <li
-                                            key={i}
-                                            className="rounded-lg border px-3 py-2 dark:border-gray-700"
-                                        >
-                                            <div className="font-medium">{displayBranchName(b)}</div>
-                                            {displayBranchAddress(b) && <div className="text-xs text-gray-500">{displayBranchAddress(b)}</div>}
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </SettingsCard>
-
-                        <SettingsCard title="Add Branch (Local Draft)">
-                            <form
-                                onSubmit={addBranchDraft}
-                                className="grid grid-cols-1 gap-4 md:grid-cols-2"
-                            >
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Branch Name</label>
-                                    <input
-                                        value={branchName}
-                                        onChange={(e) => setBranchName(e.target.value)}
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                        placeholder="e.g., Main Office"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Address</label>
-                                    <input
-                                        value={branchAddress}
-                                        onChange={(e) => setBranchAddress(e.target.value)}
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                        placeholder="Street, City"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Email</label>
-                                    <input
-                                        type="email"
-                                        value={branchEmail}
-                                        onChange={(e) => setBranchEmail(e.target.value)}
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                        placeholder="contact@example.com"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="mb-1 block text-sm font-medium">Phone</label>
-                                    <input
-                                        value={branchPhone}
-                                        onChange={(e) => setBranchPhone(e.target.value)}
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                        placeholder="+63 900 000 0000"
-                                    />
-                                </div>
-                                <div className="flex justify-end md:col-span-2">
-                                    <button
-                                        type="submit"
-                                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                                    >
-                                        <Plus size={16} /> Add Draft
-                                    </button>
-                                </div>
-                            </form>
-                            {branchDrafts.length > 0 ? (
-                                <div className="pt-2">
-                                    <h3 className="mb-2 text-sm font-medium">Pending Branches (local)</h3>
-                                    <ul className="space-y-2">
-                                        {branchDrafts.map((d) => (
+                                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                    {branches.map((b, i) => {
+                                        const id = b?.branch_id ?? b?.id ?? i;
+                                        const isEditing = editingBranchId === (b?.branch_id ?? b?.id);
+                                        return (
                                             <li
-                                                key={d.id}
-                                                className="flex items-center justify-between rounded-lg border px-3 py-2 dark:border-gray-700"
+                                                key={id}
+                                                className="rounded-lg border px-3 py-2 dark:border-gray-700"
                                             >
-                                                <div>
-                                                    <div className="font-medium">{d.branch_name}</div>
-                                                    <div className="text-xs text-gray-500">
-                                                        {d.address} {d.email && `• ${d.email}`} {d.phone && `• ${d.phone}`}
+                                                {isEditing ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <input
+                                                            value={editingBranchName}
+                                                            onChange={(e) => setEditingBranchName(e.target.value)}
+                                                            className="flex-1 rounded-lg border px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
+                                                        />
+                                                        <button
+                                                            onClick={saveEditBranch}
+                                                            className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
+                                                        >
+                                                            Save
+                                                        </button>
+                                                        <button
+                                                            onClick={cancelEditBranch}
+                                                            className="rounded border px-2 py-1 text-xs hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                                                        >
+                                                            Cancel
+                                                        </button>
                                                     </div>
-                                                </div>
-                                                <button
-                                                    onClick={() => removeBranchDraft(d.id)}
-                                                    className="inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
-                                                >
-                                                    <Trash2 size={14} /> Remove
-                                                </button>
+                                                ) : (
+                                                    <div className="flex items-center justify-between gap-2">
+                                                        <div>
+                                                            <div className="font-medium">{displayBranchName(b)}</div>
+                                                            {displayBranchAddress(b) && (
+                                                                <div className="text-xs text-gray-500">{displayBranchAddress(b)}</div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <button
+                                                                onClick={() => startEditBranch(b)}
+                                                                className="rounded border px-2 py-1 text-xs hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                onClick={() => {
+                                                                    const bid = b?.branch_id ?? b?.id;
+                                                                    if (!bid) return;
+                                                                    if (
+                                                                        window.confirm(
+                                                                            "Are you sure you want to delete this branch? This action cannot be undone.",
+                                                                        )
+                                                                    ) {
+                                                                        deleteBranch(bid);
+                                                                    }
+                                                                }}
+                                                                className="inline-flex items-center gap-1 rounded border px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                                                                title="Delete branch"
+                                                            >
+                                                                <Trash2 size={12} /> Delete
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </li>
-                                        ))}
-                                    </ul>
-                                    <p className="mt-2 text-xs text-gray-500">
-                                        Drafts are saved in this browser only. Ask an admin to add branches in the backend.
-                                    </p>
-                                </div>
-                            ) : (
-                                <p className="text-xs text-gray-500">No local drafts yet.</p>
+                                        );
+                                    })}
+                                </ul>
                             )}
                         </SettingsCard>
                     </div>
@@ -721,7 +808,7 @@ const Settings = () => {
 
                 {/* Case Preferences */}
                 {activeTab === "case-categories" && (
-                    <div className="space-y-6">
+                    <div className="mx-auto max-w-6xl space-y-6">
                         <SettingsCard
                             title="Case Categories & Types"
                             actions={
@@ -850,8 +937,6 @@ const Settings = () => {
                                         </div>
                                     )}
                                 </div>
-
-                                <p className="text-xs text-gray-500">New items are saved to the server and appear below.</p>
                             </div>
                         </SettingsCard>
                     </div>

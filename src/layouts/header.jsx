@@ -61,6 +61,27 @@ export const Header = ({ collapsed, setCollapsed }) => {
             }));
     };
 
+    // fetch notification unread count
+    const fetchUnreadCount = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/api/notifications/unread-count/${user.user_id}`, {
+                credentials: "include",
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setUnreadCount(data.count || 0);
+            }
+        } catch (e) {
+            console.error("Failed to count unread notification/s", e);
+            setUnreadCount(0);
+        }
+    };
+
+    const [unreadCount, setUnreadCount] = useState(0);
+    useEffect(() => {
+        fetchUnreadCount();
+    }, []);
+
     // Global search across routes and backend entities (cases, clients, documents)
     useEffect(() => {
         let active = true;
@@ -235,9 +256,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
                 <button
                     onClick={() => navigate("notifications")}
-                    className="btn-ghost size-10"
+                    className="btn-ghost relative size-10"
                 >
                     <Bell size={20} />
+                    {unreadCount > 0 && (
+                        <span className="absolute -right-[-4px] -top-[-2px] inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-[10px] font-bold text-white">
+                            {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                    )}
                 </button>
 
                 <button
