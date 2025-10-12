@@ -31,9 +31,7 @@ const Settings = () => {
 
     const [branchDrafts, setBranchDrafts] = useState([]);
     const [branchName, setBranchName] = useState("");
-    const [branchAddress, setBranchAddress] = useState("");
-    const [branchEmail, setBranchEmail] = useState("");
-    const [branchPhone, setBranchPhone] = useState("");
+    
     // New: edit states for branch PUT
     const [editingBranchId, setEditingBranchId] = useState(null);
     const [editingBranchName, setEditingBranchName] = useState("");
