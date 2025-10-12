@@ -150,12 +150,67 @@ export const Tasks = () => {
                         <Column
                             key={column.id}
                             column={column}
-                            tasks={tasks.filter((task) => task.doc_status === column.id)}
+                            tasks={tasks.filter((task) => task.doc_status === column.id )}
                             getPriorityStyle={getPriorityStyle}
                         />
                     ))}
                 </div>
             </DndContext>
+
+            {/* List of Overdue Tasks */}
+            <div className="mt-10">
+                <h1 className="mb-3 text-lg font-bold text-slate-800 dark:text-slate-100">Overdue Tasks</h1>
+                <div className="overflow-x-auto rounded-xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                    <div className="max-h-[40vh] overflow-y-auto">
+                        <table className="w-full table-auto text-sm">
+                            <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Task Name
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Due Date
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Status
+                                    </th>   
+                                </tr>
+                            </thead>
+                            <tbody className="dark:divide-slate-700">
+                                {tasks.filter(task => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE).length > 0 ? (
+                                    tasks
+                                        .filter(task => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE)
+                                        .map((task) => (
+                                            <tr
+                                                key={task.doc_id}
+                                                className="transition-colors odd:bg-white even:bg-gray-50/60 hover:bg-gray-50 dark:odd:bg-slate-800 dark:even:bg-slate-800/60 dark:hover:bg-slate-700/60"
+                                            >
+                                                <td className="max-w-[180px] truncate px-4 font-medium text-slate-800 dark:text-slate-100">
+                                                    {task.doc_name}
+                                                </td>
+                                                <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
+                                                    {new Date(task.doc_due_date).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-4 py-3 capitalize text-slate-800 dark:text-slate-100">
+                                                    {task.doc_status === "todo" ? "To Do" : task.doc_status === "in_progress" ? "In Progress" : "Done"}
+                                                </td>
+                                            </tr>
+                                        ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="3"
+                                            className="px-5 py-8 text-center text-slate-500 dark:text-slate-400"
+                                        >
+                                            No overdue tasks.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             {/* Task Overview */}
             <div className="mt-10">

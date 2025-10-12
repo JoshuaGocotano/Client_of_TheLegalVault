@@ -169,10 +169,12 @@ const Settings = () => {
         setEditingBranchId(id);
         setEditingBranchName(b?.branch_name ?? b?.name ?? "");
     };
+
     const cancelEditBranch = () => {
         setEditingBranchId(null);
         setEditingBranchName("");
     };
+
     const saveEditBranch = async () => {
         const id = editingBranchId;
         const name = editingBranchName.trim();
@@ -191,6 +193,7 @@ const Settings = () => {
             toast.error(e.message || "Failed to update branch", { id: toastId, duration: 4000 });
         }
     };
+
     const deleteBranch = async (id) => {
         if (!id) return;
         const toastId = toast.loading("Deleting branch...", { duration: 3000 });
