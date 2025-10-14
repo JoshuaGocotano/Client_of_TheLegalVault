@@ -198,7 +198,7 @@ export const Reports = () => {
         if (user) fetchArchivedCasesCount();
     }, [user]);
 
-    // Processing documents count (derived from documents API)
+    // Processing documents count
     useEffect(() => {
         const fetchProcessingDocumentsCount = async () => {
             try {
@@ -216,6 +216,22 @@ export const Reports = () => {
                 setProcessingDocumentsCount(count);
             } catch (e) {
                 console.error("Failed to compute processing documents count:", e);
+                setProcessingDocumentsCount(0);
+            }
+        };
+        fetchProcessingDocumentsCount();
+    }, []);
+
+    // count processing documents
+    useEffect(() => {
+        const fetchProcessingDocumentsCount = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/documents/count/processing", { credentials: "include" });
+                if (!res.ok) throw new Error("Failed to fetch processing documents count");
+                const data = await res.json();
+                setProcessingDocumentsCount(data.count ?? 0);
+            } catch (error) {
+                console.error("Failed to fetch processing documents count:", error);
                 setProcessingDocumentsCount(0);
             }
         };
