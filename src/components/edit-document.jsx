@@ -56,6 +56,7 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         doc_password: "",
         doc_type: "Support",
         case_id: doc.case_id,
+        doc_last_updated_by: user.user_id,
     });
 
     const onTaskChange = (e) => {
@@ -109,8 +110,10 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         const toastId = toast.loading("Saving changes...", { duration: 4000 });
         try {
             const payload = { ...supportForm };
+
             if (!payload.doc_password) delete payload.doc_password;
             if (user?.user_id) payload.doc_submitted_by = user.user_id;
+
             const res = await fetch(`http://localhost:3000/api/documents/${doc.doc_id}`, {
                 method: "PUT",
                 credentials: "include",
@@ -119,7 +122,8 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
             });
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.error || "Failed to update document");
-            toast.success("Document updated", { id: toastId, duration: 3000 });
+
+            toast.success("Document updated", { id: toastId, duration: 4000 });
             if (onSaved) onSaved();
         } catch (err) {
             console.error("Update support document failed", err);
