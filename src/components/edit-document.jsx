@@ -4,7 +4,7 @@ import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 
 export default function EditDocument({ doc, users = [], onClose, onSaved }) {
-    const { user } = useAuth() || {};
+    const { user } = useAuth();
 
     if (!doc) return null;
 
@@ -46,6 +46,7 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         doc_type: "Task",
         doc_status: doc.doc_status || "todo",
         case_id: doc.case_id,
+        doc_last_updated_by: user.user_id || "",
     });
 
     const [supportForm, setSupportForm] = useState({
@@ -82,16 +83,20 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
     const submitTask = async () => {
         const toastId = toast.loading("Saving changes...", { duration: 4000 });
         try {
-            const payload = { ...taskForm };
+            const payload = { ...taskForm};
+
             if (!payload.doc_password) delete payload.doc_password;
+
             const res = await fetch(`http://localhost:3000/api/documents/${doc.doc_id}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
+
             const data = await res.json().catch(() => ({}));
             if (!res.ok) throw new Error(data.error || "Failed to update document");
+
             toast.success("Task document updated", { id: toastId, duration: 3000 });
             if (onSaved) onSaved();
         } catch (err) {

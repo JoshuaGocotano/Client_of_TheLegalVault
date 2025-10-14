@@ -53,7 +53,7 @@ export const Tasks = () => {
                         method: "PUT",
                         headers: { "Content-Type": "application/json" },
                         credentials: "include",
-                        body: JSON.stringify({ doc_status: newStatus }),
+                        body: JSON.stringify({ doc_status: newStatus, doc_last_updated_by: user.user_id }),
                     })
                         .then((res) => {
                             if (!res.ok) throw new Error("Failed to update task status");
@@ -110,7 +110,7 @@ export const Tasks = () => {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify({ doc_status: newStatus }),
+                body: JSON.stringify({ doc_status: newStatus, doc_last_updated_by: user.user_id }),
             });
             if (!res.ok) throw new Error("Failed to update task status");
 
