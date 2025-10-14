@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Download, Trash2, FileText, Search, Filter, X } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const Documents = () => {
+    const { user } = useAuth();
+
     const [error, setError] = useState("");
     const [documents, setDocuments] = useState([]);
     const [search, setSearch] = useState("");
@@ -19,7 +22,14 @@ const Documents = () => {
         const fetchDocs = async () => {
             setError("");
             try {
-                const res = await fetch("http://localhost:3000/api/documents", {
+                const doc_endpoint =
+                    user.user_role === "Admin"
+                        ? "http://localhost:3000/api/documents"
+                        : user.user_role === "Lawyer"
+                          ? `http://localhost:3000/api/documents/lawyer/${user.user_id}`
+                          : `http://localhost:3000/api/documents/submitter/${user.user_id}`;
+
+                const res = await fetch(doc_endpoint, {
                     credentials: "include",
                 });
                 if (!res.ok) throw new Error(`Failed to load documents (${res.status})`);

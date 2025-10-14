@@ -94,7 +94,7 @@ export const Tasks = () => {
         const ids = (Array.isArray(COLUMNS) ? COLUMNS : []).map((c) => c?.id);
         return {
             TODO: ids[0] || "todo",
-            INPROGRESS: ids[1] || "in-progress",
+            INPROGRESS: ids[1] || "in_progress",
             DONE: ids[2] || "done",
         };
     })[0];

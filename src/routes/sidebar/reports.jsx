@@ -99,6 +99,13 @@ const formatDistanceToNow = (date) => {
 export const Reports = () => {
     const navigate = useNavigate();
     const { user } = useAuth() || {};
+
+    if (!user) return null;
+    if (user.user_role !== "Admin") {
+        navigate("/unauthorized");
+        return null;
+    }
+
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     // remove toggle in favor of scrollable list
