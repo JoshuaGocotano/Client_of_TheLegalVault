@@ -8,9 +8,9 @@ const allNavbarLinks = [
     { label: "Tasks", icon: ListTodo, path: "/tasks" },
     { label: "Users", icon: ShieldUser, path: "/users" },
     { label: "Reports", icon: ChartColumn, path: "/reports" },
-    { label: "Activity Logs", icon: Logs, path: "/user-logs" },
     { label: "Case Archive", icon: Archive, path: "/case-archive" },
     { label: "Payments", icon: Wallet, path: "/payments" },
+    { label: "Activity Logs", icon: Logs, path: "/user-logs" },
 ];
 
 // 🔧 Export a function to get filtered links based on role
@@ -61,6 +61,7 @@ export const overviewData = [
     },
 ];
 
+// Task Management Columns or Statuses
 export const COLUMNS = [
     { id: "todo", title: "To Do" },
     { id: "in_progress", title: "In Progress" },

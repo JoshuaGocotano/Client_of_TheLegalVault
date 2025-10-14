@@ -6,6 +6,9 @@ import CaseActionModal from "./case-action-modal";
 import toast from "react-hot-toast";
 import AddTask from "./add-task";
 import AddDocument from "./add-document";
+import EditDocument from "./edit-document";
+import RejectDocumentModal from "./reject-document";
+import DeleteDocumentModal from "./delete-document";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) => {
     const { user } = useAuth();
@@ -15,6 +18,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
 
     const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [isAddDocumentOpen, setIsAddDocumentOpen] = useState(false);
+
+    // New: track document being edited
+    const [editDoc, setEditDoc] = useState(null);
+    const [rejectDoc, setRejectDoc] = useState(null);
+    const [deleteDoc, setDeleteDoc] = useState(null);
 
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
@@ -442,13 +450,15 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                         <button
                                                             className="text-yellow-600 hover:text-yellow-800"
                                                             title="Edit Document"
+                                                            onClick={() => setEditDoc(doc)}
                                                         >
                                                             <Pen size={16} />
                                                         </button>
-                                                        {doc.doc_type !== "Support" && (
+                                                        {doc.doc_type !== "Support" && doc.doc_status === "done" && (
                                                             <button
                                                                 className="text-red-600 hover:text-red-800"
                                                                 title="Reject Document"
+                                                                onClick={() => setRejectDoc(doc)}
                                                             >
                                                                 <Undo size={16} />
                                                             </button>
@@ -456,6 +466,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                         <button
                                                             className="text-red-600 hover:text-red-800"
                                                             title="Delete Document"
+                                                            onClick={() => setDeleteDoc(doc)}
                                                         >
                                                             <Trash2 size={16} />
                                                         </button>
@@ -510,6 +521,43 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     />
                                 </div>
                             </div>
+                        )}
+
+                        {/* Edit Document Modals */}
+                        {editDoc && (
+                            <EditDocument
+                                doc={editDoc}
+                                users={users}
+                                onClose={() => setEditDoc(null)}
+                                onSaved={() => {
+                                    setEditDoc(null);
+                                    fetchDocuments();
+                                }}
+                            />
+                        )}
+
+                        {/* Reject Document Modal */}
+                        {rejectDoc && (
+                            <RejectDocumentModal
+                                doc={rejectDoc}
+                                onClose={() => setRejectDoc(null)}
+                                onRejected={() => {
+                                    setRejectDoc(null);
+                                    fetchDocuments();
+                                }}
+                            />
+                        )}
+
+                        {/* Delete Document Modal */}
+                        {deleteDoc && (
+                            <DeleteDocumentModal
+                                doc={deleteDoc}
+                                onClose={() => setDeleteDoc(null)}
+                                onDeleted={() => {
+                                    setDeleteDoc(null);
+                                    fetchDocuments();
+                                }}
+                            />
                         )}
 
                         {/* close case and dismiss case button when the case is not yet completed */}

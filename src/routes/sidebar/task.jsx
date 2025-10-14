@@ -3,15 +3,22 @@ import { COLUMNS } from "@/constants";
 import Column from "@/components/tasking/column";
 import { DndContext } from "@dnd-kit/core";
 import toast from "react-hot-toast";
+import { useAuth } from "@/context/auth-context";
 
 export const Tasks = () => {
+    const { user } = useAuth();
     const [tasks, setTasks] = useState([]);
 
     // Fetch tasks
     useEffect(() => {
         const fetchTasks = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/documents", {
+                const task_endpoint =
+                    user.user_role === "Admin"
+                        ? "http://localhost:3000/api/documents"
+                        : `http://localhost:3000/api/documents/task/user/${user.user_id}`;
+
+                const res = await fetch(task_endpoint, {
                     method: "GET",
                     credentials: "include",
                 });
@@ -150,7 +157,7 @@ export const Tasks = () => {
                         <Column
                             key={column.id}
                             column={column}
-                            tasks={tasks.filter((task) => task.doc_status === column.id )}
+                            tasks={tasks.filter((task) => task.doc_status === column.id)}
                             getPriorityStyle={getPriorityStyle}
                         />
                     ))}
@@ -171,15 +178,18 @@ export const Tasks = () => {
                                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Due Date
                                     </th>
-                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
-                                        Status
-                                    </th>   
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">Status</th>
                                 </tr>
                             </thead>
                             <tbody className="dark:divide-slate-700">
-                                {tasks.filter(task => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE).length > 0 ? (
+                                {tasks.filter(
+                                    (task) => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE,
+                                ).length > 0 ? (
                                     tasks
-                                        .filter(task => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE)
+                                        .filter(
+                                            (task) =>
+                                                task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE,
+                                        )
                                         .map((task) => (
                                             <tr
                                                 key={task.doc_id}
@@ -192,7 +202,11 @@ export const Tasks = () => {
                                                     {new Date(task.doc_due_date).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-4 py-3 capitalize text-slate-800 dark:text-slate-100">
-                                                    {task.doc_status === "todo" ? "To Do" : task.doc_status === "in_progress" ? "In Progress" : "Done"}
+                                                    {task.doc_status === "todo"
+                                                        ? "To Do"
+                                                        : task.doc_status === "in_progress"
+                                                          ? "In Progress"
+                                                          : "Done"}
                                                 </td>
                                             </tr>
                                         ))
