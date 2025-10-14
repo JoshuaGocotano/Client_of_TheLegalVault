@@ -46,7 +46,7 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         doc_type: "Task",
         doc_status: doc.doc_status || "todo",
         case_id: doc.case_id,
-        doc_last_updated_by: user.user_id || "",
+        doc_last_updated_by: user.user_id,
     });
 
     const [supportForm, setSupportForm] = useState({
