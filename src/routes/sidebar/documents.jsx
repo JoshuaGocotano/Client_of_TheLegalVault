@@ -92,7 +92,7 @@ const Documents = () => {
             doc.doc_type,
             doc.doc_tag,
             String(doc.case_id ?? ""),
-            String(doc.doc_submitted_by ?? ""),
+            getSubmitterName(doc.doc_submitted_by),
             String(doc.doc_tasked_by ?? ""),
         ].map((v) => String(v || "").toLowerCase());
         return fields.some((f) => f.includes(term));
