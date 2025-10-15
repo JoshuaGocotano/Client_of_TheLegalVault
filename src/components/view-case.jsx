@@ -567,6 +567,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     title="Closing or Finishing the Case"
                                     className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
                                     onClick={() => {
+                                        // Prevent closing if there are pending or in-progress documents
+                                        const hasPendingDocs = (documents || []).some((d) => ["todo", "in_progress", "done"].includes(d.doc_status));
+                                        if (hasPendingDocs) {
+                                            toast.error("You still have pending or in-progress documents. Complete them before closing the case.");
+                                            return;
+                                        }
+
                                         setActionType("close");
                                         setIsActionModalOpen(true);
                                     }}

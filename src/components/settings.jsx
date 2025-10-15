@@ -31,7 +31,7 @@ const Settings = () => {
 
     const [branchDrafts, setBranchDrafts] = useState([]);
     const [branchName, setBranchName] = useState("");
-    
+
     // New: edit states for branch PUT
     const [editingBranchId, setEditingBranchId] = useState(null);
     const [editingBranchName, setEditingBranchName] = useState("");
@@ -60,20 +60,6 @@ const Settings = () => {
     const [users, setUsers] = useState([]);
     const [usersLoading, setUsersLoading] = useState(false);
     const [usersError, setUsersError] = useState("");
-
-    // Logs (to match loadLogs usage)
-    const [logs, setLogs] = useState([]);
-    const [logsLoading, setLogsLoading] = useState(false);
-    const [logsError, setLogsError] = useState("");
-
-    // Logs filters and pagination (frontend-only, hits backend with query params if supported)
-    const [logQuery, setLogQuery] = useState("");
-    const [logUserId, setLogUserId] = useState("");
-    const [logStart, setLogStart] = useState(""); // yyyy-mm-dd
-    const [logEnd, setLogEnd] = useState(""); // yyyy-mm-dd
-    const [logPage, setLogPage] = useState(1);
-    const [logLimit, setLogLimit] = useState(20);
-    const [logHasMore, setLogHasMore] = useState(false);
 
     // --- Helpers ---
     const fetchJson = async (url, opts = {}) => {
@@ -260,121 +246,6 @@ const Settings = () => {
         }
     };
 
-    const loadLogs = async () => {
-        setLogsError("");
-        setLogsLoading(true);
-        try {
-            const data = await fetchJson(`${API_BASE}/user-logs`);
-            setLogs(Array.isArray(data) ? data.slice(0, 50) : []);
-            // heuristic for hasMore when backend doesn't return total
-            const len = Array.isArray(data) ? data.length : 0;
-            setLogHasMore(len >= 50);
-            setLogPage(1);
-        } catch (e) {
-            setLogsError(e.message || "Failed to load logs");
-            setLogs([]);
-            setLogHasMore(false);
-        } finally {
-            setLogsLoading(false);
-        }
-    };
-
-    // Logs with filters/pagination without changing backend code
-    const buildLogsQueryString = (pageOverride) => {
-        const qs = new URLSearchParams();
-        if (logQuery.trim()) qs.set("q", logQuery.trim());
-        if (logUserId) qs.set("user_id", String(logUserId));
-        if (logStart) qs.set("start", new Date(logStart).toISOString());
-        if (logEnd) qs.set("end", new Date(logEnd).toISOString());
-        const pageToUse = pageOverride ?? logPage;
-        if (pageToUse && pageToUse > 0) qs.set("page", String(pageToUse));
-        if (logLimit) qs.set("limit", String(logLimit));
-        return qs.toString();
-    };
-
-    const fetchLogsWithFilters = async ({ page, merge } = {}) => {
-        setLogsError("");
-        setLogsLoading(true);
-        try {
-            const qs = buildLogsQueryString(page);
-            const url = qs ? `${API_BASE}/user-logs?${qs}` : `${API_BASE}/user-logs`;
-            const prevCount = merge ? logs.length : 0;
-            const data = await fetchJson(url);
-            const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
-            if (merge) {
-                setLogs((prev) => [...prev, ...items]);
-            } else {
-                setLogs(items);
-            }
-            const total = typeof data?.total === "number" ? data.total : undefined;
-            if (total !== undefined) {
-                setLogHasMore(prevCount + items.length < total);
-            } else {
-                // Fallback heuristic: if we received a full page, more may exist
-                setLogHasMore(items.length === Number(logLimit));
-            }
-            if (typeof page === "number") setLogPage(page);
-        } catch (e) {
-            setLogsError(e.message || "Failed to load logs");
-            if (!merge) setLogs([]);
-            setLogHasMore(false);
-        } finally {
-            setLogsLoading(false);
-        }
-    };
-
-    const applyLogFilters = () => {
-        // Always start at page 1 when applying filters
-        fetchLogsWithFilters({ page: 1, merge: false });
-    };
-
-    const clearLogFilters = () => {
-        setLogQuery("");
-        setLogUserId("");
-        setLogStart("");
-        setLogEnd("");
-        setLogLimit(20);
-        setLogPage(1);
-        setLogHasMore(false);
-        // Fallback to the basic loader
-        loadLogs();
-    };
-
-    const loadMoreLogs = () => {
-        const nextPage = (logPage || 1) + 1;
-        fetchLogsWithFilters({ page: nextPage, merge: true });
-    };
-
-    const exportLogsCSV = () => {
-        if (!Array.isArray(logs) || logs.length === 0) return;
-        const esc = (v) => {
-            if (v == null) return "";
-            const s = String(v).replace(/"/g, '""');
-            return /[",\n]/.test(s) ? `"${s}"` : s;
-        };
-        const rows = [
-            ["Timestamp", "User", "Action", "Details"],
-            ...logs.map((lg) => {
-                const ts = lg?.created_at || lg?.timestamp || lg?.date || "";
-                const when = ts ? new Date(ts).toISOString() : "";
-                const actor = (typeof displayUserName === "function" && displayUserName(lg)) || lg?.performed_by || lg?.user_email || lg?.user || "";
-                const action = lg?.action || lg?.event || lg?.activity || lg?.type || "Log entry";
-                const details = lg?.details || lg?.description || lg?.message || "";
-                return [when, actor, action, details].map(esc);
-            }),
-        ];
-        const csv = rows.map((r) => r.join(",")).join("\n");
-        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "logs_export.csv";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    };
-
     const loadPreferences = () => {
         try {
             const raw = localStorage.getItem("app_prefs");
@@ -486,7 +357,6 @@ const Settings = () => {
         loadBranches();
         loadUsers();
         loadPreferences();
-        loadLogs();
         loadArchiveCounts();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -496,7 +366,6 @@ const Settings = () => {
         { key: "access", label: "Case Access", icon: Lock },
         { key: "case-categories", label: "Case Categories & Types ", icon: List },
         { key: "archive", label: "Archive", icon: Archive },
-        { key: "logs", label: "Logs & Audit Trail", icon: Info },
     ];
 
     // Display helpers resilient to backend shapes
@@ -541,7 +410,7 @@ const Settings = () => {
     return (
         <div className="flex h-full">
             {/* Sidebar */}
-            <aside className="sticky top-0 h-[100vh] w-72 border-r bg-gradient-to-b from-white to-slate-50/80 shadow-lg dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
+            <aside className="sticky top-0 h-[80vh] w-72 border-r bg-gradient-to-b from-white to-slate-50/80 shadow-lg dark:border-gray-800 dark:from-gray-900 dark:to-gray-950">
                 <div className="sticky top-0 z-10 flex items-center gap-3 border-b bg-white/70 p-4 text-lg font-semibold backdrop-blur supports-[backdrop-filter]:bg-white/50 dark:border-gray-800 dark:bg-gray-900/70 dark:text-slate-200">
                     <SettingsIcon size={22} />
                     <span>Settings</span>
@@ -939,134 +808,6 @@ const Settings = () => {
                                     )}
                                 </div>
                             </div>
-                        </SettingsCard>
-                    </div>
-                )}
-
-                {/* Logs & Audit Trail */}
-                {activeTab === "logs" && (
-                    <div className="space-y-6">
-                        <SettingsCard
-                            title="Logs & Audit Trail"
-                            actions={
-                                <button
-                                    onClick={loadLogs}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                                >
-                                    <RefreshCw size={14} /> Refresh
-                                </button>
-                            }
-                        >
-                            {/* Filters */}
-                            <div className="space-y-3">
-                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
-                                    <input
-                                        value={logQuery}
-                                        onChange={(e) => setLogQuery(e.target.value)}
-                                        placeholder="Search action/details"
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                    />
-                                    <input
-                                        type="number"
-                                        value={logUserId}
-                                        onChange={(e) => setLogUserId(e.target.value)}
-                                        placeholder="User ID (optional)"
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={logStart}
-                                        onChange={(e) => setLogStart(e.target.value)}
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                    />
-                                    <input
-                                        type="date"
-                                        value={logEnd}
-                                        onChange={(e) => setLogEnd(e.target.value)}
-                                        className="w-full rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                    />
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <select
-                                        value={logLimit}
-                                        onChange={(e) => setLogLimit(Number(e.target.value) || 20)}
-                                        className="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
-                                    >
-                                        <option value={10}>10 per page</option>
-                                        <option value={20}>20 per page</option>
-                                        <option value={50}>50 per page</option>
-                                    </select>
-                                    <button
-                                        onClick={applyLogFilters}
-                                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700"
-                                        disabled={logsLoading}
-                                    >
-                                        Apply
-                                    </button>
-                                    <button
-                                        onClick={clearLogFilters}
-                                        className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                                        disabled={logsLoading}
-                                    >
-                                        Clear
-                                    </button>
-                                    <button
-                                        onClick={exportLogsCSV}
-                                        className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                                    >
-                                        Export CSV
-                                    </button>
-                                </div>
-                            </div>
-
-                            {logsLoading ? (
-                                <p className="text-sm text-gray-500">Loading…</p>
-                            ) : logsError ? (
-                                <p className="text-sm text-red-500">{logsError}</p>
-                            ) : logs.length === 0 ? (
-                                <p className="text-sm text-gray-500">No logs found.</p>
-                            ) : (
-                                <ul className="space-y-2">
-                                    {logs.map((lg, idx) => {
-                                        const ts = lg?.created_at || lg?.timestamp || lg?.date;
-                                        const when = ts ? new Date(ts).toLocaleString() : "";
-                                        const actor =
-                                            (typeof displayUserName === "function" && displayUserName(lg)) ||
-                                            lg?.performed_by ||
-                                            lg?.user_email ||
-                                            lg?.user ||
-                                            "—";
-                                        const action = lg?.action || lg?.event || lg?.activity || lg?.type || "Log entry";
-                                        const details = lg?.details || lg?.description || lg?.message || "";
-                                        return (
-                                            <li
-                                                key={lg?.log_id ?? lg?.id ?? idx}
-                                                className="rounded-lg border px-3 py-2 dark:border-gray-700"
-                                            >
-                                                <div className="font-medium">{action}</div>
-                                                <div className="text-xs text-gray-500">
-                                                    {when}
-                                                    {actor ? ` • ${actor}` : ""}
-                                                </div>
-                                                {details && <div className="mt-1 text-sm text-gray-700 dark:text-gray-300">{details}</div>}
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            )}
-
-                            {logHasMore && !logsLoading && (
-                                <div className="mt-3 flex justify-center">
-                                    <button
-                                        onClick={loadMoreLogs}
-                                        className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                                    >
-                                        Load more
-                                    </button>
-                                </div>
-                            )}
-
-                            <p className="mt-2 text-xs text-gray-500">Showing latest 50 entries or filtered results.</p>
                         </SettingsCard>
                     </div>
                 )}
