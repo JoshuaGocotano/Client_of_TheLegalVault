@@ -169,7 +169,14 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...updatedCase,
-                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Archived",
+                    case_status:
+                        type === "close"
+                            ? "Completed"
+                            : type === "dismiss"
+                              ? "Dismissed"
+                              : type === "archive" && selectedCase.case_status === "Completed"
+                                ? "Archived (Completed)"
+                                : "Archived (Dismissed)",
                     last_updated_by: user.user_id,
                 }),
             });
@@ -357,7 +364,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                       ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
                                                       : selectedCase.case_status === "Completed"
                                                         ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                        : selectedCase.case_status === "Archived (Completed)"
+                                                          ? "bg-black text-white dark:bg-slate-200 dark:text-black"
+                                                          : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                             }`}
                                         >
                                             {selectedCase.case_status}
@@ -595,7 +604,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                             </div>
                         )}
 
-                        {selectedCase.case_status === "Completed" && user.user_role === "Admin" && (
+                        {(selectedCase.case_status === "Completed" || selectedCase.case_status === "Dismissed") && user.user_role === "Admin" && (
                             <div className="mt-6 flex items-center justify-end gap-4">
                                 <button
                                     title="Archive"

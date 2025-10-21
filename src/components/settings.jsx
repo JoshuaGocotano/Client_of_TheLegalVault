@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus } from "lucide-react";
+import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus, Eye, Calendar, User } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
+import CaseAccessBoard from "@/components/case-access/case-access-board";
+import ViewModal from "./view-case";
 
 // Simple reusable section card
 const SettingsCard = ({ title, actions, children }) => (
@@ -55,6 +57,16 @@ const Settings = () => {
     const [userArchivedCount, setUserArchivedCount] = useState(null);
     const [archiveCountsLoading, setArchiveCountsLoading] = useState(false);
     const [archiveCountsError, setArchiveCountsError] = useState("");
+
+    // Add archived cases specific state
+    const [archivedCases, setArchivedCases] = useState([]);
+    const [archivedCasesLoading, setArchivedCasesLoading] = useState(false);
+    const [archivedCasesError, setArchivedCasesError] = useState("");
+    const [selectedCase, setSelectedCase] = useState(null);
+    const [archiveSearch, setArchiveSearch] = useState("");
+    const [showAccessModal, setShowAccessModal] = useState(false);
+    const [selectedAccessCase, setSelectedAccessCase] = useState(null);
+    const [selectedUsers, setSelectedUsers] = useState([]);
 
     // Users (for Case Access overview)
     const [users, setUsers] = useState([]);
@@ -352,14 +364,92 @@ const Settings = () => {
         saveCaseCustomPrefs(undefined, next);
     };
 
+    // Add archived cases functions
+    const loadArchivedCases = async () => {
+        setArchivedCasesError("");
+        setArchivedCasesLoading(true);
+        try {
+            const endpoint = user?.user_role === "Admin" ? `${API_BASE}/cases` : `${API_BASE}/cases/user/${user?.user_id}`;
+
+            const data = await fetchJson(endpoint);
+            const archived = Array.isArray(data) ? data.filter((item) => item.case_status && item.case_status.toLowerCase() === "archived") : [];
+            setArchivedCases(archived);
+        } catch (e) {
+            setArchivedCasesError(e.message || "Failed to load archived cases");
+            setArchivedCases([]);
+        } finally {
+            setArchivedCasesLoading(false);
+        }
+    };
+
+    const handleCaseUpdated = (updatedCase) => {
+        setArchivedCases((prev) => prev.map((c) => (c.case_id === updatedCase.case_id ? updatedCase : c)));
+    };
+
+    const handleUnarchive = async (caseToBeUnarchived) => {
+        const confirm = window.confirm("Are you sure you want to unarchive this case?");
+        if (!confirm) return;
+
+        const toastId = toast.loading("Unarchiving case...", { duration: 4000 });
+
+        try {
+            const res = await fetch(`${API_BASE}/cases/${caseToBeUnarchived.case_id}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    ...caseToBeUnarchived,
+                    case_status: "Completed",
+                    last_updated_by: user.user_id,
+                }),
+            });
+
+            if (!res.ok) throw new Error("Failed to unarchive case");
+
+            setArchivedCases((prev) => prev.filter((item) => item.case_id !== caseToBeUnarchived.case_id));
+
+            // Update archive counts
+            loadArchiveCounts();
+
+            toast.success("Case unarchived successfully.", { id: toastId, duration: 4000 });
+        } catch (err) {
+            console.error("Error unarchiving case:", err);
+            toast.error("Error unarchiving case", { id: toastId, duration: 4000 });
+        }
+    };
+
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = users.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                  .replace(/\s+/g, " ")
+                  .trim()
+            : "Unassigned";
+    };
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "short",
+            day: "numeric",
+        });
+    };
+
     useEffect(() => {
         loadCaseData();
         loadBranches();
         loadUsers();
         loadPreferences();
         loadArchiveCounts();
+        if (user) {
+            loadArchivedCases();
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [user]);
 
     const tabs = [
         { key: "branch", label: "Branch", icon: Building2 },
@@ -367,6 +457,21 @@ const Settings = () => {
         { key: "case-categories", label: "Case Categories & Types ", icon: List },
         { key: "archive", label: "Archive", icon: Archive },
     ];
+
+    // Filter archived cases based on search
+    const filteredArchivedCases = archivedCases.filter((item) => {
+        const matchesSearch =
+            item.cc_name?.toLowerCase().includes(archiveSearch.toLowerCase()) ||
+            item.ct_name?.toLowerCase().includes(archiveSearch.toLowerCase()) ||
+            item.client_fullname?.toLowerCase().includes(archiveSearch.toLowerCase()) ||
+            item.case_id.toString().includes(archiveSearch);
+
+        const isOwner = item.lawyer_id === user?.user_id;
+        const isAdmin = user?.user_role === "Admin";
+        const isAllowed = Array.isArray(item.case_allowed_viewers) ? item.case_allowed_viewers.includes(user?.user_id) : false;
+
+        return matchesSearch && (isOwner || isAdmin || isAllowed);
+    });
 
     // Display helpers resilient to backend shapes
     const displayType = (item) => item?.ct_name ?? item?.name ?? item?.type_name ?? item?.title ?? `Type #${item?.id ?? "?"}`;
@@ -404,6 +509,91 @@ const Settings = () => {
             alert("Diagnostics copied to clipboard.");
         } catch {
             alert("Failed to copy diagnostics.");
+        }
+    };
+
+    // =====================
+    // Case Access Drag Board (Admin/Lawyer)
+    // =====================
+    const [roleBoard, setRoleBoard] = useState({ admin: [], lawyer: [] });
+
+    useEffect(() => {
+        const admins = users.filter((u) => (u?.user_role || "").toLowerCase() === "admin");
+        const lawyers = users.filter((u) => (u?.user_role || "").toLowerCase() === "lawyer");
+        setRoleBoard({ admin: admins, lawyer: lawyers });
+    }, [users]);
+
+    const hasAdmin = (roleBoard.admin || []).length > 0;
+    const canDragRoles = (() => {
+        const r = (user?.user_role || "").toLowerCase();
+        if (r === "admin") return true;
+        if (r === "lawyer" && !hasAdmin) return true; // allow first admin assignment if none exists
+        return false;
+    })();
+
+    const persistUserRole = async (userId, newRole) => {
+        const trials = [
+            { url: `${API_BASE}/users/${userId}`, method: "PUT", body: { user_role: newRole } },
+            { url: `${API_BASE}/users/${userId}/role`, method: "PUT", body: { user_role: newRole } },
+        ];
+        let lastErr;
+        for (const t of trials) {
+            try {
+                const res = await fetch(t.url, {
+                    method: t.method,
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify(t.body),
+                });
+                if (!res.ok) throw new Error((await res.text()) || "Failed to update role");
+                return true;
+            } catch (e) {
+                lastErr = e;
+            }
+        }
+        throw lastErr || new Error("Failed to update role");
+    };
+
+    const onDragStartUser = (fromCol, id) => (e) => {
+        try {
+            e.dataTransfer.setData("text/userId", String(id));
+            e.dataTransfer.setData("text/fromCol", String(fromCol));
+        } catch {}
+    };
+
+    const onDragOverCol = (e) => {
+        e.preventDefault();
+    };
+
+    const onDropToCol = (toCol) => async (e) => {
+        e.preventDefault();
+        if (!canDragRoles) {
+            toast.error("You do not have permission to change roles.");
+            return;
+        }
+        const userIdStr = e.dataTransfer.getData("text/userId");
+        const fromCol = e.dataTransfer.getData("text/fromCol");
+        if (!userIdStr || !fromCol) return;
+        if (fromCol === toCol) return;
+        const uid = Number(userIdStr);
+
+        const fromList = Array.from(roleBoard[fromCol] || []);
+        const toList = Array.from(roleBoard[toCol] || []);
+        const idx = fromList.findIndex((u) => (u?.user_id ?? u?.id) === uid);
+        if (idx < 0) return;
+        const [moved] = fromList.splice(idx, 1);
+        const prev = roleBoard;
+        // Optimistically append to end of destination
+        const next = { ...roleBoard, [fromCol]: fromList, [toCol]: [...toList, moved] };
+        setRoleBoard(next);
+        try {
+            await persistUserRole(uid, toCol);
+            toast.success(`${displayUserName(moved)} is now ${toCol}.`);
+            // Also refresh base list to keep in sync
+            loadUsers();
+        } catch (e) {
+            setRoleBoard(prev);
+            toast.error(e.message || "Failed to update role");
         }
     };
 
@@ -599,6 +789,14 @@ const Settings = () => {
                                     </button>
                                 }
                             >
+                                {/* Separated Case Access Drag Board */}
+                                <CaseAccessBoard
+                                    users={users}
+                                    apiBase={API_BASE}
+                                    currentUserRole={user?.user_role}
+                                    onAfterChange={loadUsers}
+                                />
+
                                 {usersLoading ? (
                                     <p className="text-sm text-gray-500">Loading…</p>
                                 ) : usersError ? (
@@ -607,7 +805,8 @@ const Settings = () => {
                                     <p className="text-sm text-gray-500">No users found.</p>
                                 ) : (
                                     <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                        {users.map((u) => (
+                                        {users.filter((u => u.user_role && (u.user_role.toLowerCase() === 'paralegal' || u.user_role.toLowerCase() === 'staff')))
+                                        .map((u) => (
                                             <li
                                                 key={u.user_id ?? u.id}
                                                 className="rounded-lg border px-3 py-2 dark:border-gray-700"
@@ -618,7 +817,8 @@ const Settings = () => {
                                         ))}
                                     </ul>
                                 )}
-                                <p className="mt-2 text-xs text-gray-500">User access is managed in the backend. This list is read-only.</p>
+
+                                <p className="mt-2 text-xs text-gray-500">User access </p>
                             </SettingsCard>
                         </div>
                     ) : (
@@ -672,6 +872,121 @@ const Settings = () => {
                                 </div>
                             )}
                             <p className="mt-2 text-xs text-gray-500">Counts are based on current server data.</p>
+                        </SettingsCard>
+
+                        {/* Archived Cases List */}
+                        <SettingsCard
+                            title="Archived Cases"
+                            actions={
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                                        {filteredArchivedCases.length} case{filteredArchivedCases.length !== 1 ? "s" : ""}
+                                    </span>
+                                    <button
+                                        onClick={loadArchivedCases}
+                                        className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                                    >
+                                        <RefreshCw size={14} /> Refresh
+                                    </button>
+                                </div>
+                            }
+                        >
+                            {/* Search */}
+                            <div className="mb-4">
+                                <input
+                                    type="text"
+                                    placeholder="Search archived cases..."
+                                    value={archiveSearch}
+                                    onChange={(e) => setArchiveSearch(e.target.value)}
+                                    className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder:text-gray-400"
+                                />
+                            </div>
+
+                            {/* Cases List */}
+                            {archivedCasesLoading ? (
+                                <p className="text-sm text-gray-500">Loading archived cases…</p>
+                            ) : archivedCasesError ? (
+                                <p className="text-sm text-red-500">{archivedCasesError}</p>
+                            ) : filteredArchivedCases.length > 0 ? (
+                                <div className="space-y-3">
+                                    {filteredArchivedCases.map((caseItem) => (
+                                        <div
+                                            key={caseItem.case_id}
+                                            className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+                                        >
+                                            <div className="flex items-start justify-between">
+                                                <div className="flex-1 space-y-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <h4 className="font-medium text-gray-900 dark:text-white">Case #{caseItem.case_id}</h4>
+                                                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
+                                                            Archived
+                                                        </span>
+                                                    </div>
+
+                                                    <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{caseItem.ct_name}</p>
+                                                    <div className="flex flex-wrap gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                                        <div className="flex items-center gap-1">
+                                                            <User size={12} />
+                                                            <span>{caseItem.client_fullname}</span>
+                                                        </div>
+
+                                                        {user?.user_role === "Admin" && (
+                                                            <div className="flex items-center gap-1">
+                                                                <span>Atty. {getLawyerFullName(caseItem.user_id)}</span>
+                                                            </div>
+                                                        )}
+
+                                                        <div className="flex items-center gap-1">
+                                                            <Calendar size={12} />
+                                                            <span>Archived: {formatDateTime(caseItem.case_last_updated)}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => setSelectedCase(caseItem)}
+                                                        className="flex items-center gap-1 rounded-md bg-blue-50 px-3 py-1 text-sm text-blue-600 hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:hover:bg-blue-900/30"
+                                                    >
+                                                        <Eye size={14} />
+                                                        View
+                                                    </button>
+
+                                                    {(user?.user_role === "Admin" || caseItem.lawyer_id === user?.user_id) && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedAccessCase(caseItem);
+                                                                setSelectedUsers(caseItem.case_allowed_viewers || []);
+                                                                setShowAccessModal(true);
+                                                            }}
+                                                            className="flex items-center gap-1 rounded-md bg-yellow-50 px-3 py-1 text-sm text-yellow-600 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:text-yellow-400 dark:hover:bg-yellow-900/30"
+                                                        >
+                                                            <Lock size={14} />
+                                                            Share Access
+                                                        </button>
+                                                    )}
+
+                                                    {user?.user_role === "Admin" && (
+                                                        <button
+                                                            onClick={() => handleUnarchive(caseItem)}
+                                                            className="flex items-center gap-1 rounded-md bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30"
+                                                        >
+                                                            <Archive size={14} />
+                                                            Unarchive
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+                                    <div className="text-sm text-gray-500 dark:text-gray-400">
+                                        {archiveSearch ? "No archived cases match your search." : "No archived cases found."}
+                                    </div>
+                                </div>
+                            )}
                         </SettingsCard>
                     </div>
                 )}
@@ -812,6 +1127,91 @@ const Settings = () => {
                     </div>
                 )}
             </main>
+
+            {/* Add ViewModal */}
+
+            <ViewModal
+                selectedCase={selectedCase}
+                setSelectedCase={setSelectedCase}
+                tableData={archivedCases}
+                onCaseUpdated={handleCaseUpdated}
+            />
+
+            {showAccessModal && selectedAccessCase && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                    <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800 dark:text-gray-200">
+                        <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+                            <Lock size={18} />
+                            Share Access for Case #{selectedAccessCase.case_id}
+                        </h3>
+
+                        {usersLoading ? (
+                            <p className="text-sm text-gray-500">Loading users...</p>
+                        ) : usersError ? (
+                            <p className="text-sm text-red-500">{usersError}</p>
+                        ) : (
+                            <div className="max-h-64 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700">
+                                {users.map((u) => (
+                                    <label
+                                        key={u.user_id}
+                                        className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                                    >
+                                        <div className="flex flex-col">
+                                            <span className="text-sm font-medium">{u.user_fullname}</span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400">{u.user_role}</span>
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedUsers.includes(u.user_id)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    setSelectedUsers([...selectedUsers, u.user_id]);
+                                                } else {
+                                                    setSelectedUsers(selectedUsers.filter((id) => id !== u.user_id));
+                                                }
+                                            }}
+                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button
+                                onClick={() => setShowAccessModal(false)}
+                                className="rounded-md bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={async () => {
+                                    try {
+                                        await fetch(`${API_BASE}/cases/${selectedAccessCase.case_id}/share`, {
+                                            method: "PUT",
+                                            headers: { "Content-Type": "application/json" },
+                                            credentials: "include",
+                                            body: JSON.stringify({ allowed_viewers: selectedUsers }),
+                                        });
+                                        toast.success("Access updated!");
+                                        setArchivedCases((prev) =>
+                                            prev.map((item) =>
+                                                item.case_id === selectedAccessCase.case_id ? { ...item, case_allowed_viewers: selectedUsers } : item,
+                                            ),
+                                        );
+                                        setShowAccessModal(false);
+                                    } catch {
+                                        toast.error("Failed to update access");
+                                    }
+                                }}
+                                className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                            >
+                                Save Access
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

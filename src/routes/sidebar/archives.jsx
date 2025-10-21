@@ -69,7 +69,11 @@ const Archives = () => {
                 const data = await res.json();
 
                 // Filter archived only
-                const archived = data.filter((item) => item.case_status && item.case_status.toLowerCase() === "archived");
+                const archived = data.filter(
+                    (item) =>
+                        (item.case_status && item.case_status.toLowerCase() === "archived (completed)") ||
+                        item.case_status.toLowerCase() === "archived (dismissed)",
+                );
 
                 setArchivedCases(archived);
             } catch (err) {
