@@ -372,7 +372,11 @@ const Settings = () => {
             const endpoint = user?.user_role === "Admin" ? `${API_BASE}/cases` : `${API_BASE}/cases/user/${user?.user_id}`;
 
             const data = await fetchJson(endpoint);
-            const archived = Array.isArray(data) ? data.filter((item) => item.case_status && item.case_status.toLowerCase() === "archived") : [];
+            const archived = data.filter(
+                (item) =>
+                    (item.case_status && item.case_status.toLowerCase() === "archived (completed)") ||
+                    item.case_status.toLowerCase() === "archived (dismissed)",
+            );
             setArchivedCases(archived);
         } catch (e) {
             setArchivedCasesError(e.message || "Failed to load archived cases");
@@ -466,7 +470,7 @@ const Settings = () => {
             item.client_fullname?.toLowerCase().includes(archiveSearch.toLowerCase()) ||
             item.case_id.toString().includes(archiveSearch);
 
-        const isOwner = item.lawyer_id === user?.user_id;
+        const isOwner = item.user_id === user?.user_id;
         const isAdmin = user?.user_role === "Admin";
         const isAllowed = Array.isArray(item.case_allowed_viewers) ? item.case_allowed_viewers.includes(user?.user_id) : false;
 
@@ -805,16 +809,21 @@ const Settings = () => {
                                     <p className="text-sm text-gray-500">No users found.</p>
                                 ) : (
                                     <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                                        {users.filter((u => u.user_role && (u.user_role.toLowerCase() === 'paralegal' || u.user_role.toLowerCase() === 'staff')))
-                                        .map((u) => (
-                                            <li
-                                                key={u.user_id ?? u.id}
-                                                className="rounded-lg border px-3 py-2 dark:border-gray-700"
-                                            >
-                                                <div className="font-medium">{displayUserName(u)}</div>
-                                                <div className="text-xs text-gray-500">{u?.user_role || "—"}</div>
-                                            </li>
-                                        ))}
+                                        {users
+                                            .filter(
+                                                (u) =>
+                                                    u.user_role &&
+                                                    (u.user_role.toLowerCase() === "paralegal" || u.user_role.toLowerCase() === "staff"),
+                                            )
+                                            .map((u) => (
+                                                <li
+                                                    key={u.user_id ?? u.id}
+                                                    className="rounded-lg border px-3 py-2 dark:border-gray-700"
+                                                >
+                                                    <div className="font-medium">{displayUserName(u)}</div>
+                                                    <div className="text-xs text-gray-500">{u?.user_role || "—"}</div>
+                                                </li>
+                                            ))}
                                     </ul>
                                 )}
 
@@ -833,7 +842,7 @@ const Settings = () => {
                 {activeTab === "archive" && (
                     <div className="space-y-6">
                         <SettingsCard
-                            title="Archive"
+                            title="Cases"
                             actions={
                                 <button
                                     onClick={loadArchiveCounts}
@@ -952,7 +961,7 @@ const Settings = () => {
                                                         View
                                                     </button>
 
-                                                    {(user?.user_role === "Admin" || caseItem.lawyer_id === user?.user_id) && (
+                                                    {(user?.user_role === "Admin" || caseItem.user_id === user?.user_id) && (
                                                         <button
                                                             onClick={() => {
                                                                 setSelectedAccessCase(caseItem);
@@ -1157,7 +1166,9 @@ const Settings = () => {
                                         className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/40"
                                     >
                                         <div className="flex flex-col">
-                                            <span className="text-sm font-medium">{u.user_fullname}</span>
+                                            <span className="text-sm font-medium">
+                                                {u.user_fname} {u.user_mname} {u.user_lname}
+                                            </span>
                                             <span className="text-xs text-gray-500 dark:text-gray-400">{u.user_role}</span>
                                         </div>
                                         <input
