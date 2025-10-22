@@ -355,7 +355,7 @@ export const Tasks = () => {
                                                 <td className="px-4 py-2 text-center">
                                                     <button
                                                         onClick={() => navigate("/tasks/approved")}
-                                                        className="rounded-md border border-violet-300 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-600 hover:text-white dark:border-violet-600 dark:text-violet-400 dark:hover:bg-slate-700/30"
+                                                        className="rounded-md border border-violet-300 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-600 hover:text-white dark:border-violet-600 dark:text-violet-400 dark:hover:bg-violet-700 dark:hover:text-white"
                                                     >
                                                         View Approved Tasks
                                                     </button>
