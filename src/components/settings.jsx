@@ -317,12 +317,6 @@ const Settings = () => {
         }
     };
 
-    const removeCustomCategory = (name) => {
-        const next = customCategories.filter((c) => c !== name);
-        setCustomCategories(next);
-        saveCaseCustomPrefs(next, undefined);
-    };
-
     const addCustomType = async (e) => {
         e.preventDefault();
         const name = newTypeName.trim();
@@ -356,12 +350,6 @@ const Settings = () => {
         } finally {
             setAddTypeLoading(false);
         }
-    };
-
-    const removeCustomType = (name) => {
-        const next = customTypes.filter((t) => t !== name);
-        setCustomTypes(next);
-        saveCaseCustomPrefs(undefined, next);
     };
 
     // Add archived cases functions
@@ -452,7 +440,6 @@ const Settings = () => {
         if (user) {
             loadArchivedCases();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     const tabs = [
@@ -927,8 +914,10 @@ const Settings = () => {
                                                 <div className="flex-1 space-y-2">
                                                     <div className="flex items-center gap-2">
                                                         <h4 className="font-medium text-gray-900 dark:text-white">Case #{caseItem.case_id}</h4>
-                                                        <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                                            Archived
+                                                        <span
+                                                            className={`rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300`}
+                                                        >
+                                                            {caseItem.case_status}
                                                         </span>
                                                     </div>
 

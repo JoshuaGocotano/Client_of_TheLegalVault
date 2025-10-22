@@ -96,6 +96,7 @@ export const Tasks = () => {
             TODO: ids[0] || "todo",
             INPROGRESS: ids[1] || "in_progress",
             DONE: ids[2] || "done",
+            APPROVED: "approved",
         };
     })[0];
 
@@ -167,7 +168,7 @@ export const Tasks = () => {
             {/* List of Overdue Tasks */}
             <div className="mt-10">
                 <h1 className="mb-3 text-lg font-bold text-slate-800 dark:text-slate-100">Overdue Tasks</h1>
-                <div className="overflow-x-auto rounded-xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                <div className="overflow-x-auto rounded-xl bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
                     <div className="max-h-[40vh] overflow-y-auto">
                         <table className="w-full table-auto text-sm">
                             <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
@@ -183,12 +184,19 @@ export const Tasks = () => {
                             </thead>
                             <tbody className="dark:divide-slate-700">
                                 {tasks.filter(
-                                    (task) => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE,
+                                    (task) =>
+                                        task.doc_due_date &&
+                                        new Date(task.doc_due_date) < new Date() &&
+                                        task.doc_status !== STATUS_IDS.DONE &&
+                                        task.doc_status !== STATUS_IDS.APPROVED,
                                 ).length > 0 ? (
                                     tasks
                                         .filter(
                                             (task) =>
-                                                task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE,
+                                                task.doc_due_date &&
+                                                new Date(task.doc_due_date) < new Date() &&
+                                                task.doc_status !== STATUS_IDS.DONE &&
+                                                task.doc_status !== STATUS_IDS.APPROVED,
                                         )
                                         .map((task) => (
                                             <tr
@@ -206,7 +214,9 @@ export const Tasks = () => {
                                                         ? "To Do"
                                                         : task.doc_status === "in_progress"
                                                           ? "In Progress"
-                                                          : "Done"}
+                                                          : task.doc_status === "done"
+                                                            ? "Done"
+                                                            : task.doc_status}
                                                 </td>
                                             </tr>
                                         ))
@@ -270,7 +280,13 @@ export const Tasks = () => {
 
                                             {/* Status */}
                                             <td className="px-5 py-3 capitalize text-slate-800 dark:text-slate-100">
-                                                {task.doc_status === "todo" ? "To Do" : task.doc_status === "in_progress" ? "In Progress" : "Done"}
+                                                {task.doc_status === "todo"
+                                                    ? "To Do"
+                                                    : task.doc_status === "in_progress"
+                                                      ? "In Progress"
+                                                      : task.doc_status === "done"
+                                                        ? "Done"
+                                                        : task.doc_status}
                                             </td>
 
                                             {/* Due Date + Priority */}
@@ -294,43 +310,45 @@ export const Tasks = () => {
                                             </td>
 
                                             {/* Actions */}
-                                            <td className="px-4 py-2 text-center">
-                                                <div className="flex flex-wrap justify-center gap-2">
-                                                    <button
-                                                        onClick={() => updateTaskStatus(task.doc_id, STATUS_IDS.TODO)}
-                                                        disabled={task.doc_status === STATUS_IDS.TODO}
-                                                        className={`rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700 ${
-                                                            task.doc_status === STATUS_IDS.TODO
-                                                                ? "cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-700/30 dark:text-slate-500"
-                                                                : "bg-white text-slate-700 dark:bg-slate-700/40 dark:text-slate-200"
-                                                        }`}
-                                                    >
-                                                        To Do
-                                                    </button>
-                                                    <button
-                                                        onClick={() => updateTaskStatus(task.doc_id, STATUS_IDS.INPROGRESS)}
-                                                        disabled={task.doc_status === STATUS_IDS.INPROGRESS}
-                                                        className={`rounded-md px-3 py-1.5 text-xs font-medium text-white ${
-                                                            task.doc_status === STATUS_IDS.INPROGRESS
-                                                                ? "cursor-not-allowed bg-indigo-400"
-                                                                : "bg-indigo-600 hover:bg-indigo-700"
-                                                        }`}
-                                                    >
-                                                        Progress
-                                                    </button>
-                                                    <button
-                                                        onClick={() => updateTaskStatus(task.doc_id, STATUS_IDS.DONE)}
-                                                        disabled={task.doc_status === STATUS_IDS.DONE}
-                                                        className={`rounded-md px-3 py-1.5 text-xs font-medium text-white ${
-                                                            task.doc_status === STATUS_IDS.DONE
-                                                                ? "cursor-not-allowed bg-emerald-400"
-                                                                : "bg-emerald-600 hover:bg-emerald-700"
-                                                        }`}
-                                                    >
-                                                        Done
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            {task.doc_status !== "approved" && (
+                                                <td className="px-4 py-2 text-center">
+                                                    <div className="flex flex-wrap justify-center gap-2">
+                                                        <button
+                                                            onClick={() => updateTaskStatus(task.doc_id, STATUS_IDS.TODO)}
+                                                            disabled={task.doc_status === STATUS_IDS.TODO}
+                                                            className={`rounded-md border border-slate-300 px-3 py-1.5 text-xs font-medium hover:bg-slate-50 dark:border-slate-600 dark:hover:bg-slate-700 ${
+                                                                task.doc_status === STATUS_IDS.TODO
+                                                                    ? "cursor-not-allowed bg-slate-100 text-slate-400 dark:bg-slate-700/30 dark:text-slate-500"
+                                                                    : "bg-white text-slate-700 dark:bg-slate-700/40 dark:text-slate-200"
+                                                            }`}
+                                                        >
+                                                            To Do
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateTaskStatus(task.doc_id, STATUS_IDS.INPROGRESS)}
+                                                            disabled={task.doc_status === STATUS_IDS.INPROGRESS}
+                                                            className={`rounded-md px-3 py-1.5 text-xs font-medium text-white ${
+                                                                task.doc_status === STATUS_IDS.INPROGRESS
+                                                                    ? "cursor-not-allowed bg-indigo-400"
+                                                                    : "bg-indigo-600 hover:bg-indigo-700"
+                                                            }`}
+                                                        >
+                                                            Progress
+                                                        </button>
+                                                        <button
+                                                            onClick={() => updateTaskStatus(task.doc_id, STATUS_IDS.DONE)}
+                                                            disabled={task.doc_status === STATUS_IDS.DONE}
+                                                            className={`rounded-md px-3 py-1.5 text-xs font-medium text-white ${
+                                                                task.doc_status === STATUS_IDS.DONE
+                                                                    ? "cursor-not-allowed bg-emerald-400"
+                                                                    : "bg-emerald-600 hover:bg-emerald-700"
+                                                            }`}
+                                                        >
+                                                            Done
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))
                                 ) : (

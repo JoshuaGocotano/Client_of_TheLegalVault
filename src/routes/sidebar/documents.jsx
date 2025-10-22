@@ -148,6 +148,7 @@ const Documents = () => {
                             <th className="px-4 py-3">Name</th>
                             <th className="px-4 py-3">Case ID</th>
                             <th className="px-4 py-3">Type</th>
+                            <th className="px-4 py-3">Date Submitted</th>
                             <th className="px-4 py-3">Submitted By</th>
                             <th className="px-4 py-3 text-center">Actions</th>
                         </tr>
@@ -174,6 +175,11 @@ const Documents = () => {
                                         <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
                                         <td className="px-4 py-3">{doc.case_id}</td>
                                         <td className="px-4 py-3">{doc.doc_type}</td>
+                                        <td className="px-4 py-3">
+                                            {doc.doc_type === "Support"
+                                                ? new Date(doc.doc_date_created).toLocaleDateString()
+                                                : new Date(doc.doc_date_submitted).toLocaleDateString()}
+                                        </td>
                                         <td className="px-4 py-3">{getSubmitterName(doc.doc_submitted_by)}</td>
                                         <td className="flex justify-center gap-4 px-4 py-3">
                                             <div className="flex items-center gap-3">
