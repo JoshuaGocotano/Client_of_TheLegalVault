@@ -28,7 +28,7 @@ import ClientContact from "./components/client-contacts";
 import ChangePass from "./auth/changepass";
 import { Payments } from "./routes/sidebar/payments";
 import Settings from "./components/settings";
-import { ApprovedTasks } from "./components/approved-tasks";
+import ApprovedTasks from "./components/approved-tasks";
 
 export default function App() {
     const router = createBrowserRouter([

@@ -4,9 +4,12 @@ import Column from "@/components/tasking/column";
 import { DndContext } from "@dnd-kit/core";
 import toast from "react-hot-toast";
 import { useAuth } from "@/context/auth-context";
+import { useNavigate } from "react-router-dom";
 
 export const Tasks = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
     const [tasks, setTasks] = useState([]);
 
     // Fetch tasks
@@ -310,7 +313,7 @@ export const Tasks = () => {
                                             </td>
 
                                             {/* Actions */}
-                                            {task.doc_status !== "approved" && (
+                                            {task.doc_status !== "approved" ? (
                                                 <td className="px-4 py-2 text-center">
                                                     <div className="flex flex-wrap justify-center gap-2">
                                                         <button
@@ -347,6 +350,15 @@ export const Tasks = () => {
                                                             Done
                                                         </button>
                                                     </div>
+                                                </td>
+                                            ) : (
+                                                <td className="px-4 py-2 text-center">
+                                                    <button
+                                                        onClick={() => navigate("/tasks/approved")}
+                                                        className="rounded-md border border-violet-300 px-3 py-1.5 text-xs font-medium text-violet-600 hover:bg-violet-600 hover:text-white dark:border-violet-600 dark:text-violet-400 dark:hover:bg-slate-700/30"
+                                                    >
+                                                        View Approved Tasks
+                                                    </button>
                                                 </td>
                                             )}
                                         </tr>
