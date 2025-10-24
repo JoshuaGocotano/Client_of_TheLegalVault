@@ -989,7 +989,7 @@ const Settings = () => {
                     </div>
                 )}
 
-                {/* Case Preferences */}
+                {/* Case Categories and its Subtypes*/}
                 {activeTab === "case-categories" && (
                     <div className="mx-auto max-w-6xl space-y-6">
                         <SettingsCard
@@ -1052,7 +1052,7 @@ const Settings = () => {
                                             onChange={(e) => setNewTypeCategoryId(e.target.value)}
                                             className="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 sm:w-64"
                                         >
-                                            <option value="">No category (optional)</option>
+                                            <option value="">Select Category</option>
                                             {categories.map((c) => (
                                                 <option
                                                     key={c.cc_id ?? c.id}
@@ -1064,7 +1064,7 @@ const Settings = () => {
                                         </select>
                                         <button
                                             type="submit"
-                                            disabled={!newTypeName.trim() || addTypeLoading}
+                                            disabled={!newTypeName.trim() || addTypeLoading || !newTypeCategoryId}
                                             className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             {addTypeLoading ? (
