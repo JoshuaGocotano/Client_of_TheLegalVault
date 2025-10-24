@@ -197,7 +197,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                 <>
                                     <input
                                         type="text"
-                                        placeholder="First Name"
+                                        placeholder="First Name *"
                                         value={personName.first}
                                         onChange={(e) => setPersonName({ ...personName, first: e.target.value })}
                                         className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
@@ -212,7 +212,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                                     />
                                     <input
                                         type="text"
-                                        placeholder="Last Name"
+                                        placeholder="Last Name *"
                                         value={personName.last}
                                         onChange={(e) => setPersonName({ ...personName, last: e.target.value })}
                                         className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
@@ -222,7 +222,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                             ) : (
                                 <input
                                     type="text"
-                                    placeholder="Company Name"
+                                    placeholder="Company Name *"
                                     value={clientData.client_fullname}
                                     onChange={(e) =>
                                         setClientData({
@@ -239,7 +239,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                         <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                             <input
                                 type="email"
-                                placeholder="Email"
+                                placeholder="Email *"
                                 value={clientData.client_email}
                                 onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
                                 className="rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
@@ -247,7 +247,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                             />
                             <input
                                 type="tel"
-                                placeholder="Phone Number"
+                                placeholder="Phone Number *"
                                 value={clientData.client_phonenum}
                                 onChange={(e) =>
                                     setClientData({
@@ -262,7 +262,7 @@ const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
                         <div className="mt-4">
                             <input
                                 type="text"
-                                placeholder="Address (Optional)"
+                                placeholder="Address *"
                                 value={clientData.client_address}
                                 onChange={(e) =>
                                     setClientData({
