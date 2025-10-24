@@ -1052,7 +1052,7 @@ const Settings = () => {
                                             onChange={(e) => setNewTypeCategoryId(e.target.value)}
                                             className="rounded-lg border px-3 py-2 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 sm:w-64"
                                         >
-                                            <option value="">Select Category</option>
+                                            <option value="" disabled>Select Category</option>
                                             {categories.map((c) => (
                                                 <option
                                                     key={c.cc_id ?? c.id}
