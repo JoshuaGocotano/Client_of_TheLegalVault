@@ -81,7 +81,8 @@ const ApprovedTasks = () => {
                         <tr>
                             <th className="px-4 py-2">Task ID</th>
                             <th className="px-4 py-2">Document Name</th>
-                            <th className="px-4 py-2">Assigned To</th>
+                            <th className="px-4 py-2">Tasked To</th>
+                            <th className="px-4 py-2">Tasked By</th>
                             <th className="px-4 py-2">Due Date</th>
                             <th className="px-4 py-2">Date Submitted</th>
                             <th className="px-4 py-2">Status</th>
@@ -96,6 +97,7 @@ const ApprovedTasks = () => {
                                 <td className="px-4 py-2">{task.doc_id}</td>
                                 <td className="px-4 py-2">{task.doc_name}</td>
                                 <td className="px-4 py-2">{getUserFullName(task.doc_tasked_to)}</td>
+                                <td className="px-4 py-2">Atty. {getUserFullName(task.doc_tasked_by)}</td>
                                 <td className="px-4 py-2">{new Date(task.doc_due_date).toLocaleDateString()}</td>
                                 <td className="px-4 py-2">
                                     {new Date(task.doc_date_submitted).toLocaleDateString()}
