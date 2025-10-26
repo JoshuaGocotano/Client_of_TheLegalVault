@@ -193,16 +193,14 @@ const Documents = () => {
                                                     View
                                                 </a>
                                             </div>
-                                            {user.user_role !== "Staff" &&
-                                                user.user_role !==
-                                                    "Paralegal"(
-                                                        <button
-                                                            className="text-red-500 hover:text-red-700"
-                                                            onClick={() => confirmDelete(doc)}
-                                                        >
-                                                            <Trash2 size={16} />
-                                                        </button>,
-                                                    )}
+                                            {(user.user_role !== "Staff" || user.user_role !== "Paralegal") && (
+                                                <button
+                                                    className="text-red-500 hover:text-red-700"
+                                                    onClick={() => confirmDelete(doc)}
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            )}
                                         </td>
                                     </tr>
                                 ))
