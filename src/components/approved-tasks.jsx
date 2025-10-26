@@ -20,6 +20,7 @@ const ApprovedTasks = () => {
 
                 const response = await fetch(task_endpoint, {
                     method: "GET",
+                    credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
