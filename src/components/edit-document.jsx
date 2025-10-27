@@ -47,6 +47,7 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         doc_status: doc.doc_status || "todo",
         case_id: doc.case_id,
         doc_last_updated_by: user.user_id,
+        doc_reference: doc.doc_reference || [],
     });
 
     const [supportForm, setSupportForm] = useState({
@@ -57,6 +58,7 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         doc_type: "Support",
         case_id: doc.case_id,
         doc_last_updated_by: user.user_id,
+        doc_file: doc.doc_file || "",
     });
 
     // --- New: File handling state ---
@@ -80,8 +82,8 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
                 } else if (Array.isArray(doc.doc_reference)) {
                     refs = doc.doc_reference;
                 }
-            } catch (_) {
-                // ignore parse errors
+            } catch (e) {
+                console.error("Failed to parse doc_reference", e);
             }
         }
         setExistingRefs(refs);
@@ -123,11 +125,42 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
         setRefFileError("");
         e.target.value = null;
     };
+
     const removeNewRefAt = (idx) => {
         setNewRefFiles((prev) => prev.filter((_, i) => i !== idx));
     };
-    const removeExistingRefAt = (idx) => {
-        setExistingRefs((prev) => prev.filter((_, i) => i !== idx));
+
+    // Actual removal of existing reference
+    const removeExistingRefAt = async (idx) => {
+        const onConfirm = window.confirm("Are you sure you want to remove this reference file from the document?");
+        if (!onConfirm) return;
+
+        if (onConfirm) {
+            const toastId = toast.loading("Removing file reference...", { duration: 3000 });
+            try {
+                const refToRemove = existingRefs[idx];
+                setExistingRefs((prev) => prev.filter((_, i) => i !== idx));
+
+                // Make backend call
+                const res = await fetch(`http://localhost:3000/api/documents/${doc.doc_id}/remove-reference`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                    body: JSON.stringify({ referencePath: refToRemove }),
+                });
+
+                console.log("refToRemove", refToRemove, typeof refToRemove);
+
+                if (!res.ok) {
+                    throw new Error("Failed to remove reference from server");
+                }
+
+                toast.success("Reference removed successfully", { id: toastId, duration: 3000 });
+            } catch (err) {
+                console.error("Failed to remove reference", err);
+                toast.error(err.message || "Failed to remove reference", { id: toastId, duration: 3000 });
+            }
+        }
     };
 
     const onMainFileChange = (e) => {
@@ -152,7 +185,7 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
                 if (v !== undefined && v !== null) fd.append(k, v);
             });
             // Keep list for existing references after removals
-            fd.append("doc_reference_keep", JSON.stringify(existingRefs));
+            fd.append("doc_reference", JSON.stringify(existingRefs));
             // Newly added reference files
             newRefFiles.forEach((f) => fd.append("doc_reference", f));
 
@@ -525,23 +558,27 @@ export default function EditDocument({ doc, users = [], onClose, onSaved }) {
                             />
                         </div>
 
-                        {/* New: Main file (same design as Add Document) */}
+                        {/* the main file (support document) */}
                         <div className="flex flex-col">
-                            <label className="mb-1 text-sm font-medium">Attached File (PDF)</label>
+                            <label className="mb-1 text-sm font-medium">File (PDF)</label>
                             {/* Current file */}
-                            <div className="mb-2 text-sm">
-                                {doc.doc_file ? (
-                                    <a
-                                        className="text-blue-600 hover:underline"
-                                        href={`http://localhost:3000${doc.doc_file}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                    >
-                                        Current: 📄 {doc.doc_file.split("/").pop()}
-                                    </a>
-                                ) : (
-                                    <span className="text-gray-500 dark:text-gray-400">No file attached</span>
-                                )}
+                            <div className="mb-2 flex items-center justify-between rounded border px-2 py-1 text-sm dark:border-gray-600">
+                                <a
+                                    className="text-blue-600 hover:underline"
+                                    href={`http://localhost:3000${doc.doc_file}`}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >
+                                    Current: 📄 {doc.doc_file.split("/").pop()}
+                                </a>
+                                <button
+                                    type="button"
+                                    onClick={clearMainFile}
+                                    className="ml-2 text-red-500 hover:text-red-700"
+                                    title="Remove selected new file"
+                                >
+                                    ❌
+                                </button>
                             </div>
                             <input
                                 type="file"
