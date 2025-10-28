@@ -128,7 +128,11 @@ export const Reports = () => {
                     },
                 });
                 const data = await res.json();
-                setLogs(data);
+
+                // only get the logs that has an action with text "Status: Completed" or "Status: Dismissed"
+                const completedOrDismissedLogs = data.filter((log) => /status: completed|status: dismissed/i.test(log.user_log_action));
+
+                setLogs(completedOrDismissedLogs);
             } catch (err) {
                 console.error("Error fetching logs:", err);
             } finally {
@@ -306,7 +310,7 @@ export const Reports = () => {
             {/* User Activity Logs */}
             <div className="card p-4">
                 <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">User Activity</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Completions and Dismissals</h2>
                     <button
                         onClick={() => navigate("/user-logs")}
                         className="text-xl font-bold text-blue-800 hover:underline"
@@ -321,7 +325,7 @@ export const Reports = () => {
                     <>
                         <div className="max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700">
                             <table className="w-full text-sm">
-                                <thead className="sticky top-0 bg-gray-100 text-left text-gray-600 dark:bg-gray-800">
+                                <thead className="sticky top-0 bg-gray-100 text-left text-gray-500 dark:bg-gray-800">
                                     <tr>
                                         <th className="p-2">USER</th>
                                         <th className="p-2">ACTION</th>
