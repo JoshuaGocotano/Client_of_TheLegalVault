@@ -106,6 +106,87 @@ export const Reports = () => {
         return null;
     }
 
+    // TEST DATA counts for the last week, monthly and quarterly report of completed and dismissed cases
+    
+    const [lastWeekCount, setLastWeekCount] = useState({
+        completed: [
+            {
+                monday: 5,
+                tuesday: 8,
+                wednesday: 6,
+                thursday: 10,
+                friday: 7,
+                saturday: 4,
+                sunday: 9,
+            },
+        ],
+        dismissed: [
+            {
+                monday: 2,
+                tuesday: 3,
+                wednesday: 1,
+                thursday: 4,
+                friday: 2,
+                saturday: 0,
+                sunday: 3,
+            },
+        ],
+    });
+
+    const [monthlyCount, setMonthlyCount] = useState({
+        completed: [
+            {
+                january: 50,
+                february: 65,
+                march: 80,
+                april: 70,
+                may: 90,
+                june: 75,
+                july: 85,
+                august: 95,
+                september: 60,
+                october: 100,
+                november: 110,
+                december: 120,
+            },
+        ],
+        dismissed: [
+            {
+                january: 20,
+                february: 25,
+                march: 30,
+                april: 15,
+                may: 35,
+                june: 20,
+                july: 25,
+                august: 30,
+                september: 15,
+                october: 40,
+                november: 45,
+                december: 50,
+            },
+        ],
+    });
+
+    const [quarterlyCount, setQuarterlyCount] = useState({
+        completed: [
+            {
+                q1: 200,
+                q2: 250,
+                q3: 300,
+                q4: 350,
+            },
+        ],
+        dismissed: [
+            {
+                q1: 80,
+                q2: 90,
+                q3: 100,
+                q4: 110,
+            },
+        ],
+    });
+
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
     // remove toggle in favor of scrollable list
