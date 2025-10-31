@@ -287,7 +287,7 @@ const Cases = () => {
                     <tbody className="text-slate-950 dark:text-white">
                         {currentCases.length > 0 ? (
                             currentCases
-                                .filter((c) => c.case_status !== "Archived")
+                                .filter((c) => c.case_status !== "Archived (Completed)" && c.case_status !== "Archived (Dismissed)")
                                 .map((cases) => (
                                     <tr
                                         key={cases.case_id}

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ShieldUser, FileText, Archive, FolderKanban } from "lucide-react";
+import { FileText, Archive, FolderKanban, FlagTriangleRight } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useNavigate } from "react-router-dom";
 import defaultAvatar from "../../assets/default-avatar.png";
@@ -138,61 +138,118 @@ export const Reports = () => {
         return null;
     }
 
-    // TEST DATA counts
-    const [lastWeekCount] = useState({
-        completed: [{ monday: 5, tuesday: 8, wednesday: 6, thursday: 10, friday: 7, saturday: 4, sunday: 9 }],
-        dismissed: [{ monday: 2, tuesday: 3, wednesday: 1, thursday: 4, friday: 2, saturday: 0, sunday: 3 }],
+    const [lastWeekCount, setLastWeekCount] = useState({
+        completed: [{ monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 }],
+        dismissed: [{ monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 }],
     });
 
-    const [monthlyCount] = useState({
+    // Fetching the actual last week counts from the server
+    useEffect(() => {
+        const fetchLastWeekCounts = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/reports/last-week", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const data = await res.json();
+                setLastWeekCount({
+                    completed: [data.completed],
+                    dismissed: [data.dismissed],
+                });
+            } catch (err) {
+                console.error("Error fetching last week counts:", err);
+            }
+        };
+        fetchLastWeekCounts();
+    }, []);
+
+    const [monthlyCount, setMonthlyCount] = useState({
         completed: [
             {
-                january: 50,
-                february: 65,
-                march: 80,
-                april: 70,
-                may: 90,
-                june: 75,
-                july: 85,
-                august: 95,
-                september: 60,
-                october: 100,
-                november: 110,
-                december: 120,
+                january: 0,
+                february: 0,
+                march: 0,
+                april: 0,
+                may: 0,
+                june: 0,
+                july: 0,
+                august: 0,
+                september: 0,
+                october: 0,
+                november: 0,
+                december: 0,
             },
         ],
         dismissed: [
             {
-                january: 20,
-                february: 25,
-                march: 30,
-                april: 15,
-                may: 35,
-                june: 20,
-                july: 25,
-                august: 30,
-                september: 15,
-                october: 40,
-                november: 45,
-                december: 50,
+                january: 0,
+                february: 0,
+                march: 0,
+                april: 0,
+                may: 0,
+                june: 0,
+                july: 0,
+                august: 0,
+                september: 0,
+                october: 0,
+                november: 0,
+                december: 0,
             },
         ],
     });
 
-    const [quarterlyCount] = useState({
-        completed: [{ q1: 200, q2: 250, q3: 300, q4: 350 }],
-        dismissed: [{ q1: 80, q2: 90, q3: 100, q4: 110 }],
+    // Fetching the actual monthly counts from the server
+    useEffect(() => {
+        const fetchMonthlyCounts = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/reports/monthly", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const data = await res.json();
+                setMonthlyCount({
+                    completed: [data.completed],
+                    dismissed: [data.dismissed],
+                });
+            } catch (err) {
+                console.error("Error fetching monthly counts:", err);
+            }
+        };
+        fetchMonthlyCounts();
+    }, []);
+
+    // for quarterly counts, we can derive from monthly counts
+    const [quarterlyCount, setQuarterlyCount] = useState({
+        completed: [{ q1: 0, q2: 0, q3: 0, q4: 0 }],
+        dismissed: [{ q1: 0, q2: 0, q3: 0, q4: 0 }],
     });
+
+    useEffect(() => {
+        const computeQuarterlyCounts = () => {
+            const completed = monthlyCount.completed[0];
+            const dismissed = monthlyCount.dismissed[0];
+            const quarterlyCompleted = {
+                q1: completed.january + completed.february + completed.march,
+                q2: completed.april + completed.may + completed.june,
+                q3: completed.july + completed.august + completed.september,
+                q4: completed.october + completed.november + completed.december,
+            };
+            const quarterlyDismissed = {
+                q1: dismissed.january + dismissed.february + dismissed.march,
+                q2: dismissed.april + dismissed.may + dismissed.june,
+                q3: dismissed.july + dismissed.august + dismissed.september,
+                q4: dismissed.october + dismissed.november + dismissed.december,
+            };
+            setQuarterlyCount({
+                completed: [quarterlyCompleted],
+                dismissed: [quarterlyDismissed],
+            });
+        };
+        computeQuarterlyCounts();
+    }, [monthlyCount]);
 
     // CHART STATE
     const [chartType, setChartType] = useState("weekly");
-
-    const transformData = (dataObj, labelMap) =>
-        Object.entries(dataObj).map(([key, value]) => ({
-            name: labelMap[key] || key,
-            Completed: value.completed || value,
-            Dismissed: value.dismissed || 0,
-        }));
 
     // generate chart data dynamically
     const getChartData = () => {
@@ -229,17 +286,45 @@ export const Reports = () => {
     // Logs and counts (unchanged)
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [usersCount, setUsersCount] = useState(0);
-    const [archivedCasesCount, setArchivedCasesCount] = useState(0);
-    const [processingCasesCount, setProcessingCasesCount] = useState(0);
-    const [processingDocumentsCount, setProcessingDocumentsCount] = useState(0);
 
+    const [caseCounts, setCaseCounts] = useState({
+        completed: 0,
+        dismissed: 0,
+        archivedCompleted: 0,
+        archivedDismissed: 0,
+    });
+
+    // fetching case counts
+    useEffect(() => {
+        const fetchCaseCounts = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/reports/case-counts", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch case counts");
+                const data = await res.json();
+                setCaseCounts(data);
+            } catch (err) {
+                console.error("Error fetching case counts:", err);
+            }
+        };
+        fetchCaseCounts();
+    }, []);
+
+    // fetching logs
     useEffect(() => {
         const fetchLogs = async () => {
             try {
                 const res = await fetch("http://localhost:3000/api/user-logs", { method: "GET", credentials: "include" });
                 const data = await res.json();
-                const filtered = data.filter((log) => /status: completed|status: dismissed/i.test(log.user_log_action));
+
+                // filtering logs for completed, dismissed, and archived actions only and does not include the ones with "New allowed viewer(s)" text
+                const filtered = data.filter(
+                    (log) =>
+                        /status: completed|status: dismissed|archived /i.test(log.user_log_action) &&
+                        !/New allowed viewer\(s\)/i.test(log.user_log_action),
+                );
                 setLogs(filtered);
             } catch (err) {
                 console.error("Error fetching logs:", err);
@@ -259,18 +344,28 @@ export const Reports = () => {
             {/* Stat Cards */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <StatCard
-                    title="Users"
-                    value={usersCount}
+                    title="Completed Cases"
+                    value={caseCounts.completed}
                     icon={
-                        <ShieldUser
+                        <FolderKanban
                             size={20}
                             className="text-blue-500"
                         />
                     }
                 />
                 <StatCard
-                    title="Archived Cases"
-                    value={archivedCasesCount}
+                    title="Dismissed Cases"
+                    value={caseCounts.dismissed}
+                    icon={
+                        <FolderKanban
+                            size={20}
+                            className="text-red-500"
+                        />
+                    }
+                />
+                <StatCard
+                    title="Archived Completed Cases"
+                    value={caseCounts.archivedCompleted}
                     icon={
                         <Archive
                             size={20}
@@ -279,20 +374,10 @@ export const Reports = () => {
                     }
                 />
                 <StatCard
-                    title="Processing Cases"
-                    value={processingCasesCount}
+                    title="Archived Dismissed Cases"
+                    value={caseCounts.archivedDismissed}
                     icon={
-                        <FolderKanban
-                            size={20}
-                            className="text-orange-500"
-                        />
-                    }
-                />
-                <StatCard
-                    title="Processing Documents"
-                    value={processingDocumentsCount}
-                    icon={
-                        <FileText
+                        <Archive
                             size={20}
                             className="text-purple-500"
                         />
@@ -302,25 +387,31 @@ export const Reports = () => {
 
             {/* CHART SECTION */}
             <div className="relative rounded-xl bg-white p-6 shadow-md dark:bg-gray-800">
-                {/* Toggle buttons */}
-                <div className="mb-4 flex flex-wrap items-center gap-2">
-                    {[
-                        { label: "Last 7 Days", value: "weekly" },
-                        { label: "Monthly", value: "monthly" },
-                        { label: "Quarterly", value: "quarterly" },
-                    ].map((btn) => (
-                        <button
-                            key={btn.value}
-                            onClick={() => setChartType(btn.value)}
-                            className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                                chartType === btn.value
-                                    ? "bg-blue-600 text-white"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                            }`}
-                        >
-                            {btn.label}
-                        </button>
-                    ))}
+                {/* Chart Header: Toggles + Year */}
+                <div className="mb-4 flex flex-wrap items-center justify-between">
+                    {/* Toggle buttons */}
+                    <div className="flex gap-2">
+                        {[
+                            { label: "This Week", value: "weekly" },
+                            { label: "Monthly", value: "monthly" },
+                            { label: "Quarterly", value: "quarterly" },
+                        ].map((btn) => (
+                            <button
+                                key={btn.value}
+                                onClick={() => setChartType(btn.value)}
+                                className={`rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                                    chartType === btn.value
+                                        ? "bg-blue-600 text-white"
+                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                                }`}
+                            >
+                                {btn.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Current Year */}
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">{new Date().getFullYear()}</span>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6">
@@ -329,13 +420,18 @@ export const Reports = () => {
                         dataKey="Completed"
                         chartData={chartData}
                     />
+
+                    <p className="flex items-center gap-1 text-xs italic text-gray-400 opacity-80">
+                        <FlagTriangleRight size={16} />
+                        Note: This data includes the archived cases that are closed/completed or dismissed
+                    </p>
                 </div>
             </div>
 
             {/* Logs Table */}
             <div className="card p-4">
                 <div className="mb-3 flex items-center justify-between">
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Completions and Dismissals</h2>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-white">Completions, Dismissals and Archive</h2>
                     <button
                         onClick={() => navigate("/user-logs")}
                         className="text-lg font-bold text-blue-800 hover:underline"
