@@ -71,10 +71,6 @@ const ChartPlaceholder = ({ title, chartData }) => (
                         stroke="#94a3b8"
                     />
                     <YAxis stroke="#94a3b8" />
-                    <CartesianGrid
-                        strokeDasharray="3 3"
-                        stroke="#e2e8f0"
-                    />
                     <Tooltip />
 
                     {/* Completed line */}

@@ -34,33 +34,6 @@ export const getNavbarLinks = (role) => {
     return [];
 };
 
-export const overviewData = [
-    {
-        name: "Criminal",
-        total: 150,
-    },
-    {
-        name: "Civil",
-        total: 700,
-    },
-    {
-        name: "Special Proceedings",
-        total: 100,
-    },
-    {
-        name: "Constitutional",
-        total: 200,
-    },
-    {
-        name: "Jurisdictional",
-        total: 20,
-    },
-    {
-        name: "Special Courts",
-        total: 20,
-    },
-];
-
 // Task Management Columns or Statuses
 export const COLUMNS = [
     { id: "todo", title: "To Do" },
