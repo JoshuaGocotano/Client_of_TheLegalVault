@@ -319,87 +319,89 @@ const Users = () => {
                     </thead>
                     <tbody className="dark:text-slate-50">
                         {paginatedUsers.length > 0 ? (
-                            paginatedUsers.map((u) => (
-                                <tr
-                                    key={u.user_id}
-                                    className="border-t border-gray-200 hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-950"
-                                >
-                                    <td className="flex items-center gap-3 px-4 py-3">
-                                        <img
-                                            src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
-                                            alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
-                                            className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${
-                                                u.user_status === "Active"
-                                                    ? "border-green-500"
-                                                    : u.user_status === "Pending"
-                                                      ? "border-yellow-500"
-                                                      : u.user_status === "Suspended"
-                                                        ? "border-red-500"
-                                                        : "border-gray-300"
-                                            }`}
-                                        />
-                                        <span className="font-medium">
-                                            {`${u.user_fname || ""} ${u.user_mname || ""} ${u.user_lname || ""}`.replace(/\s+/g, " ").trim()}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3">{u.user_email}</td>
-                                    <td className="px-4 py-3">{u.user_phonenum}</td>
-                                    <td className="px-4 py-3">{u.user_role === "Admin" ? "Super Lawyer" : u.user_role}</td>
-                                    <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
-                                    <td className="px-4 py-3">
-                                        <span
-                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                                                u.user_status === "Active"
-                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                    : u.user_status === "Pending"
-                                                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                      : u.user_status === "Suspended"
-                                                        ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
-                                            }`}
-                                        >
-                                            {u.user_status}
-                                        </span>
-                                    </td>
-                                    <td className="px-4 py-3 text-right">
-                                        {u.user_status !== "Suspended" ? (
-                                            <div className="flex justify-center gap-2">
-                                                <button
-                                                    onClick={() => openEditModal(u)}
-                                                    className="text-blue-600 hover:text-blue-800"
-                                                    title="Edit User Info"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => openRemoveModal(u)}
-                                                    className="text-red-500 hover:text-red-700"
-                                                    title="Suspend User"
-                                                >
-                                                    <UserRoundX className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        ) : (
-                                            <div className="flex justify-center gap-2">
-                                                <button
-                                                    onClick={() => openEditModal(u)}
-                                                    className="text-blue-600 hover:text-blue-800"
-                                                    title="Edit User Info"
-                                                >
-                                                    <Pencil className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleUserActivation(u)}
-                                                    className="text-green-600 hover:text-blue-800"
-                                                    title="Activate User"
-                                                >
-                                                    <UserRoundPlus className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))
+                            paginatedUsers
+                                .filter((u) => u.user_id !== user.user_id)
+                                .map((u) => (
+                                    <tr
+                                        key={u.user_id}
+                                        className="border-t border-gray-200 hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-950"
+                                    >
+                                        <td className="flex items-center gap-3 px-4 py-3">
+                                            <img
+                                                src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
+                                                alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
+                                                className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${
+                                                    u.user_status === "Active"
+                                                        ? "border-green-500"
+                                                        : u.user_status === "Pending"
+                                                          ? "border-yellow-500"
+                                                          : u.user_status === "Suspended"
+                                                            ? "border-red-500"
+                                                            : "border-gray-300"
+                                                }`}
+                                            />
+                                            <span className="font-medium">
+                                                {`${u.user_fname || ""} ${u.user_mname || ""} ${u.user_lname || ""}`.replace(/\s+/g, " ").trim()}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">{u.user_email}</td>
+                                        <td className="px-4 py-3">{u.user_phonenum}</td>
+                                        <td className="px-4 py-3">{u.user_role === "Admin" ? "Super Lawyer" : u.user_role}</td>
+                                        <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
+                                        <td className="px-4 py-3">
+                                            <span
+                                                className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
+                                                    u.user_status === "Active"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : u.user_status === "Pending"
+                                                          ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                          : u.user_status === "Suspended"
+                                                            ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                }`}
+                                            >
+                                                {u.user_status}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            {u.user_status !== "Suspended" ? (
+                                                <div className="flex justify-center gap-2">
+                                                    <button
+                                                        onClick={() => openEditModal(u)}
+                                                        className="text-blue-600 hover:text-blue-800"
+                                                        title="Edit User Info"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => openRemoveModal(u)}
+                                                        className="text-red-500 hover:text-red-700"
+                                                        title="Suspend User"
+                                                    >
+                                                        <UserRoundX className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div className="flex justify-center gap-2">
+                                                    <button
+                                                        onClick={() => openEditModal(u)}
+                                                        className="text-blue-600 hover:text-blue-800"
+                                                        title="Edit User Info"
+                                                    >
+                                                        <Pencil className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleUserActivation(u)}
+                                                        className="text-green-600 hover:text-blue-800"
+                                                        title="Activate User"
+                                                    >
+                                                        <UserRoundPlus className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))
                         ) : (
                             <tr>
                                 <td
