@@ -320,7 +320,7 @@ const Users = () => {
                     <tbody className="dark:text-slate-50">
                         {paginatedUsers.length > 0 ? (
                             paginatedUsers
-                                .filter((u) => u.user_id !== user.user_id)
+                                // .filter((u) => u.user_id !== user.user_id)
                                 .map((u) => (
                                     <tr
                                         key={u.user_id}
@@ -373,13 +373,15 @@ const Users = () => {
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </button>
-                                                    <button
-                                                        onClick={() => openRemoveModal(u)}
-                                                        className="text-red-500 hover:text-red-700"
-                                                        title="Suspend User"
-                                                    >
-                                                        <UserRoundX className="h-4 w-4" />
-                                                    </button>
+                                                    {u.user_id !== user.user_id && (
+                                                        <button
+                                                            onClick={() => openRemoveModal(u)}
+                                                            className="text-red-500 hover:text-red-700"
+                                                            title="Suspend User"
+                                                        >
+                                                            <UserRoundX className="h-4 w-4" />
+                                                        </button>
+                                                    )}
                                                 </div>
                                             ) : (
                                                 <div className="flex justify-center gap-2">
