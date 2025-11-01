@@ -11,6 +11,7 @@ export const Tasks = () => {
     const navigate = useNavigate();
 
     const [tasks, setTasks] = useState([]);
+    const [selectedTask, setSelectedTask] = useState(null);
 
     // Fetch tasks
     useEffect(() => {
@@ -126,6 +127,55 @@ export const Tasks = () => {
         }
     };
 
+    const [users, setUsers] = useState([]);
+
+    // fetch users for name resolution
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch users");
+                const data = await res.json();
+                setUsers(data);
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
+
+        fetchUsers();
+    }, []);
+
+    // get userfull name helper
+    const getUserFullName = (userId) => {
+        if (!Array.isArray(users)) return "Unknown";
+        const user = users.find((u) => u.user_id === userId);
+        return user ? `${user.user_fname} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname}` : "Unknown";
+    };
+
+    // for task modal
+    const [fileReferences, setFileReferences] = useState([]);
+
+    useEffect(() => {
+        if (!selectedTask) return;
+
+        let refs = [];
+        try {
+            if (typeof selectedTask.doc_reference === "string") {
+                const parsed = JSON.parse(selectedTask.doc_reference);
+                if (Array.isArray(parsed)) refs = parsed;
+            } else if (Array.isArray(selectedTask.doc_reference)) {
+                refs = selectedTask.doc_reference;
+            }
+        } catch (e) {
+            console.error("Failed to parse doc_reference", e);
+        }
+
+        setFileReferences(refs);
+    }, [selectedTask]);
+
     return (
         <div className="space-y-5">
             {/* Header */}
@@ -163,12 +213,13 @@ export const Tasks = () => {
                             column={column}
                             tasks={tasks.filter((task) => task.doc_status === column.id)}
                             getPriorityStyle={getPriorityStyle}
+                            onTaskClick={(task) => setSelectedTask(task)}
                         />
                     ))}
                 </div>
             </DndContext>
 
-            {/* List of Overdue Tasks */}
+            {/* Overdue Tasks */}
             <div className="mt-10">
                 <h1 className="mb-3 text-lg font-bold text-slate-800 dark:text-slate-100">Overdue Tasks</h1>
                 <div className="overflow-x-auto rounded-xl bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
@@ -183,6 +234,12 @@ export const Tasks = () => {
                                         Due Date
                                     </th>
                                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Tasked To
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Tasked By
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody className="dark:divide-slate-700">
@@ -220,6 +277,12 @@ export const Tasks = () => {
                                                           : task.doc_status === "done"
                                                             ? "Done"
                                                             : task.doc_status}
+                                                </td>
+                                                <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
+                                                    {getUserFullName(task.doc_tasked_to) || "-"}
+                                                </td>
+                                                <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
+                                                    Atty. {getUserFullName(task.doc_tasked_by) || "-"}
                                                 </td>
                                             </tr>
                                         ))
@@ -299,6 +362,7 @@ export const Tasks = () => {
                                                         {task.doc_due_date ? new Date(task.doc_due_date).toLocaleDateString() : "No date"}
                                                     </span>
                                                     <span
+                                                        title={`Priority: ${task.doc_prio_level || "None"}`}
                                                         className={`inline-block h-2.5 w-2.5 rounded-full ${
                                                             task.doc_prio_level === "High"
                                                                 ? "bg-red-500"
@@ -378,6 +442,106 @@ export const Tasks = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Task Details Modal */}
+            {selectedTask && (
+                <div className="animate-fadeIn fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ease-out">
+                    <div className="w-full max-w-lg transform rounded-2xl bg-white shadow-2xl transition-all duration-200 ease-out dark:bg-slate-800">
+                        {/* Header */}
+                        <div className="flex items-start justify-between border-b border-slate-200 p-5 dark:border-slate-700">
+                            <div>
+                                <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{selectedTask.doc_name}</h2>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Task ID: {selectedTask.doc_id}</p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedTask(null)}
+                                className="rounded-full p-1.5 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700 dark:hover:bg-slate-700 dark:hover:text-white"
+                                aria-label="Close"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {/* Body */}
+                        <div className="max-h-[70vh] overflow-y-auto p-6 text-sm">
+                            {/* Meta Info */}
+                            <div className="mb-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400">Priority</p>
+                                    <p
+                                        className={`mt-0.5 inline-block rounded-md px-2 py-0.5 text-xs font-medium ${
+                                            selectedTask.doc_prio_level === "High"
+                                                ? "bg-red-100 text-red-700 dark:bg-red-700/30 dark:text-red-300"
+                                                : selectedTask.doc_prio_level === "Mid"
+                                                  ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/30 dark:text-yellow-300"
+                                                  : "bg-blue-100 text-blue-700 dark:bg-blue-700/30 dark:text-blue-300"
+                                        }`}
+                                    >
+                                        {selectedTask.doc_prio_level || "None"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400">Status</p>
+                                    <p className="mt-0.5 font-medium capitalize text-slate-800 dark:text-slate-200">
+                                        {selectedTask.doc_status?.replace("_", " ") || "Unknown"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400">Due Date</p>
+                                    <p className="mt-0.5 text-slate-800 dark:text-slate-200">
+                                        {selectedTask.doc_due_date ? new Date(selectedTask.doc_due_date).toLocaleDateString() : "No due date"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400">Tasked By</p>
+                                    <p className="mt-0.5 text-slate-800 dark:text-slate-200">
+                                        {getUserFullName(selectedTask.doc_tasked_by)
+                                            ? `Atty. ${getUserFullName(selectedTask.doc_tasked_by)}`
+                                            : "Unknown"}
+                                    </p>
+                                </div>
+                                <div className="sm:col-span-2">
+                                    <p className="text-slate-500 dark:text-slate-400">Related Case</p>
+                                    <p className="mt-0.5 text-slate-800 dark:text-slate-200">
+                                        {selectedTask.case_id ? `Case #${selectedTask.case_id}` : "No case linked"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Task Details */}
+                            <div className="mb-6">
+                                <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">Task Details:</h3>
+                                <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 dark:text-slate-300">
+                                    {selectedTask.doc_task || "No task details available."}
+                                </p>
+                            </div>
+
+                            {/* File References */}
+                            <div>
+                                <h3 className="mb-2 text-sm font-semibold text-slate-800 dark:text-slate-200">File References:</h3>
+                                {fileReferences.length > 0 ? (
+                                    <ul className="list-disc space-y-1 pl-5 text-sm text-slate-700 dark:text-slate-300">
+                                        {fileReferences.map((ref, index) => (
+                                            <li key={index}>
+                                                <a
+                                                    className="text-blue-600 hover:underline dark:text-blue-400"
+                                                    href={`http://localhost:3000${ref}`}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                >
+                                                    📄 {ref.split("/").pop()}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-xs italic text-slate-500 dark:text-slate-400">No file references found.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
