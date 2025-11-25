@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Trash2, FileText, Search, Filter, X } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import AddDocument from "@/components/add-document.jsx";
+import toast from "react-hot-toast";
 
 const Documents = () => {
     const { user } = useAuth();
@@ -100,10 +101,25 @@ const Documents = () => {
 
     const handleDelete = () => {
         if (docToDelete) {
-            // Frontend-only removal (no backend DELETE route provided)
-            setDocuments(documents.filter((doc) => doc.doc_id !== docToDelete.doc_id));
-            setDocToDelete(null);
-            setShowDeleteModal(false);
+            try {
+                const deleteDocument = async () => {
+                    const res = await fetch(`http://localhost:3000/api/documents/${docToDelete.doc_id}`, {
+                        method: "DELETE",
+                        credentials: "include",
+                    });
+                    if (!res.ok) throw new Error(`Failed to delete document (${res.status})`);
+                    // Refresh document list
+                    fetchDocs();
+                    setDocuments(documents.filter((doc) => doc.doc_id !== docToDelete.doc_id));
+                    setDocToDelete(null);
+                    setShowDeleteModal(false);
+                };
+                deleteDocument();
+            } catch (e) {
+                setError(e.message || "Failed to delete document");
+                toast.error("Failed to delete document");
+                console.error(e);
+            }
         }
     };
 
@@ -137,7 +153,7 @@ const Documents = () => {
     const paginatedDocs = filteredDocs.slice(startIndex, startIndex + itemsPerPage);
 
     return (
-        <div className="min-h-screen space-y-6 text-black dark:text-white">
+        <div className="space-y-6 text-black dark:text-white">
             {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
 
             {/* Header with toggle (design from Tasks) */}
@@ -403,7 +419,7 @@ const Documents = () => {
                     onClick={() => setShowDeleteModal(false)}
                 >
                     <div
-                        className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
+                        className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <button
@@ -412,7 +428,8 @@ const Documents = () => {
                         >
                             <X size={20} />
                         </button>
-                        <h2 className="mb-4 text-lg font-semibold text-gray-800">Are you sure you want to remove this document?</h2>
+                        <h2 className="text-lg font-semibold text-gray-800">Are you sure you want to delete this document?</h2>
+                        <p className="mb-4 text-slate-500">This action cannot be undone.</p>
                         <div className="flex justify-end gap-3">
                             <button
                                 onClick={() => setShowDeleteModal(false)}
