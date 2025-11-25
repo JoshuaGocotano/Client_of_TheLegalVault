@@ -13,6 +13,16 @@ import DeleteDocumentModal from "./delete-document";
 const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) => {
     const { user } = useAuth();
 
+    // CASE TAGGING test data
+    const case_tag_list = [
+        { id: 1, name: "Case Intake" },
+        { id: 2, name: "Case Processing..." },
+        { id: 3, name: "High Priority" },
+    ];
+
+    // default case tag every case created
+    const case_tag = { id: 1, name: "Case Intake" };
+
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 

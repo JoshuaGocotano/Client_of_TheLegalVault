@@ -287,7 +287,7 @@ export const Payments = () => {
                                 <th className="px-4 py-3">Amount</th>
                                 <th className="px-4 py-3">Date</th>
                                 <th className="px-4 py-3">Payment Type</th>
-                                <th className="px-4 py-3">Added By</th>
+                                <th className="px-4 py-3">Processed By</th>
                                 <th className="px-4 py-3">Action</th>
                             </tr>
                         </thead>
