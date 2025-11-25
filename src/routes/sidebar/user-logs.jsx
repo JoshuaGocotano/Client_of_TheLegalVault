@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search, ListCheck, FilePlus2 } from "lucide-react";
+import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search, ListCheck, FilePlus2, BadgeCent } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
@@ -48,6 +48,7 @@ const Userlogs = () => {
         if (type === "archive log") return <Archive className="h-5 w-5" />;
         if (type === "task log") return <ListCheck className="h-5 w-5" />;
         if (type === "support document log") return <FilePlus2 className="h-5 w-5" />;
+        if (type === "payment log") return <BadgeCent className="h-5 w-5" />;
 
         if (/login/.test(action)) return <LogIn className="h-5 w-5" />;
         if (/logout/.test(action)) return <LogOut className="h-5 w-5" />;
@@ -67,6 +68,7 @@ const Userlogs = () => {
         if (/task/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
         if (/support document/i.test(action)) return "bg-teal-100 text-teal-700 dark:bg-teal-900 dark:text-teal-300";
         if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
+        if (/payment/i.test(action)) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
         return "bg-gray-100 text-gray-700 dark:bg-gray-700/20 dark:text-gray-300";
     };
 
@@ -92,6 +94,7 @@ const Userlogs = () => {
         if (/new support document/i.test(action)) return "New Support Document Added";
         if (/support document updated/i.test(action)) return "Support Document Update";
         if (/fail|error/i.test(action)) return "Error";
+        if (/payment/i.test(action)) return "Payment";
         return "Action";
     };
 

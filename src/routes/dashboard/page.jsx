@@ -190,6 +190,7 @@ const DashboardPage = () => {
                     value={counts.archivedCases}
                     icon={<Archive size={26} />}
                 />
+                
                 <Card
                     title="Processing Cases"
                     value={counts.processingCases}
