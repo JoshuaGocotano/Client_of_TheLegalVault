@@ -30,7 +30,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 const data = await res.json();
 
                 // The API should return { count: number }
-                setPendingCount(data.count || 0);
+                setPendingCount(data.count || "");
             } catch (error) {
                 console.error("Error fetching pending tasks count:", error);
             }
