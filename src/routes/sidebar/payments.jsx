@@ -91,6 +91,12 @@ export const Payments = () => {
     const [paymentTypeFilter, setPaymentTypeFilter] = useState("All");
     const [currentPage, setCurrentPage] = useState(1);
     const [addPayment, setAddPayment] = useState(null);
+    const [chequeDetails, setChequeDetails] = useState({
+        cheque_name: "",
+        cheque_number: ""
+    });
+    const [selectedCheque, setSelectedCheque] = useState(null);
+    const [selectedCash, setSelectedCash] = useState(null);
 
     const filteredPayments = paymentsData.filter((p) => {
         const matchesSearch =
@@ -105,6 +111,9 @@ export const Payments = () => {
 
         return matchesSearch && matchesPaymentType;
     });
+
+    // Only show account columns when specifically filtering by "Cheque"
+    const hasVisibleCheques = paymentTypeFilter === "Cheque";
 
     // Pagination
     const rowsPerPage = 10;
@@ -141,25 +150,53 @@ export const Payments = () => {
 
         const toastId = toast.loading("Adding payment...", { duration: 4000 });
         try {
+            const paymentData = {
+                ...addPayment,
+                payment_amount: amt.toFixed(2)
+            };
+
+            // Add cheque details if payment type is Cheque
+            if (addPayment.payment_type === "Cheque") {
+                if (!chequeDetails.cheque_name.trim()) {
+                    toast.error("Cheque name is required for cheque payments.", { id: toastId });
+                    return;
+                }
+                if (!chequeDetails.cheque_number.trim()) {
+                    toast.error("Cheque number is required for cheque payments.", { id: toastId });
+                    return;
+                }
+                // Send both formats to ensure compatibility
+                paymentData.check_name = chequeDetails.cheque_name.trim();
+                paymentData.check_number = chequeDetails.cheque_number.trim();
+                paymentData.cheque_name = chequeDetails.cheque_name.trim();
+                paymentData.cheque_number = chequeDetails.cheque_number.trim();
+            }
+
+            console.log("Sending payment data:", paymentData); // Debug log
+
             const res = await fetch("http://localhost:3000/api/payments", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ ...addPayment, payment_amount: amt.toFixed(2) }),
+                credentials: "include",
+                body: JSON.stringify(paymentData),
             });
 
             const data = await res.json();
+            console.log("Response status:", res.status); // Debug log
+            console.log("Response data:", data); // Debug log
 
             if (res.ok) {
                 setPaymentsData((prev) => [...prev, data]);
-
                 toast.success("Payment added successfully!", { id: toastId, duration: 4000 });
                 setAddPayment(null);
+                setChequeDetails({ cheque_name: "", cheque_number: "" });
             } else {
-                toast.error(data.error || "Failed to add payment", { id: toastId });
+                console.error("Payment failed:", data); // Debug log
+                toast.error(data.error || data.message || "Failed to add payment", { id: toastId });
             }
         } catch (err) {
             console.error("Error adding payment:", err);
-            toast.error("Error adding payment", { id: toastId });
+            toast.error("Network error: " + err.message, { id: toastId });
         }
     };
 
@@ -228,7 +265,10 @@ export const Payments = () => {
                     <option value="Cash">Cash</option>
                 </select>
                 <button
-                    onClick={() => setAddPayment({ case_id: "", user_id: user.user_id, payment_amount: "", payment_type: "" })}
+                    onClick={() => {
+                        setAddPayment({ case_id: "", user_id: user.user_id, payment_amount: "", payment_type: "" });
+                        setChequeDetails({ cheque_name: "", cheque_number: "" });
+                    }}
                     className="flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
                 >
                     Add Payment
@@ -259,16 +299,33 @@ export const Payments = () => {
                                         className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                                     >
                                         <td className="px-4 py-3">{p.payment_id}</td>
-                                        <td className="px-4 py-3">{p.client_fullname}</td>
-                                        <td
-                                            className="max-w-xs truncate px-4 py-3 text-center font-medium"
-                                            title={p.case_id}
-                                        >
+                                        <td className="px-4 py-3">
+                                            {p.client_fullname}
+                                        </td>
+                                        <td className="max-w-xs truncate px-4 py-3 text-center font-medium" title={p.case_id}>
                                             {p.case_id}
                                         </td>
                                         <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.payment_amount)}</td>
                                         <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
-                                        <td className="px-4 py-3">{p.payment_type}</td>
+                                        <td className="px-4 py-3">
+                                            {p.payment_type === "Cheque" ? (
+                                                <span
+                                                    className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800 cursor-pointer hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-200 dark:hover:bg-blue-800"
+                                                    onClick={() => setSelectedCheque(p)}
+                                                    title="Click to view cheque details"
+                                                >
+                                                    💳 Cheque
+                                                </span>
+                                            ) : (
+                                                <span
+                                                    className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 cursor-pointer hover:bg-green-200 dark:bg-green-900 dark:text-green-200 dark:hover:bg-green-800"
+                                                    onClick={() => setSelectedCash(p)}
+                                                    title="Click to view cash payment details"
+                                                >
+                                                    💵 Cash
+                                                </span>
+                                            )}
+                                        </td>
                                         <td className="px-4 py-3">
                                             {p.user_fname} {p.user_mname ? p.user_mname[0] + "." : ""} {p.user_lname}
                                         </td>
@@ -328,6 +385,7 @@ export const Payments = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Add Payment</h3>
+                        {/* ...existing code... */}
                         <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Case</label>
@@ -431,7 +489,13 @@ export const Payments = () => {
                                 <label className="font-semibold dark:text-blue-700">Payment Type</label>
                                 <select
                                     value={addPayment.payment_type}
-                                    onChange={(e) => setAddPayment({ ...addPayment, payment_type: e.target.value })}
+                                    onChange={(e) => {
+                                        setAddPayment({ ...addPayment, payment_type: e.target.value });
+                                        // Reset cheque details when payment type changes
+                                        if (e.target.value !== "Cheque") {
+                                            setChequeDetails({ cheque_name: "", cheque_number: "" });
+                                        }
+                                    }}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
                                     <option
@@ -444,10 +508,39 @@ export const Payments = () => {
                                     <option value="Cash">Cash</option>
                                 </select>
                             </div>
+
+                            {/* Cheque Details - Only show when Cheque is selected */}
+                            {addPayment.payment_type === "Cheque" && (
+                                <>
+                                    <div>
+                                        <label className="font-semibold dark:text-blue-700">Cheque Name *</label>
+                                        <input
+                                            type="text"
+                                            value={chequeDetails.cheque_name}
+                                            onChange={(e) => setChequeDetails({ ...chequeDetails, cheque_name: e.target.value })}
+                                            className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+                                            placeholder="Enter cheque name"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="font-semibold dark:text-blue-700">Cheque Number *</label>
+                                        <input
+                                            type="text"
+                                            value={chequeDetails.cheque_number}
+                                            onChange={(e) => setChequeDetails({ ...chequeDetails, cheque_number: e.target.value })}
+                                            className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+                                            placeholder="Enter cheque number"
+                                        />
+                                    </div>
+                                </>
+                            )}
                         </div>
                         <div className="mt-6 flex justify-end gap-2">
                             <button
-                                onClick={() => setAddPayment(null)}
+                                onClick={() => {
+                                    setAddPayment(null);
+                                    setChequeDetails({ cheque_name: "", cheque_number: "" });
+                                }}
                                 className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-100 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
                             >
                                 Cancel
@@ -459,6 +552,135 @@ export const Payments = () => {
                                 Add Payment
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Cheque Details Modal */}
+            {selectedCheque && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                    <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-br from-blue-50 to-white p-6 shadow-2xl dark:border-blue-700 dark:from-blue-900/20 dark:to-gray-800">
+                        {/* Close button */}
+                        <button
+                            onClick={() => setSelectedCheque(null)}
+                            className="absolute right-4 top-4 rounded-full bg-gray-200 p-2 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                            ✕
+                        </button>
+
+                        {/* Cheque Header */}
+                        <div className="mb-6 flex items-center gap-3">
+                            <div className="rounded-full bg-blue-600 p-3">
+                                <span className="text-xl text-white">💳</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-blue-900 dark:text-blue-100">CHEQUE</h3>
+                                <p className="text-sm text-blue-600 dark:text-blue-300">Payment ID: {selectedCheque.payment_id}</p>
+                            </div>
+                        </div>
+
+                        {/* Cheque Details */}
+                        <div className="space-y-4">
+                            {/* Pay To */}
+                            <div className="rounded-lg bg-white/80 p-4 dark:bg-gray-700/50">
+                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">PAY TO THE ORDER OF</p>
+                                <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedCheque.client_fullname}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Case #{selectedCheque.case_id}</p>
+                            </div>
+
+                            {/* Amount */}
+                            <div className="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/20">
+                                <p className="text-sm font-medium text-green-700 dark:text-green-300">AMOUNT</p>
+                                <p className="text-3xl font-bold text-green-800 dark:text-green-200">{formatCurrency(selectedCheque.payment_amount)}</p>
+                            </div>
+
+                            {/* Account Details */}
+                            <div className="grid grid-cols-1 gap-3">
+                                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">CHEQUE NAME</p>
+                                    <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        {selectedCheque.cheque_name || selectedCheque.check_name || "N/A"}
+                                    </p>
+                                </div>
+                                <div className="rounded-lg bg-gray-50 p-3 dark:bg-gray-700/50">
+                                    <p className="text-sm font-medium text-gray-600 dark:text-gray-400">CHEQUE NUMBER</p>
+                                    <p className="font-mono text-lg font-semibold text-gray-900 dark:text-white">
+                                        {selectedCheque.cheque_number || selectedCheque.check_number || "N/A"}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="border-t pt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                                <p>Date: {formatDateTime(selectedCheque.payment_date)}</p>
+                                <p>Processed by: {selectedCheque.user_fname} {selectedCheque.user_lname}</p>
+                            </div>
+                        </div>
+
+                        {/* Decorative Elements */}
+                        <div className="absolute -right-8 -top-8 h-16 w-16 rounded-full bg-blue-200/30 dark:bg-blue-800/20"></div>
+                        <div className="absolute -bottom-4 -left-4 h-8 w-8 rounded-full bg-blue-300/40 dark:bg-blue-700/30"></div>
+                    </div>
+                </div>
+            )}
+
+            {/* Cash Payment Details Modal */}
+            {selectedCash && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                    <div className="relative w-full max-w-md overflow-hidden rounded-2xl border-2 border-dashed border-green-300 bg-gradient-to-br from-green-50 to-white p-6 shadow-2xl dark:border-green-700 dark:from-green-900/20 dark:to-gray-800">
+                        {/* Close button */}
+                        <button
+                            onClick={() => setSelectedCash(null)}
+                            className="absolute right-4 top-4 rounded-full bg-gray-200 p-2 text-gray-600 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        >
+                            ✕
+                        </button>
+
+                        {/* Cash Header */}
+                        <div className="mb-6 flex items-center gap-3">
+                            <div className="rounded-full bg-green-600 p-3">
+                                <span className="text-xl text-white">💵</span>
+                            </div>
+                            <div>
+                                <h3 className="text-xl font-bold text-green-900 dark:text-green-100">CASH PAYMENT</h3>
+                                <p className="text-sm text-green-600 dark:text-green-300">Payment ID: {selectedCash.payment_id}</p>
+                            </div>
+                        </div>
+
+                        {/* Cash Payment Details */}
+                        <div className="space-y-4">
+                            {/* Pay To */}
+                            <div className="rounded-lg bg-white/80 p-4 dark:bg-gray-700/50">
+                                <p className="text-sm font-medium text-green-700 dark:text-green-300">PAYMENT MADE TO</p>
+                                <p className="text-lg font-bold text-gray-900 dark:text-white">{selectedCash.client_fullname}</p>
+                                <p className="text-sm text-gray-600 dark:text-gray-400">Case #{selectedCash.case_id}</p>
+                            </div>
+
+                            {/* Amount */}
+                            <div className="rounded-lg bg-green-50 p-4 text-center dark:bg-green-900/20">
+                                <p className="text-sm font-medium text-green-700 dark:text-green-300">AMOUNT PAID</p>
+                                <p className="text-3xl font-bold text-green-800 dark:text-green-200">{formatCurrency(selectedCash.payment_amount)}</p>
+                            </div>
+
+                            {/* Payment Method */}
+                            <div className="rounded-lg bg-gray-50 p-4 text-center dark:bg-gray-700/50">
+                                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">PAYMENT METHOD</p>
+                                <div className="mt-2 flex items-center justify-center gap-2">
+                                    <span className="text-2xl">💵</span>
+                                    <p className="text-lg font-bold text-green-800 dark:text-green-200">CASH</p>
+                                </div>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="border-t pt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+                                <p>Date: {formatDateTime(selectedCash.payment_date)}</p>
+                                <p>Processed by: {selectedCash.user_fname} {selectedCash.user_lname}</p>
+                            </div>
+                        </div>
+
+                        {/* Decorative Elements */}
+                        <div className="absolute -right-8 -top-8 h-16 w-16 rounded-full bg-green-200/30 dark:bg-green-800/20"></div>
+                        <div className="absolute -bottom-4 -left-4 h-8 w-8 rounded-full bg-green-300/40 dark:bg-green-700/30"></div>
                     </div>
                 </div>
             )}

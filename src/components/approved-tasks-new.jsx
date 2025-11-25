@@ -76,7 +76,7 @@ const ApprovedTasks = () => {
 
         // Search filter
         if (filters.search) {
-            filtered = filtered.filter(task =>
+            filtered = filtered.filter(task => 
                 task.doc_name.toLowerCase().includes(filters.search.toLowerCase()) ||
                 getUserFullName(task.doc_tasked_to).toLowerCase().includes(filters.search.toLowerCase()) ||
                 getUserFullName(task.doc_tasked_by).toLowerCase().includes(filters.search.toLowerCase())
@@ -87,7 +87,7 @@ const ApprovedTasks = () => {
         if (filters.dateRange !== 'all') {
             const now = new Date();
             const filterDate = new Date();
-
+            
             switch (filters.dateRange) {
                 case 'week':
                     filterDate.setDate(now.getDate() - 7);
@@ -99,8 +99,8 @@ const ApprovedTasks = () => {
                     filterDate.setMonth(now.getMonth() - 3);
                     break;
             }
-
-            filtered = filtered.filter(task =>
+            
+            filtered = filtered.filter(task => 
                 new Date(task.doc_date_submitted) >= filterDate
             );
         }
@@ -152,7 +152,7 @@ const ApprovedTasks = () => {
                 {/* Header Section */}
                 <div className="flex items-center justify-between">
                     {/* Back Button */}
-                    <button
+                    <button 
                         onClick={() => window.history.back()}
                         className="group flex items-center justify-center w-14 h-14 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-2xl hover:border-blue-400 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:bg-gray-700 dark:hover:border-blue-400 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
@@ -160,7 +160,7 @@ const ApprovedTasks = () => {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                         </svg>
                     </button>
-
+                    
                     {/* Title Section */}
                     <div className="text-center flex-1 mx-8">
                         <div className="inline-flex items-center gap-3 mb-2">
@@ -271,7 +271,7 @@ const ApprovedTasks = () => {
                                     Reset All
                                 </button>
                             </div>
-
+                            
                             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                                 {/* Search Filter */}
                                 <div className="space-y-2">
@@ -281,7 +281,7 @@ const ApprovedTasks = () => {
                                             type="text"
                                             placeholder="Search tasks..."
                                             value={filters.search}
-                                            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                                            onChange={(e) => setFilters({...filters, search: e.target.value})}
                                             className="w-full pl-11 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 shadow-sm hover:shadow-md"
                                         />
                                         <div className="absolute left-3 top-3.5 p-1 bg-gray-100 dark:bg-gray-600 rounded-lg">
@@ -297,7 +297,7 @@ const ApprovedTasks = () => {
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Date Range</label>
                                     <select
                                         value={filters.dateRange}
-                                        onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
+                                        onChange={(e) => setFilters({...filters, dateRange: e.target.value})}
                                         className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 shadow-sm hover:shadow-md"
                                     >
                                         <option value="all">All Time</option>
@@ -312,7 +312,7 @@ const ApprovedTasks = () => {
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Assignee</label>
                                     <select
                                         value={filters.assignee}
-                                        onChange={(e) => setFilters({ ...filters, assignee: e.target.value })}
+                                        onChange={(e) => setFilters({...filters, assignee: e.target.value})}
                                         className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 shadow-sm hover:shadow-md"
                                     >
                                         <option value="all">All Assignees</option>
@@ -329,7 +329,7 @@ const ApprovedTasks = () => {
                                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Status</label>
                                     <select
                                         value={filters.submissionStatus}
-                                        onChange={(e) => setFilters({ ...filters, submissionStatus: e.target.value })}
+                                        onChange={(e) => setFilters({...filters, submissionStatus: e.target.value})}
                                         className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white transition-all duration-200 shadow-sm hover:shadow-md"
                                     >
                                         <option value="all">All Status</option>
@@ -361,7 +361,7 @@ const ApprovedTasks = () => {
                                 {approvedTasks.length === 0 ? 'No Approved Tasks' : 'No Tasks Found'}
                             </h3>
                             <p className="text-gray-500 dark:text-gray-400 mb-6 text-lg max-w-md mx-auto">
-                                {approvedTasks.length === 0
+                                {approvedTasks.length === 0 
                                     ? 'There are no approved tasks to display at the moment.'
                                     : 'No tasks match your current filters. Try adjusting your search criteria.'
                                 }
@@ -396,8 +396,9 @@ const ApprovedTasks = () => {
                                     {filteredTasks.map((task, index) => (
                                         <tr
                                             key={task.doc_id}
-                                            className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 ${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
-                                                }`}
+                                            className={`hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 dark:hover:from-gray-700 dark:hover:to-gray-600 transition-all duration-200 ${
+                                                index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
+                                            }`}
                                         >
                                             <td className="px-8 py-6 whitespace-nowrap">
                                                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-gradient-to-r from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-full">
