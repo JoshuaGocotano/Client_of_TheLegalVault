@@ -326,7 +326,7 @@ const DashboardPage = () => {
                                             className="ml-2 size-10 rounded-full object-cover"
                                         />
                                         <div className="flex flex-col gap-y-1">
-                                            <p className="text-sm font-medium">
+                                            <p className="text-sm font-medium dark:text-slate-200">
                                                 {log.user_fullname || "Unknown User"}
                                             </p>
                                             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -335,7 +335,7 @@ const DashboardPage = () => {
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-sm font-semibold">
+                                        <p className="text-sm font-semibold dark:text-slate-200">
                                             {new Date(log.user_log_time).toLocaleTimeString([], {
                                                 hour: "2-digit",
                                                 minute: "2-digit",
