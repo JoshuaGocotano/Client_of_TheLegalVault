@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus, Eye, Calendar, User } from "lucide-react";
+import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus, Eye, Calendar, User, CreditCard, Edit2 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 import CaseAccessBoard from "@/components/case-access/case-access-board";
@@ -33,10 +33,14 @@ const Settings = () => {
 
     const [branchDrafts, setBranchDrafts] = useState([]);
     const [branchName, setBranchName] = useState("");
+    const [branchAddress, setBranchAddress] = useState("");
+    const [branchDateOpened, setBranchDateOpened] = useState("");
 
     // New: edit states for branch PUT
     const [editingBranchId, setEditingBranchId] = useState(null);
     const [editingBranchName, setEditingBranchName] = useState("");
+    const [editingBranchAddress, setEditingBranchAddress] = useState("");
+    const [editingBranchDateOpened, setEditingBranchDateOpened] = useState("");
 
     // Case preferences (local)
     const [customCategories, setCustomCategories] = useState([]);
@@ -109,6 +113,7 @@ const Settings = () => {
         setBranchesLoading(true);
         try {
             const data = await fetchJson(`${API_BASE}/branches`);
+            console.log("Branch data received:", data); // Debug log
             setBranches(Array.isArray(data) ? data : []);
         } catch (e) {
             setBranchesError(e.message || "Failed to load branches");
@@ -122,33 +127,41 @@ const Settings = () => {
         setBranchDrafts(list);
         try {
             localStorage.setItem("branch_drafts", JSON.stringify(list));
-        } catch {}
+        } catch { }
     };
     const loadBranchDrafts = () => {
         try {
             const raw = localStorage.getItem("branch_drafts");
             if (raw) setBranchDrafts(JSON.parse(raw));
-        } catch {}
+        } catch { }
     };
     // Replace local-only draft submit with server POST; keep drafts as optional fallback list
     const addBranchDraft = async (e) => {
         e.preventDefault();
         if (!branchName.trim()) return;
         const name = branchName.trim();
+        const address = branchAddress.trim();
+        const dateOpened = branchDateOpened;
+
         const toastId = toast.loading("Adding branch...", { duration: 3000 });
         try {
+            const payload = {
+                branch_name: name,
+                ...(address && { address }),
+                ...(dateOpened && { date_opened: dateOpened })
+            };
+
             const created = await fetchJson(`${API_BASE}/branches`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ branch_name: name }),
+                body: JSON.stringify(payload),
             });
             // Optimistically add to list
             setBranches((prev) => [created, ...prev]);
             toast.success("Branch added", { id: toastId, duration: 3000 });
             setBranchName("");
             setBranchAddress("");
-            setBranchEmail("");
-            setBranchPhone("");
+            setBranchDateOpened("");
         } catch (e) {
             toast.error(e.message || "Failed to add branch", { id: toastId, duration: 4000 });
         }
@@ -164,11 +177,15 @@ const Settings = () => {
         if (!id) return;
         setEditingBranchId(id);
         setEditingBranchName(b?.branch_name ?? b?.name ?? "");
+        setEditingBranchAddress(b?.address ?? "");
+        setEditingBranchDateOpened(b?.date_opened ? b.date_opened.split('T')[0] : "");
     };
 
     const cancelEditBranch = () => {
         setEditingBranchId(null);
         setEditingBranchName("");
+        setEditingBranchAddress("");
+        setEditingBranchDateOpened("");
     };
 
     const saveEditBranch = async () => {
@@ -177,15 +194,27 @@ const Settings = () => {
         if (!id || !name) return;
         const toastId = toast.loading("Updating branch...", { duration: 3000 });
         try {
+            const payload = {
+                branch_name: name,
+                address: editingBranchAddress.trim() || null,
+                date_opened: editingBranchDateOpened || null
+            };
+
+            console.log("Saving branch with payload:", payload); // Debug log
+
             const updated = await fetchJson(`${API_BASE}/branches/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ branch_name: name }),
+                body: JSON.stringify(payload),
             });
+
+            console.log("Updated branch response:", updated); // Debug log
+
             setBranches((prev) => prev.map((b) => ((b?.branch_id ?? b?.id) === id ? updated : b)));
             toast.success("Branch updated", { id: toastId, duration: 3000 });
             cancelEditBranch();
         } catch (e) {
+            console.error("Error updating branch:", e); // Debug log
             toast.error(e.message || "Failed to update branch", { id: toastId, duration: 4000 });
         }
     };
@@ -278,6 +307,8 @@ const Settings = () => {
             // ignore
         }
     };
+
+
 
     const saveCaseCustomPrefs = (nextCats, nextTypes) => {
         const payload = { categories: nextCats ?? customCategories, types: nextTypes ?? customTypes };
@@ -416,8 +447,8 @@ const Settings = () => {
         const lawyer = users.find((u) => u.user_id === lawyerId);
         return lawyer
             ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
-                  .replace(/\s+/g, " ")
-                  .trim()
+                .replace(/\s+/g, " ")
+                .trim()
             : "Unassigned";
     };
 
@@ -549,7 +580,7 @@ const Settings = () => {
         try {
             e.dataTransfer.setData("text/userId", String(id));
             e.dataTransfer.setData("text/fromCol", String(fromCol));
-        } catch {}
+        } catch { }
     };
 
     const onDragOverCol = (e) => {
@@ -601,11 +632,10 @@ const Settings = () => {
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
-                            className={`group relative flex items-center gap-3 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                                activeTab === tab.key
-                                    ? "border-blue-500/60 bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                                    : "border-transparent text-gray-700 hover:bg-blue-50 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-800/80"
-                            } `}
+                            className={`group relative flex items-center gap-3 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${activeTab === tab.key
+                                ? "border-blue-500/60 bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                                : "border-transparent text-gray-700 hover:bg-blue-50 hover:text-blue-700 dark:text-gray-300 dark:hover:bg-gray-800/80"
+                                } `}
                         >
                             <tab.icon size={18} />
                             {tab.label}
@@ -625,16 +655,38 @@ const Settings = () => {
                                 onSubmit={addBranchDraft}
                                 className="space-y-6"
                             >
-                                <div className="space-y-2">
-                                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Branch Name</label>
-                                    <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Branch Name *</label>
                                         <input
                                             type="text"
                                             value={branchName}
                                             onChange={(e) => setBranchName(e.target.value)}
                                             placeholder="Enter branch name (e.g., Main Office)"
-                                            className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                            className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                            required
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Address</label>
+                                        <input
+                                            type="text"
+                                            value={branchAddress}
+                                            onChange={(e) => setBranchAddress(e.target.value)}
+                                            placeholder="Enter branch address"
+                                            className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Date Opened</label>
+                                        <input
+                                            type="date"
+                                            value={branchDateOpened}
+                                            onChange={(e) => setBranchDateOpened(e.target.value)}
+                                            className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        />
+                                    </div>
+                                    <div className="flex items-end">
                                         <button
                                             type="submit"
                                             className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
@@ -692,74 +744,163 @@ const Settings = () => {
                             ) : branches.length === 0 ? (
                                 <p className="text-sm text-gray-500">No branches found.</p>
                             ) : (
-                                <ul className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                                     {branches.map((b, i) => {
                                         const id = b?.branch_id ?? b?.id ?? i;
                                         const isEditing = editingBranchId === (b?.branch_id ?? b?.id);
+
+                                        console.log("Branch object:", b); // Debug log
+                                        console.log("Branch address:", displayBranchAddress(b)); // Debug log
+                                        console.log("Branch date opened:", b?.date_opened); // Debug log
+
                                         return (
-                                            <li
+                                            <div
                                                 key={id}
-                                                className="rounded-lg border px-3 py-2 dark:border-gray-700"
+                                                className="group relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
                                             >
                                                 {isEditing ? (
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            value={editingBranchName}
-                                                            onChange={(e) => setEditingBranchName(e.target.value)}
-                                                            className="flex-1 rounded-lg border px-2 py-1 text-sm dark:border-gray-700 dark:bg-gray-900"
-                                                        />
-                                                        <button
-                                                            onClick={saveEditBranch}
-                                                            className="rounded bg-blue-600 px-2 py-1 text-xs text-white hover:bg-blue-700"
-                                                        >
-                                                            Save
-                                                        </button>
-                                                        <button
-                                                            onClick={cancelEditBranch}
-                                                            className="rounded border px-2 py-1 text-xs hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                                                        >
-                                                            Cancel
-                                                        </button>
+                                                    /* Edit Mode */
+                                                    <div className="space-y-4">
+                                                        <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Edit Branch Information</h4>
+
+                                                        <div className="space-y-3">
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                                    Branch Name *
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    value={editingBranchName}
+                                                                    onChange={(e) => setEditingBranchName(e.target.value)}
+                                                                    placeholder="Enter branch name"
+                                                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                                                    required
+                                                                />
+                                                            </div>
+
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                                    Address
+                                                                </label>
+                                                                <textarea
+                                                                    value={editingBranchAddress}
+                                                                    onChange={(e) => setEditingBranchAddress(e.target.value)}
+                                                                    rows={2}
+                                                                    placeholder="Enter branch address"
+                                                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm resize-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                                                />
+                                                            </div>
+
+                                                            <div>
+                                                                <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                                                    Date Opened
+                                                                </label>
+                                                                <input
+                                                                    type="date"
+                                                                    value={editingBranchDateOpened}
+                                                                    onChange={(e) => setEditingBranchDateOpened(e.target.value)}
+                                                                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+                                                                />
+                                                            </div>
+                                                        </div>
+
+                                                        <div className="flex gap-2 pt-2 border-t dark:border-gray-600">
+                                                            <button
+                                                                onClick={saveEditBranch}
+                                                                disabled={!editingBranchName.trim()}
+                                                                className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                                            >
+                                                                Save Changes
+                                                            </button>
+                                                            <button
+                                                                onClick={cancelEditBranch}
+                                                                className="flex-1 rounded-md bg-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-400 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 ) : (
-                                                    <div className="flex items-center justify-between gap-2">
-                                                        <div>
-                                                            <div className="font-medium">{displayBranchName(b)}</div>
-                                                            {displayBranchAddress(b) && (
-                                                                <div className="text-xs text-gray-500">{displayBranchAddress(b)}</div>
-                                                            )}
+                                                    /* View Mode */
+                                                    <div className="space-y-3">
+                                                        <div className="flex items-start justify-between">
+                                                            <div className="flex-1">
+                                                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                                                    {displayBranchName(b)}
+                                                                </h3>
+                                                                <div className="text-xs text-gray-500 dark:text-gray-400">
+                                                                    Branch ID: #{b?.branch_id ?? b?.id}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                                                                <button
+                                                                    onClick={() => startEditBranch(b)}
+                                                                    className="rounded p-1.5 text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-900/20"
+                                                                    title="Edit Branch"
+                                                                >
+                                                                    <Edit2 size={16} />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => {
+                                                                        const bid = b?.branch_id ?? b?.id;
+                                                                        if (!bid) return;
+                                                                        if (window.confirm("Are you sure you want to delete this branch? This action cannot be undone.")) {
+                                                                            deleteBranch(bid);
+                                                                        }
+                                                                    }}
+                                                                    className="rounded p-1.5 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
+                                                                    title="Delete Branch"
+                                                                >
+                                                                    <Trash2 size={16} />
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => startEditBranch(b)}
-                                                                className="rounded border px-2 py-1 text-xs hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                                                            >
-                                                                Edit
-                                                            </button>
-                                                            <button
-                                                                onClick={() => {
-                                                                    const bid = b?.branch_id ?? b?.id;
-                                                                    if (!bid) return;
-                                                                    if (
-                                                                        window.confirm(
-                                                                            "Are you sure you want to delete this branch? This action cannot be undone.",
-                                                                        )
-                                                                    ) {
-                                                                        deleteBranch(bid);
-                                                                    }
-                                                                }}
-                                                                className="inline-flex items-center gap-1 rounded border px-2 py-1 text-xs text-red-600 hover:bg-red-50 dark:border-gray-700 dark:hover:bg-gray-700"
-                                                                title="Delete branch"
-                                                            >
-                                                                <Trash2 size={12} /> Delete
-                                                            </button>
+
+                                                        <div className="space-y-3">
+                                                            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-3">
+                                                                <div className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                                                                    📍 Address
+                                                                </div>
+                                                                <div className="text-sm text-gray-700 dark:text-gray-300">
+                                                                    {displayBranchAddress(b) || "No address provided"}
+                                                                </div>
+                                                                {!displayBranchAddress(b) && (
+                                                                    <button
+                                                                        onClick={() => startEditBranch(b)}
+                                                                        className="mt-1 text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400"
+                                                                    >
+                                                                        Click to add address
+                                                                    </button>
+                                                                )}
+                                                            </div>
+
+                                                            {b?.date_opened && (
+                                                                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                                                                    <div className="text-xs font-medium text-blue-700 dark:text-blue-300 mb-1">
+                                                                        📅 Date Opened
+                                                                    </div>
+                                                                    <div className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                                                                        {formatDateTime(b.date_opened)}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
+                                                                <div className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">
+                                                                    ✅ Status
+                                                                </div>
+                                                                <div className="text-sm text-green-800 dark:text-green-200 font-medium">
+                                                                    Active Branch
+                                                                </div>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 )}
-                                            </li>
+                                            </div>
                                         );
                                     })}
-                                </ul>
+                                </div>
                             )}
                         </SettingsCard>
                     </div>

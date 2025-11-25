@@ -47,28 +47,34 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
         <aside
             ref={ref}
             className={cn(
-                "z-999 fixed flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg border-slate-300 bg-white shadow-md [transition:_width_300ms_cubic-bezier(0.4,_0,_0.2,_1),_left_300ms_cubic-bezier(0.4,_0,_0.2,_1),_background-color_150ms_cubic-bezier(0.4,_0,_0.2,_1),_border_150ms_cubic-bezier(0.4,_0,_0.2,_1)] dark:border-slate-700 dark:bg-slate-900",
-                collapsed ? "md:w-[70px] md:items-center" : "md:w-[240px]",
+                "fixed z-100 flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg bg-[#1c3482] p-3 text-white shadow-md transition-all dark:bg-slate-900",
+                collapsed ? "p-0 md:w-[70px] md:items-center" : "md:w-[240px]",
                 collapsed ? "max-md:left-full" : "max-md:left-0",
             )}
         >
             {/* Logo Section */}
-            <div className="flex items-center gap-x-3 p-3 opacity-60">
+            <div className="flex items-center justify-center gap-x-3 p-3 border-b border-white/20 pb-3 pt-3">
                 <img
                     src={light_logo2}
-                    alt="opascor_logo_light"
-                    className="h-23 w-20 dark:hidden"
+                    alt="legalvault_logo_light"
+                    className="h-16 w-22 dark:hidden "
                 />
                 <img
-                    src={light_logo}
-                    alt="opascor_logo_dark"
-                    className="h-23 hidden w-20 brightness-150 dark:block"
+                    src={light_logo2}
+                    alt="legalvault_logo_dark"
+                    className="h-16 w-25 hidden dark:block"
                 />
-                {!collapsed && <p className="font-serif text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">Legal Vault</p>}
-            </div>
 
+                {!collapsed && (
+                    <p className="font-serif text-2xl font-bold tracking-wide text-white drop-shadow-lg">
+                        Legal Vault
+                    </p>
+                )}
+
+
+            </div>
             {/* Navigation Links */}
-            <div className="flex w-full flex-col gap-y-3 overflow-y-auto overflow-x-hidden p-3 [scrollbar-width:_thin]">
+            <div className="flex flex-col gap-y-3 px-2 pb-6 mt-6">
                 {navbarLinks.map((link) => {
                     const isTaskLink = link.label === "Tasks";
 
@@ -76,7 +82,16 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                         <NavLink
                             key={link.label}
                             to={link.path}
-                            className={cn("sidebar-item relative", collapsed && "md:w-[45px]")}
+                            className={({ isActive }) =>
+                                cn(
+                                    "flex items-center gap-x-3 rounded-lg border border-white/20 px-4 py-2 text-sm font-medium transition-all duration-300",
+                                    "shadow-lg",
+                                    "bg-white/10 dark:bg-white/5",
+                                    "hover:translate-x-1 hover:scale-[1.02] hover:shadow-lg hover:bg-white/50 hover:text-[#1c3482] dark:hover:bg-white/50 dark:hover:text-white",
+                                    isActive ? "bg-white/100 text-[#1c3482] dark:bg-white/100" : "text-white",
+                                    collapsed && "justify-center px-2",
+                                )
+                            }
                         >
                             {/* Icon */}
                             <div className="relative">
