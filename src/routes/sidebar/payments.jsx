@@ -613,7 +613,7 @@ export const Payments = () => {
                             {/* Footer */}
                             <div className="border-t pt-4 text-center text-sm text-gray-600 dark:text-gray-400">
                                 <p>Date: {formatDateTime(selectedCheque.payment_date)}</p>
-                                <p>Processed by: {selectedCheque.user_fname} {selectedCheque.user_lname}</p>
+                                <p>Processed by: {selectedCheque.user_fname} {selectedCheque.user_mname} {selectedCheque.user_lname}</p>
                             </div>
                         </div>
 
@@ -674,7 +674,7 @@ export const Payments = () => {
                             {/* Footer */}
                             <div className="border-t pt-4 text-center text-sm text-gray-600 dark:text-gray-400">
                                 <p>Date: {formatDateTime(selectedCash.payment_date)}</p>
-                                <p>Processed by: {selectedCash.user_fname} {selectedCash.user_lname}</p>
+                                <p>Processed by: {selectedCash.user_fname} {selectedCash.user_mname} {selectedCash.user_lname}</p>
                             </div>
                         </div>
 
