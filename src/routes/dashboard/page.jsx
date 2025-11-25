@@ -127,7 +127,7 @@ const DashboardPage = () => {
 
     // --- UI Section ---
     const Card = ({ title, value, icon }) => (
-        <div className="card">
+        <div className="card w-full">
             <div className="card-header">
                 <p className="card-title">{title}</p>
                 <div className="w-fit rounded-lg bg-blue-500/20 p-2 text-blue-500 dark:bg-blue-600/20 dark:text-blue-600">{icon}</div>
@@ -185,30 +185,37 @@ const DashboardPage = () => {
                         icon={<ShieldUser size={26} />}
                     />
                 )}
-                <Card
-                    title="Archived Cases"
-                    value={counts.archivedCases}
-                    icon={<Archive size={26} />}
-                />
-                <Card
-                    title="Processing Cases"
-                    value={counts.processingCases}
-                    icon={<FolderOpen size={26} />}
-                />
-                <Card
-                    title="Processing Documents"
-                    value={counts.processingDocs}
-                    icon={<FileMinus size={26} />}
-                />
-            </div>
 
-            {/* === Second Row === */}
-            <div className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin" ? "md:grid-cols-2 lg:grid-cols-3" : "lg:grid-cols-3"}`}>
-                <Card
-                    title="Clients"
-                    value={counts.clients}
-                    icon={<Users size={26} />}
-                />
+                {(user.user_role === "Admin" || user.user_role === "Lawyer") && (
+                    <>
+                        <Card
+                            title="Archived Cases"
+                            value={counts.archivedCases}
+                            icon={<Archive size={26} />}
+                        />
+                        <Card
+                            title="Processing Cases"
+                            value={counts.processingCases}
+                            icon={<FolderOpen size={26} />}
+                        />
+                    </>
+                )}
+
+                {user.user_role !== "Paralegal" && (
+                    <Card
+                        title="Processing Documents"
+                        value={counts.processingDocs}
+                        icon={<FileMinus size={26} />}
+                    />
+                )}
+
+                {user.user_role !== "Paralegal" && (
+                    <Card
+                        title="Clients"
+                        value={counts.clients}
+                        icon={<Users size={26} />}
+                    />
+                )}
                 <Card
                     title="Pending Approvals"
                     value={counts.docsForApproval}
