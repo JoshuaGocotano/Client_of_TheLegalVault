@@ -454,7 +454,7 @@ export const Tasks = () => {
 
             {/* Task Details Modal */}
             {selectedTask && (
-                <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ease-out">
+                <div className="animate-fadeIn fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ease-out">
                     <div className="w-full max-w-lg transform rounded-2xl bg-white shadow-2xl transition-all duration-200 ease-out dark:bg-slate-800">
                         {/* Header */}
                         <div className="flex items-start justify-between border-b border-slate-200 p-5 dark:border-slate-700">
@@ -472,7 +472,7 @@ export const Tasks = () => {
                         </div>
 
                         {/* Body */}
-                        <div className="max-h-[70vh] overflow-y-auto p-6 text-sm">
+                        <div className="max-h-[80vh] overflow-y-auto p-6 text-sm">
                             {/* Meta Info */}
                             <div className="mb-5 grid grid-cols-1 gap-2 sm:grid-cols-2">
                                 <div>
