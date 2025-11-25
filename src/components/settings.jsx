@@ -19,8 +19,18 @@ const SettingsCard = ({ title, actions, children }) => (
 const API_BASE = "http://localhost:3000/api";
 
 const Settings = () => {
-    const [activeTab, setActiveTab] = useState("branch");
     const { user } = useAuth?.() || { user: null };
+
+    // Set default tab based on user role
+    const getDefaultTab = (userRole) => {
+        const role = (userRole || "").toString().toLowerCase();
+        if (role === "paralegal") {
+            return "archive";
+        }
+        return "branch";
+    };
+
+    const [activeTab, setActiveTab] = useState(() => getDefaultTab(user?.user_role));
 
     const [categories, setCategories] = useState([]);
     const [types, setTypes] = useState([]);
@@ -473,6 +483,15 @@ const Settings = () => {
         }
     }, [user]);
 
+    // Set initial tab when user data first becomes available
+    useEffect(() => {
+        if (user?.user_role) {
+            const defaultTab = getDefaultTab(user.user_role);
+            setActiveTab(defaultTab);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [user?.user_role]); // Only run when user role changes
+
     const tabs = [
         { key: "branch", label: "Branch", icon: Building2 },
         { key: "access", label: "Case Access", icon: Lock },
@@ -503,15 +522,41 @@ const Settings = () => {
     const displayUserName = (u) =>
         [u?.user_fname, u?.user_mname, u?.user_lname].filter(Boolean).join(" ") || u?.user_email || `User #${u?.user_id ?? "?"}`;
 
-    // New: role-based Case Access visibility
+    // Role-based tab visibility
     const canSeeCaseAccess = (role) => {
         const r = (role || "").toString().toLowerCase();
         return r === "admin" || r === "lawyer";
     };
-    const visibleTabs = tabs.filter((t) => t.key !== "access" || canSeeCaseAccess(user?.user_role));
 
-    // Redirect away if user cannot access the Case Access tab
+    const getVisibleTabs = (role) => {
+        const r = (role || "").toString().toLowerCase();
+
+        // Paralegals can only see Archive tab
+        if (r === "paralegal") {
+            return tabs.filter((t) => t.key === "archive");
+        }
+
+        // Admin and Lawyer can see all tabs
+        if (r === "admin" || r === "lawyer") {
+            return tabs;
+        }
+
+        // Staff and other roles can see all tabs except Case Access
+        return tabs.filter((t) => t.key !== "access");
+    };
+
+    const visibleTabs = getVisibleTabs(user?.user_role);
+
+    // Redirect users to appropriate default tab based on their role
     useEffect(() => {
+        const userRole = (user?.user_role || "").toString().toLowerCase();
+
+        // Redirect paralegal to archive if they're on any other tab
+        if (userRole === "paralegal" && activeTab !== "archive") {
+            setActiveTab("archive");
+        }
+
+        // Redirect non-admin/non-lawyer away from Case Access tab
         if (activeTab === "access" && !canSeeCaseAccess(user?.user_role)) {
             setActiveTab("branch");
         }

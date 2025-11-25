@@ -35,8 +35,8 @@ const Documents = () => {
                 user.user_role === "Admin"
                     ? "http://localhost:3000/api/documents"
                     : user.user_role === "Lawyer"
-                      ? `http://localhost:3000/api/documents/lawyer/${user.user_id}`
-                      : `http://localhost:3000/api/documents/submitter/${user.user_id}`;
+                        ? `http://localhost:3000/api/documents/lawyer/${user.user_id}`
+                        : `http://localhost:3000/api/documents/submitter/${user.user_id}`;
 
             const res = await fetch(doc_endpoint, {
                 credentials: "include",
