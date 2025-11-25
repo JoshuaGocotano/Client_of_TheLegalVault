@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { X } from "lucide-react";
 
 const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNewCase, addCaseModalRef, user }) => {
     if (!isModalOpen) return null;
@@ -7,6 +8,25 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
     const [caseCategories, setCaseCategories] = useState([]);
     const [caseCategoryTypes, setCaseCategoryTypes] = useState([]);
     const [lawyers, setLawyers] = useState([]);
+
+    // CASE TAGGING data
+    const case_tag_list = [
+        { id: 1, name: "Case Intake" },
+        { id: 2, name: "Conflict Check" },
+        { id: 3, name: "Initial Consultation" },
+        { id: 4, name: "Engagement" },
+        { id: 5, name: "Case Investigation" },
+        { id: 6, name: "Document Preparation & Filing" },
+        { id: 7, name: "Court Proceedings" },
+        { id: 8, name: "Resolution" },
+        { id: 9, name: "Case Closing" },
+    ];
+
+    // default case tags - Case Intake and Case Closing
+    const [selectedTags, setSelectedTags] = useState([
+        { id: 1, name: "Case Intake" },
+        { id: 9, name: "Case Closing" }
+    ]);
 
     // Fetching clients here for the dropdown can be implemented later
     useEffect(() => {
@@ -74,6 +94,19 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
             setNewCase((prev) => ({ ...prev, case_status: "Pending" }));
         }
     }, [newCase.user_id]);
+
+    // Case Tags Handlers
+    const handleAddTag = (tag) => {
+        if (!selectedTags.find(selected => selected.id === tag.id)) {
+            setSelectedTags(prev => [...prev, tag]);
+            console.log("Current selected tags:", [...selectedTags, tag]);
+        }
+    };
+
+    const handleRemoveTag = (tagId) => {
+        setSelectedTags(prev => prev.filter(tag => tag.id !== tagId));
+        console.log("Current selected tags:", selectedTags.filter(tag => tag.id !== tagId));
+    };
 
     // Validation for required fields
     const isFormValid = () => {
@@ -196,8 +229,8 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                                 {user.user_role !== "Admin"
                                     ? `${user.user_fname} ${user.user_mname} ${user.user_lname}`
                                     : !newCase.cc_id
-                                      ? "Select Category first"
-                                      : "Select Lawyer"}
+                                        ? "Select Category first"
+                                        : "Select Lawyer"}
                             </option>
 
                             {user.user_role === "Admin" ? (
@@ -266,8 +299,65 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                             onChange={(e) => setNewCase({ ...newCase, case_remarks: e.target.value })}
                             className="w-full resize-none rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             placeholder="Enter remarks or description..."
-                            rows={3}
+                            rows={2}
                         ></textarea>
+                    </div>
+
+                    {/* Case Tags Section */}
+                    <div className="md:col-span-2">
+                        <div className="rounded-lg border bg-gray-50 p-4 dark:bg-slate-800">
+                            <h4 className="mb-3 text-sm font-semibold">Case Tags</h4>
+
+                            {/* Selected Tags Display */}
+                            <div className="mb-4">
+                                <div className="flex flex-wrap gap-2">
+                                    {selectedTags.map((tag) => (
+                                        <span
+                                            key={tag.id}
+                                            className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
+                                        >
+                                            {tag.name}
+                                            <button
+                                                onClick={() => handleRemoveTag(tag.id)}
+                                                className="ml-1 hover:text-red-200"
+                                                title="Remove tag"
+                                                type="button"
+                                            >
+                                                <X size={12} />
+                                            </button>
+                                        </span>
+                                    ))}
+                                    {selectedTags.length === 0 && (
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">No tags selected</span>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Tag Selection */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                                    Add Tags:
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                    {case_tag_list
+                                        .filter(tag => !selectedTags.find(selected => selected.id === tag.id))
+                                        .map((tag) => (
+                                            <button
+                                                key={tag.id}
+                                                type="button"
+                                                onClick={() => handleAddTag(tag)}
+                                                className="rounded-lg border border-blue-600 px-3 py-1 text-xs text-blue-600 hover:bg-blue-600 hover:text-white transition-colors"
+                                            >
+                                                + {tag.name}
+                                            </button>
+                                        ))
+                                    }
+                                </div>
+                                {case_tag_list.filter(tag => !selectedTags.find(selected => selected.id === tag.id)).length === 0 && (
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">All tags are already selected</span>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     {/* Cabinet */}
