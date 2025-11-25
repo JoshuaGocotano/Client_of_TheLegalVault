@@ -298,8 +298,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
                                 {loading
                                     ? "Loading..."
                                     : user
-                                      ? `${user.user_fname} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname}`
-                                      : "No user"}
+                                        ? `${user.user_fname} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname}`
+                                        : "No user"}
                             </div>
                             <button
                                 onClick={handleProfile}
