@@ -24,7 +24,7 @@ export const getNavbarLinks = (role) => {
     }
 
     if (role === "Staff") {
-        return allNavbarLinks.filter((link) => ["Home", "Documents","Clients", "Tasks", "Activity Logs"].includes(link.label));
+        return allNavbarLinks.filter((link) => ["Home", "Documents", "Clients", "Tasks", "Activity Logs"].includes(link.label));
     }
 
     if (role === "Paralegal") {
@@ -38,7 +38,7 @@ export const getNavbarLinks = (role) => {
 export const COLUMNS = [
     { id: "todo", title: "To Do" },
     { id: "in_progress", title: "In Progress" },
-    { id: "done", title: "Done" },
+    { id: "done", title: "Done (For Approval)" },
 ];
 
 export const INITIAL_TASKS = [
