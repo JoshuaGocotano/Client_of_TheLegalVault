@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus, Eye, Calendar, User, CreditCard, Edit2 } from "lucide-react";
+import { Settings as SettingsIcon, List, RefreshCw, Building2, Lock, Archive, Info, Trash2, Plus, Eye, Calendar, User, CreditCard, Edit2, Tags } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 import CaseAccessBoard from "@/components/case-access/case-access-board";
@@ -46,6 +46,14 @@ const Settings = () => {
     const [branchAddress, setBranchAddress] = useState("");
     const [branchDateOpened, setBranchDateOpened] = useState("");
 
+    const [caseTags, setCaseTags] = useState([]);
+    const [caseTagsLoading, setCaseTagsLoading] = useState(false);
+    const [caseTagsError, setCaseTagsError] = useState("");
+
+    const [caseTagDrafts, setCaseTagDrafts] = useState([]);
+    const [caseTagName, setCaseTagName] = useState("");
+    const [caseTagSequence, setCaseTagSequence] = useState("");
+
     // New: edit states for branch PUT
     const [editingBranchId, setEditingBranchId] = useState(null);
     const [editingBranchName, setEditingBranchName] = useState("");
@@ -57,6 +65,7 @@ const Settings = () => {
     const [customTypes, setCustomTypes] = useState([]);
     const [newCategoryName, setNewCategoryName] = useState("");
     const [newTypeName, setNewTypeName] = useState("");
+
     // New: form helpers for server add
     const [addCatLoading, setAddCatLoading] = useState(false);
     const [addCatError, setAddCatError] = useState("");
@@ -86,6 +95,12 @@ const Settings = () => {
     const [users, setUsers] = useState([]);
     const [usersLoading, setUsersLoading] = useState(false);
     const [usersError, setUsersError] = useState("");
+
+    // New: edit states for case tag PUT
+    const [editingCaseTagId, setEditingCaseTagId] = useState(null);
+    const [editingCaseTagName, setEditingCaseTagName] = useState("");
+    const [editingCaseTagSequence, setEditingCaseTagSequence] = useState("");
+
 
     // --- Helpers ---
     const fetchJson = async (url, opts = {}) => {
@@ -243,19 +258,143 @@ const Settings = () => {
         }
     };
 
-    const loadUsers = async () => {
-        setUsersError("");
-        setUsersLoading(true);
+    // Add  functions after the helper functions
+    const loadCaseTags = async () => {
+        setCaseTagsError("");
+        setCaseTagsLoading(true);
         try {
-            const data = await fetchJson(`${API_BASE}/users`);
-            setUsers(Array.isArray(data) ? data : []);
+            const data = await fetchJson(`${API_BASE}/case-tags`);
+            console.log("Case tag data received:", data); // Debug log
+            setCaseTags(Array.isArray(data) ? data : []);
         } catch (e) {
-            setUsersError(e.message || "Failed to load users");
-            setUsers([]);
+            setCaseTagsError(e.message || "Failed to load case tags");
+            setCaseTags([]);
         } finally {
-            setUsersLoading(false);
+            setCaseTagsLoading(false);
         }
     };
+
+    const saveCaseTagDrafts = (list) => {
+        setCaseTagDrafts(list);
+        try {
+            localStorage.setItem("case_tag_drafts", JSON.stringify(list));
+        } catch { }
+    };
+
+    const loadCaseTagDrafts = () => {
+    try {
+        const raw = localStorage.getItem("case_tag_drafts");
+        if (raw) setCaseTagDrafts(JSON.parse(raw));
+    } catch { }
+};
+
+    const addCaseTagDraft = async (e) => {
+        e.preventDefault();
+        if (!caseTagName.trim()) return;
+        const name = caseTagName.trim();
+        const sequence = caseTagSequence.trim();
+
+        const toastId = toast.loading("Adding case tag...", { duration: 3000 });
+        try {
+            const payload = {
+            ctag_name: name,
+            ...(sequence && { ctag_sequence_num: parseInt(sequence) || 0 })
+            };
+
+
+            const created = await fetchJson(`${API_BASE}/case-tags`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
+            });
+            // add to list
+            setCaseTags((prev) => [created, ...prev]);
+            toast.success("Case tag added", { id: toastId, duration: 3000 });
+            setCaseTagName("");
+            setCaseTagSequence("");
+        } catch (e) {
+            toast.error(e.message || "Failed to add case tag", { id: toastId, duration: 4000 });
+        }
+    };
+    const removeCaseTagDraft = (id) => {
+    const next = caseTagDrafts.filter((d) => d.id !== id);
+    saveCaseTagDrafts(next);
+};
+
+    // edit case tag
+    const startEditCaseTag = (tag) => {
+    setEditingCaseTagId(tag?.ctag_id);
+    setEditingCaseTagName(tag?.ctag_name ?? "");
+    setEditingCaseTagSequence(tag?.ctag_sequence_num?.toString() ?? "");
+};
+
+    const cancelEditCaseTag = () => {
+        setEditingCaseTagId(null);
+        setEditingCaseTagName("");
+        setEditingCaseTagSequence("");
+    };
+
+        const saveEditCaseTag = async () => {
+            if (!editingCaseTagId || !editingCaseTagName.trim()) return;
+
+            const toastId = toast.loading("Updating case tag...", { duration: 3000 });
+
+            try {
+                const payload = {
+                    ctag_name: editingCaseTagName.trim(),
+                    ctag_sequence_num: editingCaseTagSequence ? parseInt(editingCaseTagSequence) : null,
+                    ctag_created_by: null // set if needed
+                };
+
+                console.log("Saving case tag with payload:", payload);
+
+                const updated = await fetchJson(`${API_BASE}/case-tags/${editingCaseTagId}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+
+                console.log("Updated case tag response:", updated);
+
+                setCaseTags((prev) =>
+                    prev.map((tag) => (tag.ctag_id === editingCaseTagId ? updated : tag))
+                );
+
+                toast.success("Case tag updated", { id: toastId, duration: 3000 });
+                cancelEditCaseTag();
+            } catch (e) {
+                console.error("Error updating case tag:", e);
+                toast.error(e.message || "Failed to update case tag", { id: toastId, duration: 4000 });
+            }
+        };
+    // const deleteCaseTag = async (id) => {
+    //     if (!id) return;
+    //     const toastId = toast.loading("Deleting case tag...", { duration: 3000 });
+    //     try {
+    //         await fetchJson(`${API_BASE}/case-tags/${id}`, {
+    //             method: "DELETE",
+    //         });
+    //         setCaseTags((prev) => prev.filter((tag) => (tag?.tag_id ?? tag?.id) !== id));
+    //         toast.success("Case tag deleted", { id: toastId, duration: 3000 });
+    //     } catch (e) {
+    //         toast.error(e.message || "Failed to delete case tag", { id: toastId, duration: 4000 });
+    //     }
+    // };
+
+
+        const loadUsers = async () => {
+            setUsersError("");
+            setUsersLoading(true);
+            try {
+                const data = await fetchJson(`${API_BASE}/users`);
+                setUsers(Array.isArray(data) ? data : []);
+            } catch (e) {
+                setUsersError(e.message || "Failed to load users");
+                setUsers([]);
+            } finally {
+                setUsersLoading(false);
+            }
+        };
 
     const extractCount = (data) => {
         if (typeof data === "number") return data;
@@ -313,12 +452,11 @@ const Settings = () => {
                 setCustomTypes(Array.isArray(cp.types) ? cp.types : []);
             }
             loadBranchDrafts();
+            loadCaseTagDrafts();
         } catch {
             // ignore
         }
     };
-
-
 
     const saveCaseCustomPrefs = (nextCats, nextTypes) => {
         const payload = { categories: nextCats ?? customCategories, types: nextTypes ?? customTypes };
@@ -475,6 +613,7 @@ const Settings = () => {
     useEffect(() => {
         loadCaseData();
         loadBranches();
+        loadCaseTags();
         loadUsers();
         loadPreferences();
         loadArchiveCounts();
@@ -496,6 +635,7 @@ const Settings = () => {
         { key: "branch", label: "Branch", icon: Building2 },
         { key: "access", label: "Case Access", icon: Lock },
         { key: "case-categories", label: "Case Categories & Types ", icon: List },
+        { key: "tags", label: "Case Tag", icon: Tags },
         { key: "archive", label: "Archive", icon: Archive },
     ];
 
@@ -1011,6 +1151,7 @@ const Settings = () => {
                         </div>
                     ))}
 
+
                 {/* Archive */}
                 {activeTab === "archive" && (
                     <div className="space-y-6">
@@ -1312,94 +1453,255 @@ const Settings = () => {
                 )}
             </main>
 
-            {/* Add ViewModal */}
-
-            <ViewModal
-                selectedCase={selectedCase}
-                setSelectedCase={setSelectedCase}
-                tableData={archivedCases}
-                onCaseUpdated={handleCaseUpdated}
-            />
-
-            {showAccessModal && selectedAccessCase && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                    <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800 dark:text-gray-200">
-                        <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
-                            <Lock size={18} />
-                            Share Access for Case #{selectedAccessCase.case_id}
-                        </h3>
-
-                        {usersLoading ? (
-                            <p className="text-sm text-gray-500">Loading users...</p>
-                        ) : usersError ? (
-                            <p className="text-sm text-red-500">{usersError}</p>
-                        ) : (
-                            <div className="max-h-64 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700">
-                                {users.map((u) => (
-                                    <label
-                                        key={u.user_id}
-                                        className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/40"
-                                    >
-                                        <div className="flex flex-col">
-                                            <span className="text-sm font-medium">
-                                                {u.user_fname} {u.user_mname} {u.user_lname}
-                                            </span>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">{u.user_role}</span>
-                                        </div>
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedUsers.includes(u.user_id)}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedUsers([...selectedUsers, u.user_id]);
-                                                } else {
-                                                    setSelectedUsers(selectedUsers.filter((id) => id !== u.user_id));
-                                                }
-                                            }}
-                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        />
-                                    </label>
-                                ))}
-                            </div>
-                        )}
-
-                        <div className="mt-5 flex justify-end gap-2">
-                            <button
-                                onClick={() => setShowAccessModal(false)}
-                                className="rounded-md bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={async () => {
-                                    try {
-                                        await fetch(`${API_BASE}/cases/${selectedAccessCase.case_id}/share`, {
-                                            method: "PUT",
-                                            headers: { "Content-Type": "application/json" },
-                                            credentials: "include",
-                                            body: JSON.stringify({ allowed_viewers: selectedUsers }),
-                                        });
-                                        toast.success("Access updated!");
-                                        setArchivedCases((prev) =>
-                                            prev.map((item) =>
-                                                item.case_id === selectedAccessCase.case_id ? { ...item, case_allowed_viewers: selectedUsers } : item,
-                                            ),
-                                        );
-                                        setShowAccessModal(false);
-                                    } catch {
-                                        toast.error("Failed to update access");
-                                    }
-                                }}
-                                className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-                            >
-                                Save Access
-                            </button>
+            {/* Case Tags */}
+            {activeTab === "tags" && (
+        <div className="space-y-6">
+            {/* Add Case Tag Section */}
+            <SettingsCard title="Add New Case Tag">
+                <form
+                    onSubmit={addCaseTagDraft}
+                    className="space-y-6"
+                >
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <div className="space-y-2">
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Tag Name *</label>
+                            <input
+                                type="text"
+                                value={caseTagName}
+                                onChange={(e) => setCaseTagName(e.target.value)}
+                                placeholder="Enter tag name (e.g., Case Intake)"
+                                className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                required
+                            />
                         </div>
+                        <div className="space-y-2">
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">Sequence Number</label>
+                        <input
+                            type="number"
+                            value={caseTagSequence}
+                            onChange={(e) => setCaseTagSequence(e.target.value)}
+                            placeholder="Enter sequence number"
+                            min="0"
+                            className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <button
+                            type="submit"
+                            className="inline-flex items-center justify-center gap-2 rounded-md bg-blue-600 px-5 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                            <Plus size={16} />
+                            Add Tag
+                        </button>
                     </div>
                 </div>
+            </form>
+        </SettingsCard>
+
+         {/* Existing Case Tags Section */}
+    <SettingsCard
+        title="Case Tags"
+        actions={
+            <button
+                onClick={loadCaseTags}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+            >
+                <RefreshCw size={14} /> Refresh
+            </button>
+        }
+    >
+        {caseTagsLoading ? (
+            <p className="text-sm text-gray-500">Loading…</p>
+        ) : caseTagsError ? (
+            <p className="text-sm text-red-500">{caseTagsError}</p>
+        ) : caseTags.length === 0 ? (
+            <p className="text-sm text-gray-500">No case tags found.</p>
+        ) : (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {caseTags.map((tag) => {
+            const isEditing = editingCaseTagId === tag.ctag_id;
+
+            return (
+                <div
+                    key={tag.ctag_id}
+                    className="group relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-all hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+                >
+                    {isEditing ? (
+                        /* EDIT MODE */
+                        <div className="space-y-4">
+                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                Edit Case Tag
+                            </h4>
+
+                            <div className="space-y-3">
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                        Tag Name *
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={editingCaseTagName}
+                                        onChange={(e) => setEditingCaseTagName(e.target.value)}
+                                        className="w-full rounded-md border px-3 py-2 text-sm"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
+                                        Sequence Number
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={editingCaseTagSequence}
+                                        onChange={(e) => setEditingCaseTagSequence(e.target.value)}
+                                        className="w-full rounded-md border px-3 py-2 text-sm"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex gap-2 pt-2 border-t">
+                                <button
+                                    onClick={saveEditCaseTag}
+                                    className="flex-1 rounded-md bg-green-600 px-3 py-2 text-sm text-white"
+                                >
+                                    Save Changes
+                                </button>
+
+                                <button
+                                    onClick={cancelEditCaseTag}
+                                    className="flex-1 rounded-md bg-gray-300 px-3 py-2 text-sm"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        /* VIEW MODE */
+                        <div className="space-y-3">
+                            <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                                        {tag.ctag_name}
+                                    </h3>
+                                    <p className="text-xs text-gray-500">
+                                        Sequence: #{tag.ctag_sequence_num}
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => startEditCaseTag(tag)}
+                                    className="opacity-0 group-hover:opacity-100 rounded p-1.5 text-blue-600"
+                                >
+                                    <Edit2 size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        })}
+
+            </div>
+        )}
+    </SettingsCard>
+
+    {/* View Modal */}
+    <ViewModal
+        selectedCase={selectedCase}
+        setSelectedCase={setSelectedCase}
+        tableData={archivedCases}
+        onCaseUpdated={handleCaseUpdated}
+    />
+
+    {/* Access Modal */}
+    {showAccessModal && selectedAccessCase && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="w-full max-w-lg rounded-xl bg-white p-6 shadow-2xl dark:bg-gray-800 dark:text-gray-200">
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold">
+                    <Lock size={18} />
+                    Share Access for Case #{selectedAccessCase.case_id}
+                </h3>
+
+                {usersLoading ? (
+                    <p className="text-sm text-gray-500">Loading users...</p>
+                ) : usersError ? (
+                    <p className="text-sm text-red-500">{usersError}</p>
+                ) : (
+                    <div className="max-h-64 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700">
+                        {users.map((u) => (
+                            <label
+                                key={u.user_id}
+                                className="flex items-center justify-between px-1 py-2 hover:bg-gray-50 dark:hover:bg-gray-700/40"
+                            >
+                                <div className="flex flex-col">
+                                    <span className="text-sm font-medium">
+                                        {u.user_fname} {u.user_mname} {u.user_lname}
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        {u.user_role}
+                                    </span>
+                                </div>
+
+                                <input
+                                    type="checkbox"
+                                    checked={selectedUsers.includes(u.user_id)}
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedUsers([...selectedUsers, u.user_id]);
+                                        } else {
+                                            setSelectedUsers(selectedUsers.filter((id) => id !== u.user_id));
+                                        }
+                                    }}
+                                    className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                            </label>
+                        ))}
+                    </div>
+                )}
+
+                <div className="mt-5 flex justify-end gap-2">
+                    <button
+                        onClick={() => setShowAccessModal(false)}
+                        className="rounded-md bg-gray-100 px-4 py-2 text-sm hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600"
+                    >
+                        Cancel
+                    </button>
+
+                    <button
+                        onClick={async () => {
+                            try {
+                                await fetch(`${API_BASE}/cases/${selectedAccessCase.case_id}/share`, {
+                                    method: "PUT",
+                                    headers: { "Content-Type": "application/json" },
+                                    credentials: "include",
+                                    body: JSON.stringify({ allowed_viewers: selectedUsers }),
+                                });
+
+                                toast.success("Access updated!");
+                                setArchivedCases((prev) =>
+                                    prev.map((item) =>
+                                        item.case_id === selectedAccessCase.case_id
+                                            ? { ...item, case_allowed_viewers: selectedUsers }
+                                            : item,
+                                    ),
+                                );
+                                setShowAccessModal(false);
+                            } catch {
+                                toast.error("Failed to update access");
+                            }
+                        }}
+                        className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                    >
+                                    Save Access
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+        </div>
             )}
         </div>
     );
-};
+}
 
 export default Settings;
