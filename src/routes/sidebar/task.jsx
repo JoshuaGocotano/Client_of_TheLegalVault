@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { COLUMNS } from "@/constants";
 import Column from "@/components/tasking/column";
 import { DndContext } from "@dnd-kit/core";
@@ -176,6 +176,15 @@ export const Tasks = () => {
         setFileReferences(refs);
     }, [selectedTask]);
 
+    // Function for Staff and Paralegal to update a "todo" selectedTask when viewed from todo to in_progress
+    useEffect(() => {
+        if (!selectedTask) return;
+        if (selectedTask.doc_status !== STATUS_IDS.TODO) return;
+        if (user.user_role === "Admin" || user.user_role === "Lawyer") return;
+
+        updateTaskStatus(selectedTask.doc_id, STATUS_IDS.INPROGRESS);
+    }, [selectedTask]);
+
     return (
         <div className="space-y-5">
             {/* Header */}
@@ -225,7 +234,7 @@ export const Tasks = () => {
                 <div className="overflow-x-auto rounded-xl bg-white shadow-md dark:border-slate-700 dark:bg-slate-800">
                     <div className="max-h-[40vh] overflow-y-auto">
                         <table className="w-full table-auto text-sm">
-                            <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
+                            <thead className="bg-gray-100 dark:bg-slate-900/40">
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Task Name
@@ -309,7 +318,7 @@ export const Tasks = () => {
                 <div className="overflow-x-auto rounded-xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
                     <div className="max-h-[70vh] overflow-y-auto">
                         <table className="w-full table-auto text-sm">
-                            <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
+                            <thead className="bg-gray-100 dark:bg-slate-900/40">
                                 <tr>
                                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Task Name
@@ -445,13 +454,13 @@ export const Tasks = () => {
 
             {/* Task Details Modal */}
             {selectedTask && (
-                <div className="animate-fadeIn fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ease-out">
+                <div className="animate-fadeIn fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-opacity duration-300 ease-out">
                     <div className="w-full max-w-lg transform rounded-2xl bg-white shadow-2xl transition-all duration-200 ease-out dark:bg-slate-800">
                         {/* Header */}
                         <div className="flex items-start justify-between border-b border-slate-200 p-5 dark:border-slate-700">
                             <div>
                                 <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">{selectedTask.doc_name}</h2>
-                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Task ID: {selectedTask.doc_id}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Task ID: {selectedTask.doc_id}</p>
                             </div>
                             <button
                                 onClick={() => setSelectedTask(null)}
@@ -483,7 +492,11 @@ export const Tasks = () => {
                                 <div>
                                     <p className="text-slate-500 dark:text-slate-400">Status</p>
                                     <p className="mt-0.5 font-medium capitalize text-slate-800 dark:text-slate-200">
-                                        {selectedTask.doc_status?.replace("_", " ") || "Unknown"}
+                                        {selectedTask.doc_status === "todo"
+                                            ? "to do"
+                                            : selectedTask.doc_status === "in_progress"
+                                              ? "in progress"
+                                              : "done" || "Unknown"}
                                     </p>
                                 </div>
                                 <div>
@@ -500,10 +513,16 @@ export const Tasks = () => {
                                             : "Unknown"}
                                     </p>
                                 </div>
-                                <div className="sm:col-span-2">
+                                <div>
                                     <p className="text-slate-500 dark:text-slate-400">Related Case</p>
                                     <p className="mt-0.5 text-slate-800 dark:text-slate-200">
                                         {selectedTask.case_id ? `Case #${selectedTask.case_id}` : "No case linked"}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p className="text-slate-500 dark:text-slate-400">Tasked To</p>
+                                    <p className="mt-0.5 text-slate-800 dark:text-slate-200">
+                                        {getUserFullName(selectedTask.doc_tasked_to) || "Unassigned"}
                                     </p>
                                 </div>
                             </div>
