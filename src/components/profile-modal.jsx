@@ -84,6 +84,7 @@ export const ProfileModal = ({ onClose }) => {
                     form.append(key, value);
                 });
                 form.append("user_profile", newProfile);
+                form.append("user_last_updated_by", user.user_id);
 
                 response = await fetch(`http://localhost:3000/api/users/${user.user_id}`, {
                     method: "PUT",
