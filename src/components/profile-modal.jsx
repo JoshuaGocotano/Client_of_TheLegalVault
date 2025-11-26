@@ -74,7 +74,7 @@ export const ProfileModal = ({ onClose }) => {
     };
 
     const handleSave = async () => {
-        const toastId = toast.loading("Updating profile...");
+        const toastId = toast.loading("Updating profile...", { duration: 4000 });
 
         try {
             let response;
