@@ -10,8 +10,8 @@ const allNavbarLinks = [
     { label: "Reports", icon: ChartColumn, path: "/reports" },
     { label: "Case Archive", icon: Archive, path: "/case-archive" },
     { label: "Payments", icon: Wallet, path: "/payments" },
+    { label: "Trash", icon: Trash, path: "/trash" },
     { label: "Activity Logs", icon: Logs, path: "/user-logs" },
-    { label: "Recently Deleted", icon: Trash, path: "/recently-deleted" },
 ];
 
 // 🔧 Export a function to get filtered links based on role

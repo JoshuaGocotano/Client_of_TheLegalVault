@@ -78,7 +78,7 @@ export default function App() {
                         { path: "notifications", element: <Notifications /> },
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
                         { path: "payments", element: <Payments /> },
-                        { path: "recently-deleted", element: <RecentlyDeleted /> },
+                        { path: "trash", element: <RecentlyDeleted /> },
                         { path: "settings", element: <Settings /> },
                     ],
                 },
