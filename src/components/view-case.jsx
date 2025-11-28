@@ -254,7 +254,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                         {(() => {
                                             let tags = [];
                                             try {
-                                                tags = selectedCase.case_tag ? JSON.parse(selectedCase.case_tag) : [];
+                                                tags = selectedCase.case_tag_list ? JSON.parse(selectedCase.case_tag_list) : [];
                                             } catch {
                                                 tags = [];
                                             }
