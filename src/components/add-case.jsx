@@ -303,59 +303,60 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                         ></textarea>
                     </div>
 
-                    {/* Case Tags Section */}
+                    {/* Case Tags Section (Stepper UI) */}
                     <div className="md:col-span-2">
                         <div className="rounded-lg border bg-gray-50 p-4 dark:bg-slate-800">
-                            <h4 className="mb-3 text-sm font-semibold">Case Tags</h4>
-
-                            {/* Selected Tags Display */}
-                            <div className="mb-4">
-                                <div className="flex flex-wrap gap-2">
-                                    {selectedTags.map((tag) => (
-                                        <span
-                                            key={tag.id}
-                                            className="inline-flex items-center gap-1 rounded-full bg-blue-600 px-3 py-1 text-xs font-medium text-white"
-                                        >
-                                            {tag.name}
+                            <h4 className="mb-3 text-sm font-semibold">Case Tag Process</h4>
+                            <div className="flex flex-row items-center overflow-x-auto gap-2 pb-2">
+                                {/* Stepper: Always show all steps, highlight selected */}
+                                {case_tag_list.map((tag, idx) => {
+                                    const isFirst = tag.id === 1;
+                                    const isLast = tag.id === 9;
+                                    const isSelected = selectedTags.some(t => t.id === tag.id);
+                                    // Always show Case Intake and Case Closing as selected
+                                    const alwaysSelected = isFirst || isLast;
+                                    return (
+                                        <div key={tag.id} className="flex items-center">
                                             <button
-                                                onClick={() => handleRemoveTag(tag.id)}
-                                                className="ml-1 hover:text-red-200"
-                                                title="Remove tag"
                                                 type="button"
+                                                disabled={alwaysSelected}
+                                                onClick={() => {
+                                                    if (isSelected && !alwaysSelected) {
+                                                        // Remove tag (except first/last)
+                                                        setSelectedTags(prev => prev.filter(t => t.id !== tag.id));
+                                                    } else if (!isSelected) {
+                                                        // Insert tag before last (so closing is always last)
+                                                        setSelectedTags(prev => {
+                                                            const tags = prev.filter(t => t.id !== tag.id);
+                                                            // Insert before last
+                                                            return [
+                                                                ...tags.slice(0, tags.length - 1),
+                                                                tag,
+                                                                tags[tags.length - 1],
+                                                            ];
+                                                        });
+                                                    }
+                                                }}
+                                                className={`flex items-center px-4 py-2 rounded-full border transition-colors text-xs font-medium whitespace-nowrap
+                                                    ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-slate-700 text-blue-600 border-blue-400 hover:bg-blue-50 dark:hover:bg-slate-600'}
+                                                    ${alwaysSelected ? 'cursor-not-allowed opacity-80' : 'hover:bg-blue-100 dark:hover:bg-slate-600'}`}
+                                                title={alwaysSelected ? 'This tag is always included' : isSelected ? 'Remove tag' : 'Add tag'}
                                             >
-                                                <X size={12} />
+                                                {tag.name}
+                                                {!alwaysSelected && (
+                                                    <span className="ml-2 text-lg">{isSelected ? '✓' : '+'}</span>
+                                                )}
                                             </button>
-                                        </span>
-                                    ))}
-                                    {selectedTags.length === 0 && (
-                                        <span className="text-sm text-gray-500 dark:text-gray-400">No tags selected</span>
-                                    )}
-                                </div>
+                                            {/* Arrow between steps, except last */}
+                                            {idx < case_tag_list.length - 1 && (
+                                                <span className="mx-2 text-gray-400">→</span>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
-
-                            {/* Tag Selection */}
-                            <div className="space-y-2">
-                                <label className="text-xs font-medium text-gray-600 dark:text-gray-300">
-                                    Add Tags:
-                                </label>
-                                <div className="flex flex-wrap gap-2">
-                                    {case_tag_list
-                                        .filter(tag => !selectedTags.find(selected => selected.id === tag.id))
-                                        .map((tag) => (
-                                            <button
-                                                key={tag.id}
-                                                type="button"
-                                                onClick={() => handleAddTag(tag)}
-                                                className="rounded-lg border border-blue-600 px-3 py-1 text-xs text-blue-600 hover:bg-blue-600 hover:text-white transition-colors"
-                                            >
-                                                + {tag.name}
-                                            </button>
-                                        ))
-                                    }
-                                </div>
-                                {case_tag_list.filter(tag => !selectedTags.find(selected => selected.id === tag.id)).length === 0 && (
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">All tags are already selected</span>
-                                )}
+                            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                <span>Click on a step to add/remove it from the process. <b>Case Intake</b> and <b>Case Closing</b> are always included.</span>
                             </div>
                         </div>
                     </div>
@@ -397,7 +398,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                                 return;
                             }
                             setErrorMsg("");
-                            handleAddCase();
+                            handleAddCase(selectedTags); // Pass selectedTags to parent
                         }}
                         className={`rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 ${!isFormValid() ? "cursor-not-allowed opacity-50" : ""}`}
                         disabled={!isFormValid()}
