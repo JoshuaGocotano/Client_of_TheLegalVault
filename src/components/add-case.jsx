@@ -305,8 +305,8 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
 
                     {/* Case Tags Section (Stepper UI) */}
                     <div className="md:col-span-2">
-                        <div className="rounded-lg border bg-gray-50 p-4 dark:bg-slate-800">
-                            <h4 className="mb-3 text-sm font-semibold">Case Tag Process</h4>
+                        <div className="rounded-lg== border bg-gray-50 p-4 dark:bg-slate-800">
+                            <h4 className="mb-3 text-slate-900 dark:text-slate-50 text-sm font-semibold">Case Tag Process</h4>
                             <div className="flex flex-row items-center overflow-x-auto gap-2 pb-2">
                                 {/* Stepper: Always show all steps, highlight selected */}
                                 {case_tag_list.map((tag, idx) => {
@@ -344,7 +344,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                                             >
                                                 {tag.name}
                                                 {!alwaysSelected && (
-                                                    <span className="ml-2 text-lg">{isSelected ? '✓' : '+'}</span>
+                                                    <span className="ml-2 text-md">{isSelected ? '✓' : ''}</span>
                                                 )}
                                             </button>
                                             {/* Arrow between steps, except last */}
@@ -355,9 +355,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                                     );
                                 })}
                             </div>
-                            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                <span>Click on a step to add/remove it from the process. <b>Case Intake</b> and <b>Case Closing</b> are always included.</span>
-                            </div>
+
                         </div>
                     </div>
 
