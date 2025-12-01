@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Pencil, Eye, Search } from "lucide-react";
+import { Pencil, Eye, Search, Folder } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
@@ -7,6 +7,7 @@ import { useAuth } from "@/context/auth-context";
 import AddNewCase from "../../components/add-case";
 import toast from "react-hot-toast";
 import EditCaseModal from "../../components/edit-case";
+import CaseFolder from "../../components/case-folder";
 
 const Cases = () => {
     const { user } = useAuth();
@@ -134,8 +135,7 @@ const Cases = () => {
                 assigned_by: newCase.assigned_by ? parseInt(newCase.assigned_by, 10) : null,
                 user_id: newCase.user_id ? parseInt(newCase.user_id, 10) : null,
                 case_fee: newCase.case_fee ? parseFloat(newCase.case_fee) : null,
-                case_tag_list: JSON.stringify(selectedTags), // send as JSON string
-                case_tag: JSON.stringify(selectedTags[0]), 
+                case_tag: JSON.stringify(selectedTags), // send as JSON string
             };
 
             const res = await fetch("http://localhost:3000/api/cases", {
@@ -162,8 +162,6 @@ const Cases = () => {
                 case_fee: "",
                 case_remarks: "",
                 case_status: "",
-                case_tag_list: [],
-                case_tag: "",
             });
 
             toast.success("New case added successfully!", { id: toastId, duration: 4000 });
@@ -216,29 +214,44 @@ const Cases = () => {
             </div>
 
             {/* Tabs */}
-            <div className="mb-4 flex gap-2">
-                {["All", "Pending", "Processing", "Completed", "Dismissed"].map((tab) => {
-                    const baseColors = {
-                        All: "bg-blue-500 text-white font-semibold",
-                        Pending: "bg-yellow-500 text-white font-semibold",
-                        Processing: "bg-blue-500 text-white font-semibold",
-                        Completed: "bg-green-500 text-white font-semibold",
-                        Dismissed: "bg-red-500 text-white font-semibold",
-                    };
+            <div className="mb-4 flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                    {/* Status Buttons */}
+                    <div className="flex gap-2">
+                        {["All", "Pending", "Processing", "Completed", "Dismissed"].map((tab) => {
+                            const baseColors = {
+                                All: "bg-blue-500 text-white font-semibold",
+                                Pending: "bg-yellow-500 text-white font-semibold",
+                                Processing: "bg-blue-500 text-white font-semibold",
+                                Completed: "bg-green-500 text-white font-semibold",
+                                Dismissed: "bg-red-500 text-white font-semibold",
+                            };
 
-                    const active = statusFilter === tab || (tab === "All" && statusFilter === "");
-                    return (
-                        <button
-                            key={tab}
-                            onClick={() => setStatusFilter(tab === "All" ? "" : tab)}
-                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                                active ? baseColors[tab] : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
-                            }`}
-                        >
-                            {tab}
-                        </button>
-                    );
-                })}
+                            const active = statusFilter === tab || (tab === "All" && statusFilter === "");
+
+                            return (
+                                <button
+                                    key={tab}
+                                    onClick={() => setStatusFilter(tab === "All" ? "" : tab)}
+                                    className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                                        active ? baseColors[tab] : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
+                                    }`}
+                                >
+                                    {tab}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Case Folder Button */}
+                    <button
+                        className="flex items-center gap-2 rounded-md bg-yellow-500 px-4 py-2 text-sm font-medium text-white shadow hover:bg-yellow-600"
+                        onClick={() => navigate("/cases/case-folder")}
+                    >
+                        <Folder size={16} />
+                        Case Folder
+                    </button>
+                </div>
             </div>
 
             {/* Search and Buttons */}

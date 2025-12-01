@@ -250,6 +250,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     <span>{selectedCase.branch_name}</span>
                                 </label>
                             </div>
+
                             {/* Case Tag Process Stepper - scrollable landsc    ape */}
                             <div className="col-span-2 mb-1">
                                 <div className="rounded-lg p-1">
@@ -269,7 +270,6 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                 ];
                                             }
                                             return tags.map((tag, idx, arr) => {
-                                                const isActive = idx === arr.length - 1;
                                                 const isSelected = selectedTagIdx === idx;
                                                 return (
                                                     <div
@@ -281,9 +281,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                             onClick={() => setSelectedTagIdx(idx)}
                                                             className={`flex items-center whitespace-nowrap rounded-full border px-5 py-2 text-xs font-medium transition-all duration-200 focus:outline-none ${
                                                                 isSelected
-                                                                    ? "border-blue-600 bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg"
-                                                                    : isActive
-                                                                      ? "border-blue-500 bg-gradient-to-r from-blue-400/60 to-blue-700/60 text-white opacity-90 shadow-md"
+                                                                    ? "border-blue-600 bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg opacity-90 shadow-md"
                                                                       : "border-blue-400 bg-white/20 text-blue-700 hover:bg-blue-100/40 hover:text-blue-900 dark:bg-slate-700/20 dark:text-blue-200 dark:hover:bg-blue-900/40 dark:hover:text-white"
                                                             } `}
                                                             style={{ backdropFilter: "blur(2px)" }}
