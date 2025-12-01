@@ -99,20 +99,45 @@ const Documents = () => {
         setShowDeleteModal(true);
     };
 
+    // Trash / delete document handler (no direct physical file deletion for safety)
     const handleDelete = () => {
         if (docToDelete) {
             try {
+                const now = new Date();
+                const formatted =
+                    now.getFullYear() +
+                    "-" +
+                    String(now.getMonth() + 1).padStart(2, "0") +
+                    "-" +
+                    String(now.getDate()).padStart(2, "0") +
+                    " " +
+                    String(now.getHours()).padStart(2, "0") +
+                    ":" +
+                    String(now.getMinutes()).padStart(2, "0") +
+                    ":" +
+                    String(now.getSeconds()).padStart(2, "0") +
+                    "." +
+                    String(now.getMilliseconds()).padStart(3, "0") +
+                    "000";
+
                 const deleteDocument = async () => {
                     const res = await fetch(`http://localhost:3000/api/documents/${docToDelete.doc_id}`, {
-                        method: "DELETE",
+                        method: "PUT",
                         credentials: "include",
+                        body: JSON.stringify({
+                            is_trashed: true,
+                            doc_trashed_by: user.user_id,
+                            doc_trashed_date: formatted,
+                            doc_last_updated_by: user.user_id,
+                        }),
                     });
-                    if (!res.ok) throw new Error(`Failed to delete document (${res.status})`);
+                    if (!res.ok) throw new Error(`Failed to trash document (${res.status})`);
                     // Refresh document list
                     fetchDocs();
                     setDocuments(documents.filter((doc) => doc.doc_id !== docToDelete.doc_id));
                     setDocToDelete(null);
                     setShowDeleteModal(false);
+                    toast.success("Document moved to Recently Deleted", { duration: 4000 });
                 };
                 deleteDocument();
             } catch (e) {

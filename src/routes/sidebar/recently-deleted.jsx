@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, RotateCcw, X, File, CreditCard, CheckSquare, Calendar, User, ArrowLeft, Search } from "lucide-react";
-import { useAuth } from "../context/auth-context.jsx";
+import { useAuth } from "../../context/auth-context.jsx";
 import toast from "react-hot-toast";
-import Spinner from "./loading.jsx";
+import Spinner from "../../components/loading.jsx";
 
 const API_BASE = "http://localhost:3000/api";
 
