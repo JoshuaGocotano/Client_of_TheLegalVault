@@ -69,13 +69,11 @@ export default function RecentlyDeleted({ onClose }) {
             // Documents
             if (documentsResponse.ok) {
                 const documentsData = await documentsResponse.json();
-                const docsArr = Array.isArray(documentsData)
-                    ? documentsData
+                console.log("Documents data:", documentsData);
+                // Filter for deleted documents if there's a status field
+                const deletedDocs = documentsData.filter
+                    ? documentsData.filter((doc) => doc.doc_status === "deleted" || doc.status === "deleted" || doc.is_deleted === true)
                     : documentsData.documents || documentsData || [];
-                // Only filter by is_deleted for trash
-                const deletedDocs = docsArr
-                    .filter((doc) => doc.is_deleted === true)
-                    .map((doc) => ({ ...doc, id: doc.id || doc.doc_id }));
                 setDeletedDocuments(deletedDocs);
             } else {
                 setDeletedDocuments([]);
@@ -84,13 +82,14 @@ export default function RecentlyDeleted({ onClose }) {
             // Payments
             if (paymentsResponse.ok) {
                 const paymentsData = await paymentsResponse.json();
-                const paysArr = Array.isArray(paymentsData)
-                    ? paymentsData
+                console.log("Payments data:", paymentsData);
+                // Filter for deleted payments if there's a status field
+                const deletedPayments = paymentsData.filter
+                    ? paymentsData.filter(
+                          (payment) => payment.payment_status === "deleted" || payment.status === "deleted" || payment.is_deleted === true,
+                      )
                     : paymentsData.payments || paymentsData || [];
-                const deletedPays = paysArr.filter(
-                    (payment) => payment.payment_status === "deleted" || payment.status === "deleted" || payment.is_deleted === true
-                );
-                setDeletedPayments(deletedPays);
+                setDeletedPayments(deletedPayments);
             } else {
                 setDeletedPayments([]);
             }
@@ -98,12 +97,11 @@ export default function RecentlyDeleted({ onClose }) {
             // Tasks
             if (tasksResponse.ok) {
                 const tasksData = await tasksResponse.json();
-                const tasksArr = Array.isArray(tasksData)
-                    ? tasksData
+                console.log("Tasks data:", tasksData);
+                // Filter for deleted tasks if there's a status field
+                const deletedTasks = tasksData.filter
+                    ? tasksData.filter((task) => task.task_status === "deleted" || task.status === "deleted" || task.is_deleted === true)
                     : tasksData.tasks || tasksData || [];
-                const deletedTasks = tasksArr.filter(
-                    (task) => task.task_status === "deleted" || task.status === "deleted" || task.is_deleted === true
-                );
                 setDeletedTasks(deletedTasks);
             } else {
                 setDeletedTasks([]);
@@ -229,191 +227,281 @@ export default function RecentlyDeleted({ onClose }) {
         return data;
     };
 
-    // Pagination state for load more
-    const [visibleCount, setVisibleCount] = useState(4);
+    const renderDocumentItem = (doc) => (
+        <div
+            key={doc.id}
+            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+        >
+            <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                    <div className="rounded-lg bg-blue-50 p-3 dark:bg-blue-900/20">
+                        <File className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">{doc.doc_name}</h4>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-200">
+                                    {doc.doc_type}
+                                </span>
+                                <span>•</span>
+                                <span>{doc.case_name}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-500">
+                                Deleted by <span className="font-medium">{doc.deleted_by}</span> on {formatDate(doc.deleted_date)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="ml-4 flex items-center gap-3">
+                    <button
+                        onClick={() => handleRestore(doc.id, "documents")}
+                        className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm text-white shadow-sm transition-colors hover:bg-green-700"
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                        Restore
+                    </button>
+                    <button
+                        onClick={() => handlePermanentDelete(doc.id, "documents")}
+                        className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white shadow-sm transition-colors hover:bg-red-700"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Forever
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 
-    // Reset visibleCount when tab or search changes
-    useEffect(() => {
-        setVisibleCount(4);
-    }, [activeTab, searchTerm]);
+    const renderPaymentItem = (payment) => (
+        <div
+            key={payment.id}
+            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+        >
+            <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                    <div className="rounded-lg bg-green-50 p-3 dark:bg-green-900/20">
+                        <CreditCard className="h-6 w-6 text-green-600 dark:text-green-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">${payment.payment_amount?.toFixed(2)}</h4>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-200">
+                                    {payment.payment_method}
+                                </span>
+                                <span>•</span>
+                                <span>{payment.client_name}</span>
+                            </div>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">Case: {payment.case_name}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-500">
+                                Deleted by <span className="font-medium">{payment.deleted_by}</span> on {formatDate(payment.deleted_date)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 
-    // Helper to get paginated data
-    const getPaginatedData = () => {
-        return getCurrentData().slice(0, visibleCount);
+    const renderTaskItem = (task) => (
+        <div
+            key={task.id}
+            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+        >
+            <div className="flex items-start justify-between">
+                <div className="flex items-start gap-4">
+                    <div className="rounded-lg bg-orange-50 p-3 dark:bg-orange-900/20">
+                        <CheckSquare className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                    </div>
+                    <div className="flex-1">
+                        <h4 className="mb-2 font-semibold text-gray-900 dark:text-gray-100">{task.task_name}</h4>
+                        <div className="space-y-1">
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <User className="h-4 w-4" />
+                                <span>{task.assigned_to}</span>
+                                <span>•</span>
+                                <span>{task.case_name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                                <Calendar className="h-4 w-4" />
+                                <span>Due: {new Date(task.due_date).toLocaleDateString()}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-500">
+                                Deleted by <span className="font-medium">{task.deleted_by}</span> on {formatDate(task.deleted_date)}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="ml-4 flex items-center gap-3">
+                    <button
+                        onClick={() => handleRestore(task.id, "tasks")}
+                        className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm text-white shadow-sm transition-colors hover:bg-green-700"
+                    >
+                        <RotateCcw className="h-4 w-4" />
+                        Restore
+                    </button>
+                    <button
+                        onClick={() => handlePermanentDelete(task.id, "tasks")}
+                        className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm text-white shadow-sm transition-colors hover:bg-red-700"
+                    >
+                        <Trash2 className="h-4 w-4" />
+                        Delete Forever
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderCurrentTab = () => {
+        const currentData = getCurrentData();
+
+        if (loading) {
+            return (
+                <div className="flex flex-col items-center justify-center py-20">
+                    <Spinner />
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">Loading deleted {activeTab}...</p>
+                </div>
+            );
+        }
+
+        if (error) {
+            return (
+                <div className="flex flex-col items-center justify-center py-20">
+                    <div className="mb-4 rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
+                        <X className="h-8 w-8 text-red-600 dark:text-red-400" />
+                    </div>
+                    <p className="text-lg font-medium text-red-600 dark:text-red-400">{error}</p>
+                    <button
+                        onClick={fetchAllDeletedItems}
+                        className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            );
+        }
+
+        if (currentData.length === 0) {
+            return (
+                <div className="flex flex-col items-center justify-center py-20">
+                    <div className="mb-6 rounded-full bg-gray-50 p-6 dark:bg-gray-800">
+                        <Trash2 className="h-12 w-12 text-gray-400" />
+                    </div>
+                    <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-gray-100">No deleted {activeTab} found</h3>
+                    <p className="max-w-md text-center text-gray-600 dark:text-gray-400">
+                        {searchTerm ? `No deleted ${activeTab} match your search criteria.` : `You don't have any deleted ${activeTab} to restore.`}
+                    </p>
+                    {searchTerm && (
+                        <button
+                            onClick={() => setSearchTerm("")}
+                            className="mt-4 text-blue-600 hover:underline dark:text-blue-400"
+                        >
+                            Clear search
+                        </button>
+                    )}
+                </div>
+            );
+        }
+
+        return (
+            <div className="grid gap-6">
+                {activeTab === "documents" && currentData.map(renderDocumentItem)}
+                {activeTab === "payments" && currentData.map(renderPaymentItem)}
+                {activeTab === "tasks" && currentData.map(renderTaskItem)}
+            </div>
+        );
     };
 
-    // --- ADVANCED UI POLISH START ---
-    // Add a section header for each tab, with icon and description
-    // Add a fade-in animation for cards
-    // Add a tooltip for action buttons
-    // Add a badge for days left before permanent deletion
-    // Add a divider between cards
-    // Use a soft blue background for the main area
-    // --- ADVANCED UI POLISH END ---
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-950 dark:to-blue-950 flex flex-col">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
             {/* Header */}
-            <div className="border-b border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-                <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+            <div className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 items-center justify-between">
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-4">
                             <button
                                 onClick={onClose}
-                                className="rounded p-2 hover:bg-blue-50 dark:hover:bg-gray-800 focus:outline-none transition-colors"
-                                title="Back"
+                                className="rounded-lg p-2 transition-colors hover:bg-gray-100 dark:hover:bg-gray-700"
                             >
+                                <ArrowLeft className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                             </button>
-                            <Trash2 className="h-6 w-6 text-red-500" />
-                            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Recently Deleted</h1>
+                            <div className="flex items-center gap-3">
+                                <div className="rounded-lg bg-red-50 p-2 dark:bg-red-900/20">
+                                    <Trash2 className="h-6 w-6 text-red-600 dark:text-red-400" />
+                                </div>
+                                <div>
+                                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Recently Deleted</h1>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400">Restore or permanently delete items</p>
+                                </div>
+                            </div>
                         </div>
+
                         {/* Search Bar */}
-                        <div className="relative w-64">
-                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                        <div className="relative max-w-md">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform text-gray-400" />
                             <input
                                 type="text"
                                 placeholder={`Search ${activeTab}...`}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full rounded-lg border border-gray-200 bg-white py-1.5 pl-9 pr-3 text-gray-900 placeholder-gray-400 focus:border-blue-400 focus:ring-1 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:placeholder-gray-500 shadow-sm"
+                                className="w-full rounded-lg border border-gray-300 bg-white py-2 pl-10 pr-4 text-gray-900 placeholder-gray-500 focus:border-transparent focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                             />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div className="mx-auto max-w-3xl px-4 py-6 sm:px-6 lg:px-8 w-full flex-1">
-                {/* Tabs */}
-                <div className="flex space-x-4 border-b border-gray-200 dark:border-gray-800 mb-6">
+            <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+                {/* Stats Cards */}
+                <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
                     {tabs.map((tab) => {
                         const Icon = tab.icon;
                         return (
-                            <button
+                            <div
                                 key={tab.id}
-                                onClick={() => setActiveTab(tab.id)}
-                                className={`flex items-center gap-2 px-2 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.id
-                                    ? "border-blue-500 text-blue-600 dark:text-blue-300"
-                                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                                    }`}
-                                title={tab.label}
+                                className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
                             >
-                                <Icon className="h-4 w-4" />
-                                {tab.label}
-                                {tab.count > 0 && (
-                                    <span className="ml-1 rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700 dark:bg-gray-800 dark:text-blue-200">{tab.count}</span>
-                                )}
-                            </button>
+                                <div className="flex items-center gap-4">
+                                    <div
+                                        className={`rounded-lg p-3 ${
+                                            tab.id === "documents"
+                                                ? "bg-blue-50 dark:bg-blue-900/20"
+                                                : tab.id === "payments"
+                                                  ? "bg-green-50 dark:bg-green-900/20"
+                                                  : "bg-orange-50 dark:bg-orange-900/20"
+                                        }`}
+                                    >
+                                        <Icon
+                                            className={`h-6 w-6 ${
+                                                tab.id === "documents"
+                                                    ? "text-blue-600 dark:text-blue-400"
+                                                    : tab.id === "payments"
+                                                      ? "text-green-600 dark:text-green-400"
+                                                      : "text-orange-600 dark:text-orange-400"
+                                            }`}
+                                        />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{tab.label}</p>
+                                        <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">{tab.count}</p>
+                                    </div>
+                                </div>
+                            </div>
                         );
                     })}
                 </div>
 
-                {/* Section Header */}
-                <div className="flex items-center gap-2 mb-4 mt-2">
-                    {activeTab === "documents" && <File className="h-5 w-5 text-blue-400" />}
-                    {activeTab === "tasks" && <CheckSquare className="h-5 w-5 text-orange-400" />}
-                    <span className="text-lg font-semibold text-gray-700 dark:text-gray-200 capitalize">{activeTab}</span>
-                    <span className="text-xs text-gray-400">({getCurrentData().length} deleted)</span>
-                </div>
-
-                {/* Content */}
-                <div className="min-h-[300px]">
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <Spinner />
-                            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading deleted {activeTab}...</p>
-                        </div>
-                    ) : error ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <div className="mb-4 rounded-xl bg-red-50 p-4 dark:bg-red-900/20">
-                                <X className="h-8 w-8 text-red-600 dark:text-red-400" />
-                            </div>
-                            <p className="text-lg font-medium text-red-600 dark:text-red-400">{error}</p>
-                            <button
-                                onClick={fetchAllDeletedItems}
-                                className="mt-4 rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                            >
-                                Try Again
-                            </button>
-                        </div>
-                    ) : getCurrentData().length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20">
-                            <div className="mb-6 rounded-full bg-blue-50 p-6 dark:bg-gray-800">
-                                <Trash2 className="h-12 w-12 text-blue-300 dark:text-gray-500" />
-                            </div>
-                            <h3 className="mb-2 text-lg font-semibold text-gray-900 dark:text-gray-100">No deleted {activeTab} found</h3>
-                            <p className="max-w-md text-center text-gray-500 dark:text-gray-400">
-                                {searchTerm ? `No deleted ${activeTab} match your search criteria.` : `You don't have any deleted ${activeTab} to restore.`}
-                            </p>
-                            {searchTerm && (
-                                <button
-                                    onClick={() => setSearchTerm("")}
-                                    className="mt-4 text-blue-600 hover:underline dark:text-blue-400"
-                                >
-                                    Clear search
-                                </button>
-                            )}
-                        </div>
-                    ) : (
-                        <>
-                            <div className="grid gap-4">
-                                {activeTab === "documents" && getPaginatedData().map((doc, idx, arr) => (
-                                    <React.Fragment key={doc.id}>
-                                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-md hover:shadow-lg transition-shadow flex items-center justify-between dark:border-gray-700 dark:bg-gray-800 animate-fadeIn">
-                                            <div className="flex items-center gap-3">
-                                                <File className="h-8 w-8 text-blue-400" />
-                                                <div>
-                                                    <div className="font-semibold text-gray-900 dark:text-gray-100">{doc.doc_name}</div>
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{doc.doc_type} • {doc.case_name}</div>
-                                                    <div className="text-xs text-gray-400">Deleted by {doc.deleted_by} on {formatDate(doc.deleted_date)}</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-2 min-w-[120px]">
-                                                <span className="mb-1 inline-block rounded-full bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" title="Days left before permanent deletion">
-                                                    {getDaysLeft(doc.deleted_date)} days left
-                                                </span>
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => handleRestore(doc.id, "documents")}
-                                                        className="rounded bg-green-500 px-3 py-1.5 text-xs text-white hover:bg-green-600 focus:ring-2 focus:ring-green-300 focus:outline-none shadow transition-all duration-150"
-                                                        title="Restore this document">Restore</button>
-                                                    <button onClick={() => handlePermanentDelete(doc.id, "documents")}
-                                                        className="rounded bg-red-500 px-3 py-1.5 text-xs text-white hover:bg-red-600 focus:ring-2 focus:ring-red-300 focus:outline-none shadow transition-all duration-150"
-                                                        title="Permanently delete this document">Delete Permanently</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {idx < arr.length - 1 && <div className="border-t border-gray-100 dark:border-gray-800 mx-2" />}
-                                    </React.Fragment>
-                                ))}
-                                {activeTab === "tasks" && getPaginatedData().map((task, idx, arr) => (
-                                    <React.Fragment key={task.id}>
-                                        <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-md hover:shadow-lg transition-shadow flex items-center justify-between dark:border-gray-700 dark:bg-gray-800 animate-fadeIn">
-                                            <div className="flex items-center gap-3">
-                                                <CheckSquare className="h-8 w-8 text-orange-400" />
-                                                <div>
-                                                    <div className="font-semibold text-gray-900 dark:text-gray-100">{task.task_name}</div>
-                                                    <div className="text-xs text-gray-500 dark:text-gray-400">{task.assigned_to} • {task.case_name}</div>
-                                                    <div className="text-xs text-gray-400">Deleted by {task.deleted_by} on {formatDate(task.deleted_date)}</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-col items-end gap-2 min-w-[120px]">
-                                                <span className="mb-1 inline-block rounded-full bg-yellow-100 px-2 py-0.5 text-xs text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" title="Days left before permanent deletion">
-                                                    {getDaysLeft(task.deleted_date)} days left
-                                                </span>
-                                                <div className="flex gap-2">
-                                                    <button onClick={() => handleRestore(task.id, "tasks")}
-                                                        className="rounded bg-green-500 px-3 py-1.5 text-xs text-white hover:bg-green-600 focus:ring-2 focus:ring-green-300 focus:outline-none shadow transition-all duration-150"
-                                                        title="Restore this task">Restore</button>
-                                                    <button onClick={() => handlePermanentDelete(task.id, "tasks")}
-                                                        className="rounded bg-red-500 px-3 py-1.5 text-xs text-white hover:bg-red-600 focus:ring-2 focus:ring-red-300 focus:outline-none shadow transition-all duration-150"
-                                                        title="Permanently delete this task">Delete Permanently</button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        {idx < arr.length - 1 && <div className="border-t border-gray-100 dark:border-gray-800 mx-2" />}
-                                    </React.Fragment>
-                                ))}
-                            </div>
-                            {getCurrentData().length > visibleCount && (
-                                <div className="flex justify-center mt-6">
+                {/* Tabs */}
+                <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                    <div className="border-b border-gray-200 dark:border-gray-700">
+                        <nav
+                            className="flex space-x-8 px-6"
+                            aria-label="Tabs"
+                        >
+                            {tabs.map((tab) => {
+                                const Icon = tab.icon;
+                                return (
                                     <button
                                         onClick={() => setVisibleCount((c) => c + 4)}
                                         className="rounded-lg text-blue-600 underline hover:underline dark:text-blue-400"
