@@ -13,15 +13,28 @@ import DeleteDocumentModal from "./delete-document";
 const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) => {
     const { user } = useAuth();
 
-    // CASE TAGGING test data
-    const case_tag_list = [
-        { id: 1, name: "Case Intake" },
-        { id: 2, name: "Case Processing..." },
-        { id: 3, name: "High Priority" },
-    ];
+    const [caseTagList, setCaseTagList] = useState([]); // case tags list from the server
 
-    // default case tag every case created
-    const case_tag = { id: 1, name: "Case Intake" };
+    // case tags fetching from the server
+    useEffect(() => {
+        const fetchCaseTags = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/case-tags", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) {
+                    throw new Error("Failed to fetch case tags");
+                }
+                const data = await res.json();
+                setCaseTagList(data);
+            } catch (error) {
+                console.error("Error fetching case tags:", error);
+                setErrorMsg("Error fetching case tags");
+            }
+        };
+        fetchCaseTags();
+    }, []);
 
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
@@ -262,13 +275,14 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                             } catch {
                                                 tags = [];
                                             }
+
                                             // Always default to Case Intake and Case Closing if tags are empty or invalid
                                             if (!Array.isArray(tags) || tags.length === 0) {
-                                                tags = [
-                                                    { id: 1, name: "Case Intake" },
-                                                    { id: 9, name: "Case Closing" },
-                                                ];
+                                                if (caseTagList.length > 0) {
+                                                    tags = [caseTagList[0], caseTagList[caseTagList.length - 1]];
+                                                }
                                             }
+
                                             return tags.map((tag, idx, arr) => {
                                                 const isSelected = selectedTagIdx === idx;
                                                 return (
@@ -281,8 +295,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                             onClick={() => setSelectedTagIdx(idx)}
                                                             className={`flex items-center whitespace-nowrap rounded-full border px-5 py-2 text-xs font-medium transition-all duration-200 focus:outline-none ${
                                                                 isSelected
-                                                                    ? "border-blue-600 bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-lg opacity-90 shadow-md"
-                                                                      : "border-blue-400 bg-white/20 text-blue-700 hover:bg-blue-100/40 hover:text-blue-900 dark:bg-slate-700/20 dark:text-blue-200 dark:hover:bg-blue-900/40 dark:hover:text-white"
+                                                                    ? "border-blue-600 bg-gradient-to-r from-blue-500 to-blue-700 text-white opacity-90 shadow-lg shadow-md"
+                                                                    : "border-blue-400 bg-white/20 text-blue-700 hover:bg-blue-100/40 hover:text-blue-900 dark:bg-slate-700/20 dark:text-blue-200 dark:hover:bg-blue-900/40 dark:hover:text-white"
                                                             } `}
                                                             style={{ backdropFilter: "blur(2px)" }}
                                                         >
