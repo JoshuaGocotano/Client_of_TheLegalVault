@@ -141,7 +141,7 @@ const CaseFolder = () => {
                             paginatedCases.map((c, idx) => (
                                 <tr
                                     key={c.case_id}
-                                    className={`transition-all duration-150 ${idx % 2 === 0 ? "bg-white dark:bg-slate-900" : "bg-blue-50/60 dark:bg-slate-800/60"} border-t border-gray-200 dark:border-gray-700 hover:bg-blue-100/80 dark:hover:bg-blue-950/80`}
+                                    className="border-t border-gray-200 transition hover:bg-slate-200 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
                                     <td className="px-5 py-4 font-semibold">{c.case_id}</td>
                                     <td className="px-5 py-4">{c.ct_name}</td>
