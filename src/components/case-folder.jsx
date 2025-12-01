@@ -143,7 +143,7 @@ const CaseFolder = () => {
                             paginatedCases.map((c) => (
                                 <tr
                                     key={c.case_id}
-                                    className="border-t border-gray-200 transition hover:bg-blue-600 dark:border-gray-700 dark:hover:bg-blue-950"
+                                    className="border-t border-gray-200 transition hover:bg-slate-200 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
                                     <td className="px-4 py-3">{c.case_id}</td>
                                     <td className="px-4 py-3">{c.ct_name}</td>
