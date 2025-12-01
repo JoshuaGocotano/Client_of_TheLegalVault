@@ -135,7 +135,9 @@ const Cases = () => {
                 assigned_by: newCase.assigned_by ? parseInt(newCase.assigned_by, 10) : null,
                 user_id: newCase.user_id ? parseInt(newCase.user_id, 10) : null,
                 case_fee: newCase.case_fee ? parseFloat(newCase.case_fee) : null,
-                case_tag: JSON.stringify(selectedTags), // send as JSON string
+                case_tag_list: JSON.stringify(selectedTags), // send as JSON string
+                case_tag: JSON.stringify(selectedTags[0]), // initial tag for every new case
+
             };
 
             const res = await fetch("http://localhost:3000/api/cases", {
