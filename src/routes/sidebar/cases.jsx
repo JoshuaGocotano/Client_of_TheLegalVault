@@ -245,11 +245,13 @@ const Cases = () => {
 
                     {/* Case Folder Button */}
                     <button
-                        className="flex items-center gap-2 rounded-md bg-yellow-500 px-4 py-2 text-sm font-medium text-white shadow hover:bg-yellow-600"
+                        className="flex items-center gap-2 rounded-md bg-yellow-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition-all duration-200 hover:scale-105 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2 group"
                         onClick={() => navigate("/cases/case-folder")}
                     >
-                        <Folder size={16} />
-                        Case Folder
+                        <span className="transition-transform duration-200 group-hover:rotate-12 group-hover:scale-110">
+                            <Folder size={18} />
+                        </span>
+                        <span className="tracking-wide">Case Folder</span>
                     </button>
                 </div>
             </div>
