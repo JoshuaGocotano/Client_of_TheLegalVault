@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Trash2, RotateCcw, X, File, CreditCard, CheckSquare, Calendar, User, ArrowLeft, Search } from "lucide-react";
-import { useAuth } from "../context/auth-context.jsx";
+import { useAuth } from "../../context/auth-context.jsx";
 import toast from "react-hot-toast";
-import Spinner from "./loading.jsx";
+import Spinner from "../../components/loading.jsx";
 
 const API_BASE = "http://localhost:3000/api";
 
-// This file component is the Trash in the SIDEBAR
+// This file component is the Trash in the SIDEBAR 
+// PUSH FOR JOSEPH's BRANCH UPDATE
 
 export default function RecentlyDeleted({ onClose }) {
     const { user } = useAuth() || {};
