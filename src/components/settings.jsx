@@ -35,7 +35,7 @@ const SettingsCard = ({ title, actions, children }) => (
 const API_BASE = "http://localhost:3000/api";
 
 const Settings = () => {
-    const { user } = useAuth?.() || { user: null };
+    const { user } = useAuth();
 
     // Set default tab based on user role
     const getDefaultTab = (userRole) => {
@@ -359,7 +359,7 @@ const Settings = () => {
             const payload = {
                 ctag_name: editingCaseTagName.trim(),
                 ctag_sequence_num: editingCaseTagSequence ? parseInt(editingCaseTagSequence) : null,
-                ctag_created_by: null, // set if needed
+                ctag_created_by: user.user_id,
             };
 
             console.log("Saving case tag with payload:", payload);
@@ -1557,7 +1557,7 @@ const Settings = () => {
                             actions={
                                 <button
                                     onClick={loadCaseTags}
-                                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700"
+                                    className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700 dark:text-slate-200"
                                 >
                                     <RefreshCw size={14} /> Refresh
                                 </button>
