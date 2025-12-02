@@ -727,7 +727,7 @@ const Tasks = () => {
                                                     onClick={() => handleTurnIn(selectedTask.doc_id)}
                                                     className="mt-3 w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
                                                 >
-                                                    Turn In
+                                                    Turn in
                                                 </button>
                                             </div>
                                         )}
