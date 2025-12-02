@@ -35,8 +35,8 @@ const Documents = () => {
                 user.user_role === "Admin"
                     ? "http://localhost:3000/api/documents"
                     : user.user_role === "Lawyer"
-                      ? `http://localhost:3000/api/documents/lawyer/${user.user_id}`
-                      : `http://localhost:3000/api/documents/submitter/${user.user_id}`;
+                        ? `http://localhost:3000/api/documents/lawyer/${user.user_id}`
+                        : `http://localhost:3000/api/documents/submitter/${user.user_id}`;
 
             const res = await fetch(doc_endpoint, {
                 credentials: "include",
@@ -134,7 +134,9 @@ const Documents = () => {
                     if (!res.ok) throw new Error(`Failed to trash document (${res.status})`);
                     // Refresh document list
                     fetchDocs();
-                    setDocuments(documents.filter((doc) => doc.doc_id !== docToDelete.doc_id));
+                    setDocuments(documents.map((doc) =>
+                        doc.doc_id === docToDelete.doc_id ? { ...doc, is_deleted: true } : doc
+                    ));
                     setDocToDelete(null);
                     setShowDeleteModal(false);
                     toast.success("Document moved to Recently Deleted", { duration: 4000 });
@@ -160,6 +162,7 @@ const Documents = () => {
 
     // Filtered list (by name, type, case id, submitted/tasked by)
     const filteredDocs = documents.filter((doc) => {
+        if (doc.is_deleted) return false; // Hide deleted docs from main list
         const term = search.toLowerCase();
         const fields = [
             doc.doc_name,

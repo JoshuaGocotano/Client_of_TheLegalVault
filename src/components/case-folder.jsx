@@ -83,78 +83,77 @@ const CaseFolder = () => {
     const paginatedCases = searchedCases.slice(startIndex, startIndex + itemsPerPage);
 
     return (
-        <div className="mx-auto">
-            <div className="mb-6">
-                <h2 className="title">Case Folder</h2>
-                <p className="text-sm text-gray-500">Manage all case category here.</p>
+        <div className="mx-auto max-w-full p-6">
+            {/* Header */}
+            <div className="mb-8 rounded-xl bg-gradient-to-r from-blue-900 via-blue-700 to-blue-500 p-6 shadow-lg">
+                <h2 className="text-3xl font-bold text-white drop-shadow">Case Folder</h2>
+                <p className="mt-1 text-base text-blue-100">Manage all case categories here.</p>
             </div>
 
             {/* Folder Categories */}
-            <div className="mt-2 flex flex-wrap gap-4">
+            <div className="mb-6 flex flex-wrap gap-3 justify-center">
                 {caseFolders.map((folder) => (
-                    <div
+                    <button
                         key={folder}
                         onClick={() => setActiveFolder(folder)}
-                        className={`flex cursor-pointer items-center gap-2 rounded-lg border px-2 py-2 transition ${
-                            activeFolder === folder ? "border-blue-600 bg-blue-900 text-white" : "bg-gray-200 text-black hover:bg-gray-300"
-                        } `}
+                        className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium shadow transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400/60
+                            ${activeFolder === folder
+                                ? "border-blue-700 bg-blue-700 text-white scale-105 shadow-lg"
+                                : "border-gray-300 bg-white text-blue-900 hover:bg-blue-100 hover:border-blue-400"}
+                        `}
                     >
                         <Folder size={18} />
                         <span>{folder}</span>
-                    </div>
+                    </button>
                 ))}
             </div>
 
             {/* Search Input */}
-            <div className="mt-4">
-                <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
-                    <div className="flex flex-grow items-center gap-2 rounded-md border border-gray-300 px-3 py-2 dark:border-slate-600">
-                        <Search
-                            size={18}
-                            className="text-gray-600 dark:text-gray-400"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Search documents by name, type, or case..."
-                            className="w-full bg-transparent outline-none dark:text-white"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                        />
-                    </div>
+            <div className="mb-6 flex justify-center">
+                <div className="flex w-full max-w-xl items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-2 shadow-md focus-within:ring-2 focus-within:ring-blue-400/60 dark:bg-slate-800">
+                    <Search size={20} className="text-blue-700" />
+                    <input
+                        type="text"
+                        placeholder="Search by case, type, or client..."
+                        className="w-full bg-transparent px-2 py-1 text-base text-blue-900 outline-none dark:text-white"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
                 </div>
             </div>
 
             {/* Cases Table */}
-            <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md">
-                <table className="w-full text-left text-sm">
-                    <thead className="bg-white-100 text-xs uppercase text-gray-600 dark:bg-slate-800 dark:text-gray-300">
+            <div className="overflow-x-auto rounded-xl bg-white shadow-lg dark:bg-slate-900">
+                <table className="w-full min-w-[700px] text-left text-sm">
+                    <thead className="bg-blue-50 text-xs uppercase text-blue-900 dark:bg-slate-800 dark:text-blue-200">
                         <tr>
-                            <th className="px-4 py-3">Case ID</th>
-                            <th className="px-4 py-3">Case Name</th>
-                            <th className="px-4 py-3">Case Category</th>
-                            <th className="px-4 py-3">Client</th>
-                            <th className="px-4 py-3">Date Filed</th>
-                            <th className="px-4 py-3">Lawyer</th>
-                            <th className="px-4 py-3">View</th>
+                            <th className="px-5 py-4">Case ID</th>
+                            <th className="px-5 py-4">Case Name</th>
+                            <th className="px-5 py-4">Category</th>
+                            <th className="px-5 py-4">Client</th>
+                            <th className="px-5 py-4">Date Filed</th>
+                            <th className="px-5 py-4">Lawyer</th>
+                            <th className="px-5 py-4">View</th>
                         </tr>
                     </thead>
-                    <tbody className="text-slate-950 dark:text-white">
+                    <tbody className="text-blue-950 dark:text-white">
                         {paginatedCases.length > 0 ? (
-                            paginatedCases.map((c) => (
+                            paginatedCases.map((c, idx) => (
                                 <tr
                                     key={c.case_id}
                                     className="border-t border-gray-200 transition hover:bg-slate-200 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
-                                    <td className="px-4 py-3">{c.case_id}</td>
-                                    <td className="px-4 py-3">{c.ct_name}</td>
-                                    <td className="px-4 py-3">{c.cc_name}</td>
-                                    <td className="px-4 py-3">{c.client_fullname}</td>
-                                    <td className="px-4 py-3">{formatDateTime(c.case_date_created)}</td>
-                                    <td className="px-4 py-3">{c.user_id ? `Atty. ${getLawyerFullName(c)}` : "Unassigned"}</td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-5 py-4 font-semibold">{c.case_id}</td>
+                                    <td className="px-5 py-4">{c.ct_name}</td>
+                                    <td className="px-5 py-4">{c.cc_name}</td>
+                                    <td className="px-5 py-4">{c.client_fullname}</td>
+                                    <td className="px-5 py-4">{formatDateTime(c.case_date_created)}</td>
+                                    <td className="px-5 py-4">{c.user_id ? `Atty. ${getLawyerFullName(c)}` : <span className="italic text-gray-400">Unassigned</span>}</td>
+                                    <td className="px-5 py-4">
                                         <button
-                                            className="text-blue-600 hover:text-blue-800"
+                                            className="rounded-full bg-blue-100 p-2 text-blue-700 transition hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-400/60"
                                             onClick={() => setSelectedCase(c)}
+                                            title="View Case Details"
                                         >
                                             <Eye size={18} />
                                         </button>
@@ -165,7 +164,7 @@ const CaseFolder = () => {
                             <tr>
                                 <td
                                     colSpan="7"
-                                    className="px-4 py-6 text-center text-gray-500 dark:text-gray-400"
+                                    className="px-5 py-10 text-center text-gray-400 dark:text-gray-400"
                                 >
                                     No cases found.
                                 </td>
@@ -175,36 +174,34 @@ const CaseFolder = () => {
                 </table>
             </div>
 
-            {/* Pagination and  Back Button */}
-            <div className="mt-2 flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-white">
+            {/* Pagination and Back Button */}
+            <div className="mt-6 flex flex-col items-center justify-between gap-4 md:flex-row md:gap-0 w-full">
                 {/* Back Button */}
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 rounded-md bg-gray-200 px-4 py-2 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+                    className="flex items-center gap-2 rounded-full border border-gray-300 bg-white px-5 py-2 text-blue-900 shadow hover:bg-blue-100 dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
                 >
-                    <ArrowLeft size={16} />
-                    Back to Cases
+                    <ArrowLeft size={18} />
+                    <span>Back to Cases</span>
                 </button>
 
                 {/* Pagination */}
                 {totalPages > 1 && (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 shadow dark:bg-slate-800">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                             disabled={currentPage === 1}
-                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                            className="rounded-full px-3 py-1 text-blue-700 hover:bg-blue-200 disabled:opacity-50 dark:text-blue-200 dark:hover:bg-slate-700"
                         >
                             &lt;
                         </button>
-
-                        <div>
+                        <span className="font-medium text-blue-900 dark:text-blue-100">
                             Page {currentPage} of {totalPages}
-                        </div>
-
+                        </span>
                         <button
                             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                             disabled={currentPage === totalPages}
-                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:hover:bg-slate-600"
+                            className="rounded-full px-3 py-1 text-blue-700 hover:bg-blue-200 disabled:opacity-50 dark:text-blue-200 dark:hover:bg-slate-700"
                         >
                             &gt;
                         </button>
