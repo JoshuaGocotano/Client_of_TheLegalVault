@@ -749,7 +749,7 @@ const Tasks = () => {
                                 )}
 
                                 {/* Approve and Reject buttons for admin and lawyer */}
-                                {(user.user_role === "Admin" || user.user_role === "Lawyer") && selectedTask.doc_status === STATUS_IDS.DONE && (
+                                {(user.user_role === "Admin" || user.user_role === "Lawyer") && selectedTask.doc_status === STATUS_IDS.DONE && selectedTask.doc_file && (
                                     <div className="mt-6 flex gap-4">
                                         <button
                                             onClick={() => approveTask(selectedTask.doc_id)}
