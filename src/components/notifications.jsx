@@ -56,16 +56,11 @@ const Notifications = () => {
         }
     };
 
-    const clearAll = () => {
-        setNotifications([]);
-        setSelectedNotifications([]);
-    };
-
     const filteredNotifications = notifications.filter((note) => note.notification_message.toLowerCase().includes(searchQuery.trim().toLowerCase()));
 
-    const markAsRead = async (notification_id) => {
+    const markAsReadOrUnread = async (notification_id) => {
         try {
-            await fetch(`http://localhost:3000/api/notifications/mark-read/${notification_id}`, {
+            await fetch(`http://localhost:3000/api/notifications/mark-read-or-unread/${notification_id}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: { "Content-Type": "application/json" },
@@ -77,6 +72,29 @@ const Notifications = () => {
             setNotifications((prev) => prev.map((n) => (n.notification_id === notification_id ? { ...n, is_read: true } : n)));
         } catch (err) {
             console.error("Failed to mark as read:", err);
+        }
+    };
+
+    const clearAll = async () => {
+        try {
+            const res = await fetch(`http://localhost:3000/api/notifications/clear/${user.user_id}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+            });
+
+            if (!res.ok) {
+                throw new Error("Failed to clear notifications");
+            }
+
+            toast.success("All notifications cleared");
+
+            // Clear UI instantly
+            setNotifications([]);
+            setSelectedNotifications([]);
+        } catch (err) {
+            console.error("Clear all failed:", err);
+            toast.error("Failed to clear notifications");
         }
     };
 
@@ -168,7 +186,7 @@ const Notifications = () => {
                                     key={note.notification_id}
                                     onClick={() => {
                                         if (!note.is_read) {
-                                            markAsRead(note.notification_id);
+                                            markAsReadOrUnread(note.notification_id);
                                         }
                                     }}
                                     className={`flex cursor-pointer items-start gap-4 rounded-xl border p-5 shadow-sm transition-all duration-150 hover:scale-[1.015] hover:bg-blue-50 dark:hover:bg-blue-900/60 ${
