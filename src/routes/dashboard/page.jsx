@@ -234,7 +234,7 @@ const DashboardPage = () => {
         <div className="flex flex-col gap-y-3">
             <h1 className="title">Dashboard</h1>
             <p className="dark:text-slate-300">
-                Welcome back {user?.user_fname}! Here's your overview. Let's see if you can see this text change for testing.
+                Welcome back {user?.user_fname}! Here's your overview.
             </p>
 
             {/* ---------- SUPERLAWYER SPECIAL LAYOUT ---------s- */}
