@@ -17,6 +17,13 @@ const Userlogs = () => {
     useEffect(() => {
         const fetchUserLogs = async () => {
             try {
+                // const endpoint =
+                //     user?.user_role === "Admin"
+                //         ? "http://localhost:3000/api/user-logs"
+                //         : user.user_role === "Lawyer"
+                //           ? `http://localhost:3000/api/user-logs/lawyer-and-their-tasks/${user.user_id}`
+                //           : `http://localhost:3000/api/user-logs/${user.user_id}`;
+
                 const endpoint =
                     user?.user_role === "Admin" ? "http://localhost:3000/api/user-logs" : `http://localhost:3000/api/user-logs/${user.user_id}`;
 
@@ -255,7 +262,6 @@ const Userlogs = () => {
                     </div>
                 </div>
             )} */}
-            
         </div>
     );
 };
